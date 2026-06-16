@@ -1,0 +1,346 @@
+{{ define "index" }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevForge - Premium Developer Utility Dashboard</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <!-- Custom Vanilla CSS -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
+</head>
+<body class="dark-theme">
+    <div class="glow-bg">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="glow-orb orb-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-logo">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                <h1>DevForge</h1>
+            </div>
+            
+            <nav class="nav-menu">
+                <button class="nav-item active" onclick="switchTab('base64')">
+                    <i class="fa-solid fa-code"></i>
+                    <span>Base64 Encoder</span>
+                </button>
+                <button class="nav-item" onclick="switchTab('guid')">
+                    <i class="fa-solid fa-fingerprint"></i>
+                    <span>GUID Generator</span>
+                </button>
+                <button class="nav-item" onclick="switchTab('qrcode')">
+                    <i class="fa-solid fa-qrcode"></i>
+                    <span>QR Code Gen</span>
+                </button>
+            </nav>
+
+            <!-- Quick Info / Status -->
+            <div class="sidebar-footer">
+                <div class="status-indicator">
+                    <span class="pulse-dot"></span>
+                    <span>System Online</span>
+                </div>
+                <div class="credits">v1.0.0 &bull; Premium Tools</div>
+            </div>
+        </aside>
+
+        <!-- Main Panel -->
+        <main class="main-content">
+            <!-- Top bar -->
+            <header class="top-bar">
+                <h2 id="current-tab-title">Base64 Converter</h2>
+                <div class="user-actions">
+                    <button class="btn-icon" onclick="toggleHistory()" title="Toggle History Log">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dashboard Modules (Tabs) -->
+            <div class="module-container">
+                <!-- BASE64 CONVERTER MODULE -->
+                <section id="module-base64" class="tab-module active">
+                    <div class="card glass">
+                        <div class="card-header">
+                            <h3>Base64 Encoder & Decoder</h3>
+                            <p>Translate plain text into Base64 format or decode Base64 back into readable text.</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="base64-input">Input Data</label>
+                                <textarea id="base64-input" name="text" placeholder="Type or paste plain text/base64 here..." rows="6"></textarea>
+                            </div>
+                            <div class="btn-group">
+                                <button hx-post="/api/base64/encode" 
+                                        hx-include="#base64-input" 
+                                        hx-target="#base64-output" 
+                                        hx-indicator="#base64-loader"
+                                        class="btn btn-primary"
+                                        onclick="saveToHistory('Base64 Encode', document.getElementById('base64-input').value)">
+                                    <i class="fa-solid fa-lock"></i> Encode
+                                </button>
+                                <button hx-post="/api/base64/decode" 
+                                        hx-include="#base64-input" 
+                                        hx-target="#base64-output" 
+                                        hx-indicator="#base64-loader"
+                                        class="btn btn-accent"
+                                        onclick="saveToHistory('Base64 Decode', document.getElementById('base64-input').value)">
+                                    <i class="fa-solid fa-lock-open"></i> Decode
+                                </button>
+                                <button class="btn btn-secondary" onclick="clearBase64()">
+                                    <i class="fa-solid fa-trash-can"></i> Clear
+                                </button>
+                                <div id="base64-loader" class="htmx-indicator loader"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="base64-output" class="output-wrapper">
+                        <!-- Content loaded by HTMX -->
+                    </div>
+                </section>
+
+                <!-- GUID GENERATOR MODULE -->
+                <section id="module-guid" class="tab-module">
+                    <div class="grid grid-cols-2">
+                        <div class="card glass">
+                            <div class="card-header">
+                                <h3>GUID Generator Configuration</h3>
+                                <p>Generate batch UUIDs with options for v4 (unordered), v7 (time-ordered), or custom prefix structures.</p>
+                            </div>
+                            <div class="card-body">
+                                <form hx-post="/api/guid/generate" 
+                                      hx-target="#guid-output" 
+                                      hx-indicator="#guid-loader"
+                                      onsubmit="saveToHistory('GUID Generation', document.getElementById('guid-type').value + ' x' + document.getElementById('guid-count').value)">
+                                    
+                                    <div class="form-group">
+                                        <label for="guid-count">Quantity (10 - 100)</label>
+                                        <div class="range-slider-container">
+                                            <input type="range" id="guid-count" name="count" min="10" max="100" value="10" oninput="updateRangeVal(this.value)">
+                                            <span class="range-value" id="range-val-display">10</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="guid-type">Generation Algorithm</label>
+                                        <select id="guid-type" name="type" onchange="togglePrefixInput(this.value)">
+                                            <option value="v4">UUID v4 (Random / Unordered)</option>
+                                            <option value="v7">UUID v7 (Time-ordered / Sequential)</option>
+                                            <option value="prefixed">Prefixed (Custom Prefix + Random Suffix)</option>
+                                            <option value="prefixed_guid">Prefixed GUID (First Section as Prefix)</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group" id="prefix-group" style="display: none;">
+                                        <label for="guid-prefix">Custom Prefix</label>
+                                        <input type="text" id="guid-prefix" name="prefix" placeholder="e.g. USER, PROD, order" maxlength="20">
+                                        <small class="form-help" id="prefix-format-help">The generated format will be: {prefix}-{12 random hex characters}</small>
+                                    </div>
+
+                                    <div class="btn-group">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fa-solid fa-wand-magic-sparkles"></i> Generate GUIDs
+                                        </button>
+                                        <div id="guid-loader" class="htmx-indicator loader"></div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div id="guid-output" class="output-wrapper">
+                            <div class="card glass card-placeholder">
+                                <div class="placeholder-content">
+                                    <i class="fa-solid fa-fingerprint placeholder-icon"></i>
+                                    <p>Configure parameters and click "Generate GUIDs" to display output here.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- QR CODE GENERATOR MODULE -->
+                <section id="module-qrcode" class="tab-module">
+                    <div class="grid grid-cols-2">
+                        <div class="card glass">
+                            <div class="card-header">
+                                <h3>QR Code Settings</h3>
+                                <p>Generate standard high-contrast QR codes from any web link, plain text, or configuration payload.</p>
+                            </div>
+                            <div class="card-body">
+                                <form hx-post="/api/qrcode/generate" 
+                                      hx-target="#qrcode-output" 
+                                      hx-indicator="#qrcode-loader"
+                                      onsubmit="saveToHistory('QR Code Gen', truncateString(document.getElementById('qrcode-text').value, 20))">
+                                    
+                                    <div class="form-group">
+                                        <label for="qrcode-text">Text or URL Payload</label>
+                                        <textarea id="qrcode-text" name="text" placeholder="https://example.com or any text data..." rows="5" required></textarea>
+                                    </div>
+
+                                    <div class="btn-group">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fa-solid fa-qrcode"></i> Generate QR Code
+                                        </button>
+                                        <div id="qrcode-loader" class="htmx-indicator loader"></div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div id="qrcode-output" class="output-wrapper">
+                            <div class="card glass card-placeholder">
+                                <div class="placeholder-content">
+                                    <i class="fa-solid fa-qrcode placeholder-icon"></i>
+                                    <p>Enter a text payload and click "Generate QR Code" to generate image.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Slide-out History Log panel -->
+        <aside class="history-panel" id="history-panel">
+            <div class="panel-header">
+                <h3><i class="fa-solid fa-clock-rotate-left"></i> Operation History</h3>
+                <button class="btn-close" onclick="toggleHistory()">&times;</button>
+            </div>
+            <div class="panel-body">
+                <div class="history-actions">
+                    <button class="btn btn-sm btn-secondary" onclick="clearHistoryLog()">
+                        <i class="fa-solid fa-trash-can"></i> Clear All History
+                    </button>
+                </div>
+                <div id="history-list" class="history-list">
+                    <!-- History entries will be rendered here dynamically via JS -->
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Custom Toast Notification System -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- JS Scripts -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
+{{ end }}
+
+
+{{ define "base64-result" }}
+<div class="card glass mt-4 animate-fade-in">
+    <div class="card-header flex justify-between items-center">
+        <h4>Conversion Result ({{ .Operation }})</h4>
+        <div class="card-actions">
+            {{ if not .Error }}
+            <button class="btn btn-sm btn-primary" onclick="copyToClipboard('base64-result-text')">
+                <i class="fa-solid fa-copy"></i> Copy Output
+            </button>
+            {{ end }}
+        </div>
+    </div>
+    <div class="card-body">
+        {{ if .Error }}
+        <div class="alert alert-error">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <div>{{ .Error }}</div>
+        </div>
+        {{ else }}
+        <div class="result-box">
+            <pre id="base64-result-text" class="result-text">{{ .Result }}</pre>
+        </div>
+        {{ end }}
+    </div>
+</div>
+{{ end }}
+
+
+{{ define "guid-result" }}
+<div class="card glass animate-fade-in full-height-card">
+    <div class="card-header flex justify-between items-center">
+        <div>
+            <h4>Generated GUIDs ({{ .Count }})</h4>
+            <span class="badge badge-accent">{{ .Type }}</span>
+        </div>
+        <div class="card-actions">
+            {{ if not .Error }}
+            <button class="btn btn-sm btn-primary" onclick="copyAllGUIDs()">
+                <i class="fa-solid fa-copy"></i> Copy All
+            </button>
+            {{ end }}
+        </div>
+    </div>
+    <div class="card-body scrollable-body">
+        {{ if .Error }}
+        <div class="alert alert-error">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <div>{{ .Error }}</div>
+        </div>
+        {{ else }}
+        <div class="guid-list">
+            {{ range $index, $guid := .GUIDs }}
+            <div class="guid-item">
+                <span class="guid-index">{{ add $index 1 }}</span>
+                <span class="guid-val" id="guid-{{ $index }}">{{ $guid }}</span>
+                <button class="btn-copy-inline" onclick="copyToClipboard('guid-{{ $index }}')" title="Copy to clipboard">
+                    <i class="fa-regular fa-copy"></i>
+                </button>
+            </div>
+            {{ end }}
+        </div>
+        {{ end }}
+    </div>
+</div>
+{{ end }}
+
+
+{{ define "qrcode-result" }}
+<div class="card glass animate-fade-in text-center flex-center-card">
+    <div class="card-header">
+        <h4>Generated QR Code</h4>
+    </div>
+    <div class="card-body flex flex-col items-center gap-4">
+        {{ if .Error }}
+        <div class="alert alert-error">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <div>{{ .Error }}</div>
+        </div>
+        {{ else }}
+        <div class="qr-image-wrapper">
+            <img src="{{ .ImageURL }}" alt="QR Code" class="qr-image" id="qr-code-img">
+        </div>
+        
+        <div class="qr-payload-text">
+            <strong>Payload:</strong> 
+            <span class="truncated-payload" title="{{ .Text }}">{{ .Text }}</span>
+        </div>
+
+        <div class="btn-group justify-center">
+            <button class="btn btn-primary btn-sm" onclick="copyQRCodeImage()">
+                <i class="fa-solid fa-copy"></i> Copy Image
+            </button>
+            <a href="{{ .ImageURL }}" download="qrcode.png" class="btn btn-accent btn-sm">
+                <i class="fa-solid fa-download"></i> Download PNG
+            </a>
+        </div>
+        {{ end }}
+    </div>
+</div>
+{{ end }}
