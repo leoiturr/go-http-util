@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 
 	"gin-example/handlers"
 	"github.com/gin-gonic/gin"
@@ -44,10 +45,13 @@ func main() {
 	// QR Code Generator API
 	r.POST("/api/qrcode/generate", handlers.GenerateQRCode)
 
-	// Start Gin server on port 8080
-	port := ":8080"
-	log.Printf("Server starting on http://localhost%s", port)
-	if err := r.Run(port); err != nil {
+	// Start Gin server on the configured port (Render uses the PORT environment variable)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Printf("Server starting on http://localhost:%s", port)
+	if err := r.Run(":" + port); err != nil {
 		log.Fatalf("Failed to run server: %v", err)
 	}
 }
