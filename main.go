@@ -5,8 +5,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"gin-example/handlers"
+	"gin-example/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -40,15 +42,38 @@ func main() {
 		c.HTML(http.StatusOK, "index", gin.H{})
 	})
 
-	// Base64 Converter API
-	r.POST("/api/base64/encode", handlers.EncodeBase64)
-	r.POST("/api/base64/decode", handlers.DecodeBase64)
+	// Set up rate limiter middleware from environment variables with safe defaults
+	// Default: 2 requests per second (RPS) with a burst of 4 requests
+	rps := 2.0
+	burst := 4.0
 
-	// GUID Generator API
-	r.POST("/api/guid/generate", handlers.GenerateGUIDs)
+	if rpsEnv := os.Getenv("RATE_LIMIT_RPS"); rpsEnv != "" {
+		if val, err := strconv.ParseFloat(rpsEnv, 64); err == nil {
+			rps = val
+		}
+	}
+	if burstEnv := os.Getenv("RATE_LIMIT_BURST"); burstEnv != "" {
+		if val, err := strconv.ParseFloat(burstEnv, 64); err == nil {
+			burst = val
+		}
+	}
 
-	// QR Code Generator API
-	r.POST("/api/qrcode/generate", handlers.GenerateQRCode)
+	limiter := middleware.NewRateLimiter(rps, burst)
+
+	// API Route Group with Rate Limiting
+	api := r.Group("/api")
+	api.Use(limiter.Limit())
+	{
+		// Base64 Converter API
+		api.POST("/base64/encode", handlers.EncodeBase64)
+		api.POST("/base64/decode", handlers.DecodeBase64)
+
+		// GUID Generator API
+		api.POST("/guid/generate", handlers.GenerateGUIDs)
+
+		// QR Code Generator API
+		api.POST("/qrcode/generate", handlers.GenerateQRCode)
+	}
 
 	// Start Gin server on the configured port (Render uses the PORT environment variable)
 	port := os.Getenv("PORT")

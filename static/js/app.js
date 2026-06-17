@@ -1,7 +1,7 @@
 // Dashboard Client Logic
 
 // Tab Navigation
-function switchTab(tabId) {
+function switchTab(tabId, updateHistory = true) {
     // Hide all modules
     document.querySelectorAll('.tab-module').forEach(module => {
         module.classList.remove('active');
@@ -32,7 +32,12 @@ function switchTab(tabId) {
         'guid': 'GUID Generator',
         'qrcode': 'QR Code Generator'
     };
-    document.getElementById('current-tab-title').innerText = titleMap[tabId] || 'DevForge';
+    document.getElementById('current-tab-title').innerText = titleMap[tabId] || 'DevUtils';
+
+    // Update browser history state
+    if (updateHistory) {
+        history.pushState({ tabId: tabId }, '', '#' + tabId);
+    }
 }
 
 // GUID Slider Updater
@@ -181,7 +186,7 @@ function toggleHistory() {
 function saveToHistory(operation, details) {
     if (!details || details.trim() === '') return;
 
-    const history = JSON.parse(localStorage.getItem('devforge_history') || '[]');
+    const history = JSON.parse(localStorage.getItem('devutils_history') || '[]');
     const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     
     const entry = {
@@ -197,7 +202,7 @@ function saveToHistory(operation, details) {
         history.pop();
     }
 
-    localStorage.setItem('devforge_history', JSON.stringify(history));
+    localStorage.setItem('devutils_history', JSON.stringify(history));
 }
 
 // Render History Panel items
@@ -205,7 +210,7 @@ function renderHistory() {
     const list = document.getElementById('history-list');
     if (!list) return;
 
-    const history = JSON.parse(localStorage.getItem('devforge_history') || '[]');
+    const history = JSON.parse(localStorage.getItem('devutils_history') || '[]');
 
     if (history.length === 0) {
         list.innerHTML = `
@@ -230,7 +235,7 @@ function renderHistory() {
 
 // Clear History Log
 function clearHistoryLog() {
-    localStorage.removeItem('devforge_history');
+    localStorage.removeItem('devutils_history');
     renderHistory();
     showToast('History log cleared', 'success');
 }
@@ -276,3 +281,25 @@ function loadHistoryItem(operation, details) {
         }
     }
 }
+
+// Global HTMX Error Handling
+document.addEventListener('htmx:responseError', function(evt) {
+    if (evt.detail.xhr.status === 429) {
+        showToast('Too many requests. Please wait a moment.', 'error');
+    } else {
+        showToast('An error occurred during request processing.', 'error');
+    }
+});
+
+// Listen to popstate event (back/forward browser buttons)
+window.addEventListener('popstate', function(event) {
+    const tabId = (event.state && event.state.tabId) || window.location.hash.substring(1) || 'base64';
+    switchTab(tabId, false);
+});
+
+// Initialize active tab on page load based on URL hash
+document.addEventListener('DOMContentLoaded', () => {
+    const initialTab = window.location.hash.substring(1) || 'base64';
+    switchTab(initialTab, false);
+    history.replaceState({ tabId: initialTab }, '', '#' + initialTab);
+});
