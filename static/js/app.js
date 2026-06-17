@@ -1,5 +1,31 @@
 // Dashboard Client Logic
 
+// Safe localStorage helper to prevent SecurityError in Private Browsing / Firefox
+const safeStorage = {
+    getItem(key) {
+        try {
+            return localStorage.getItem(key);
+        } catch (e) {
+            console.warn('Storage disabled or blocked:', e);
+            return null;
+        }
+    },
+    setItem(key, value) {
+        try {
+            localStorage.setItem(key, value);
+        } catch (e) {
+            console.warn('Storage disabled or blocked:', e);
+        }
+    },
+    removeItem(key) {
+        try {
+            localStorage.removeItem(key);
+        } catch (e) {
+            console.warn('Storage disabled or blocked:', e);
+        }
+    }
+};
+
 // Tab Navigation
 function switchTab(tabId, updateHistory = true) {
     // Hide all modules
@@ -186,7 +212,7 @@ function toggleHistory() {
 function saveToHistory(operation, details) {
     if (!details || details.trim() === '') return;
 
-    const history = JSON.parse(localStorage.getItem('devutils_history') || '[]');
+    const history = JSON.parse(safeStorage.getItem('devutils_history') || '[]');
     const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     
     const entry = {
@@ -202,7 +228,7 @@ function saveToHistory(operation, details) {
         history.pop();
     }
 
-    localStorage.setItem('devutils_history', JSON.stringify(history));
+    safeStorage.setItem('devutils_history', JSON.stringify(history));
 }
 
 // Render History Panel items
@@ -210,7 +236,7 @@ function renderHistory() {
     const list = document.getElementById('history-list');
     if (!list) return;
 
-    const history = JSON.parse(localStorage.getItem('devutils_history') || '[]');
+    const history = JSON.parse(safeStorage.getItem('devutils_history') || '[]');
 
     if (history.length === 0) {
         list.innerHTML = `
@@ -235,7 +261,7 @@ function renderHistory() {
 
 // Clear History Log
 function clearHistoryLog() {
-    localStorage.removeItem('devutils_history');
+    safeStorage.removeItem('devutils_history');
     renderHistory();
     showToast('History log cleared', 'success');
 }
