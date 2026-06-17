@@ -31,7 +31,7 @@
     --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     
     /* Font Families */
-    --font-mono: 'Google Sans Mono', 'Google Sans Code', 'Roboto Mono', monospace;
+    --font-mono: 'Lilex', 'Google Sans Mono', 'Google Sans Code', monospace;
 }
 
 /* Reset & Base Styles */
