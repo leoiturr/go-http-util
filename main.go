@@ -14,6 +14,9 @@ func main() {
 	// Create Gin router
 	r := gin.Default()
 
+	// Disable trusting all proxies to secure client IP headers and silence the warning
+	r.SetTrustedProxies(nil)
+
 	// Register custom template functions before loading HTML templates
 	r.SetFuncMap(template.FuncMap{
 		"add": func(a, b int) int {
@@ -26,6 +29,11 @@ func main() {
 
 	// Serve static files
 	r.Static("/static", "./static")
+
+	// Health Check API
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	})
 
 	// Main web interface route
 	r.GET("/", func(c *gin.Context) {
