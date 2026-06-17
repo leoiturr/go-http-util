@@ -29,6 +29,9 @@
     
     --transition-fast: 0.2s ease;
     --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Font Families */
+    --font-mono: 'Google Sans Mono', 'Google Sans Code', 'Roboto Mono', monospace;
 }
 
 /* Reset & Base Styles */
@@ -583,7 +586,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 .result-text {
-    font-family: 'Courier New', Courier, monospace;
+    font-family: var(--font-mono);
     font-size: 14px;
     white-space: pre-wrap;
     word-break: break-all;
@@ -696,7 +699,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 .guid-val {
-    font-family: monospace;
+    font-family: var(--font-mono);
     color: var(--text-primary);
     flex-grow: 1;
     word-break: break-all;
@@ -767,7 +770,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
 .truncated-payload {
     display: block;
-    font-family: monospace;
+    font-family: var(--font-mono);
     background: rgba(0, 0, 0, 0.2);
     padding: 4px 8px;
     border-radius: 4px;
@@ -963,7 +966,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-family: monospace;
+    font-family: var(--font-mono);
 }
 
 /* Flex utilities used in templates */
