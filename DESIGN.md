@@ -45,3 +45,7 @@ This document outlines the core architecture, layout design, and implementation 
   - Sans-serif: `Plus Jakarta Sans` (sleek, geometric, modern look).
   - Monospace: `Lilex` (developer font with coding ligatures).
   - Loaded via **Bunny Fonts** (GDPR compliant).
+
+### Mobile-First Responsive Design
+- **Mobile-First CSS**: Designed base CSS rules to fit mobile screens (vertical stacked layouts, full-width sidebars serving as top menus, scrollable nav menus, and compact card/grid spacing).
+- **Desktop Enhancements**: Uses `min-width: 1025px` media queries to expand the layout into side-by-side splits (sidebar docked to the left, full-height scrolls, dual-column grid splits, and increased spacing).
