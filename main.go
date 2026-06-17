@@ -11,9 +11,6 @@ import (
 )
 
 func main() {
-	// Set Gin to release mode in production, debug mode in development
-	gin.SetMode(gin.DebugMode)
-
 	// Create Gin router
 	r := gin.Default()
 
