@@ -73,6 +73,22 @@ func main() {
 
 		// QR Code Generator API
 		api.POST("/qrcode/generate", handlers.GenerateQRCode)
+
+		// JSON Prettifier / Minifier / Validator API
+		api.POST("/json/prettify", handlers.PrettifyJSON)
+		api.POST("/json/minify", handlers.MinifyJSON)
+		api.POST("/json/validate", handlers.ValidateJSON)
+
+		// URL Encoder / Decoder / Parser API
+		api.POST("/url/encode", handlers.EncodeURL)
+		api.POST("/url/decode", handlers.DecodeURL)
+		api.POST("/url/parse", handlers.ParseURL)
+
+		// JWT Debugger API
+		api.POST("/jwt/decode", handlers.DecodeJWT)
+
+		// Epoch / Unix Timestamp Converter API
+		api.POST("/epoch/convert", handlers.ConvertEpoch)
 	}
 
 	// Start Gin server on the configured port (Render uses the PORT environment variable)

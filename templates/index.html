@@ -61,6 +61,22 @@
                     <i class="fa-solid fa-qrcode"></i>
                     <span>QR Code Gen</span>
                 </button>
+                <button class="nav-item" onclick="switchTab('json')">
+                    <i class="fa-solid fa-file-code"></i>
+                    <span>JSON Formatter</span>
+                </button>
+                <button class="nav-item" onclick="switchTab('url')">
+                    <i class="fa-solid fa-link"></i>
+                    <span>URL Encoder</span>
+                </button>
+                <button class="nav-item" onclick="switchTab('jwt')">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>JWT Debugger</span>
+                </button>
+                <button class="nav-item" onclick="switchTab('epoch')">
+                    <i class="fa-solid fa-clock"></i>
+                    <span>Epoch Converter</span>
+                </button>
             </nav>
 
             <!-- Quick Info / Status -->
@@ -100,26 +116,15 @@
                                 <textarea id="base64-input" name="text" placeholder="Type or paste plain text/base64 here..." rows="6"></textarea>
                             </div>
                             <div class="btn-group">
-                                <button hx-post="/api/base64/encode" 
-                                        hx-include="#base64-input" 
-                                        hx-target="#base64-output" 
-                                        hx-indicator="#base64-loader"
-                                        class="btn btn-primary"
-                                        onclick="saveToHistory('Base64 Encode', document.getElementById('base64-input').value)">
+                                <button type="button" class="btn btn-primary" onclick="runBase64('encode')">
                                     <i class="fa-solid fa-lock"></i> Encode
                                 </button>
-                                <button hx-post="/api/base64/decode" 
-                                        hx-include="#base64-input" 
-                                        hx-target="#base64-output" 
-                                        hx-indicator="#base64-loader"
-                                        class="btn btn-accent"
-                                        onclick="saveToHistory('Base64 Decode', document.getElementById('base64-input').value)">
+                                <button type="button" class="btn btn-accent" onclick="runBase64('decode')">
                                     <i class="fa-solid fa-lock-open"></i> Decode
                                 </button>
-                                <button class="btn btn-secondary" onclick="clearBase64()">
+                                <button type="button" class="btn btn-secondary" onclick="clearBase64()">
                                     <i class="fa-solid fa-trash-can"></i> Clear
                                 </button>
-                                <div id="base64-loader" class="htmx-indicator loader"></div>
                             </div>
                         </div>
                     </div>
@@ -217,11 +222,183 @@
                             </div>
                         </div>
 
-                        <div id="qrcode-output" class="output-wrapper">
+                    </div>
+                </section>
+
+                <!-- JSON FORMATTER & VALIDATOR MODULE -->
+                <section id="module-json" class="tab-module">
+                    <div class="grid grid-cols-2">
+                        <div class="card glass">
+                            <div class="card-header">
+                                <h3>JSON Settings</h3>
+                                <p>Prettify, minify, or validate raw JSON payload data.</p>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="json-input">JSON Payload</label>
+                                    <textarea id="json-input" name="text" placeholder='{"key": "value"}' rows="10"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="json-indent">Prettify Indentation</label>
+                                    <select id="json-indent" name="indent">
+                                        <option value="2">2 Spaces</option>
+                                        <option value="4">4 Spaces</option>
+                                        <option value="tab">Tab</option>
+                                    </select>
+                                </div>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-primary" onclick="runJSON('prettify')">
+                                        <i class="fa-solid fa-align-left"></i> Prettify
+                                    </button>
+                                    <button type="button" class="btn btn-accent" onclick="runJSON('minify')">
+                                        <i class="fa-solid fa-compress"></i> Minify
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="runJSON('validate')">
+                                        <i class="fa-solid fa-check-double"></i> Validate
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="clearJSON()">
+                                        <i class="fa-solid fa-trash-can"></i> Clear
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="json-output" class="output-wrapper">
                             <div class="card glass card-placeholder">
                                 <div class="placeholder-content">
-                                    <i class="fa-solid fa-qrcode placeholder-icon"></i>
-                                    <p>Enter a text payload and click "Generate QR Code" to generate image.</p>
+                                    <i class="fa-solid fa-file-code placeholder-icon"></i>
+                                    <p>Enter JSON payload and select an operation to view output.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- URL ENCODER & DECODER MODULE -->
+                <section id="module-url" class="tab-module">
+                    <div class="grid grid-cols-2">
+                        <div class="card glass">
+                            <div class="card-header">
+                                <h3>URL Settings</h3>
+                                <p>Encode or decode URL query strings, or parse a full URL into query parameter components.</p>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="url-input">URL / String Payload</label>
+                                    <textarea id="url-input" name="text" placeholder="https://example.com/search?q=query&category=dev" rows="8"></textarea>
+                                </div>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-primary" onclick="runURL('encode')">
+                                        <i class="fa-solid fa-lock"></i> Encode
+                                    </button>
+                                    <button type="button" class="btn btn-accent" onclick="runURL('decode')">
+                                        <i class="fa-solid fa-lock-open"></i> Decode
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="runURL('parse')">
+                                        <i class="fa-solid fa-magnifying-glass"></i> Parse URL
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="clearURL()">
+                                        <i class="fa-solid fa-trash-can"></i> Clear
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="url-output" class="output-wrapper">
+                            <div class="card glass card-placeholder">
+                                <div class="placeholder-content">
+                                    <i class="fa-solid fa-link placeholder-icon"></i>
+                                    <p>Enter text or a URL and select an operation to view output.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- JWT DEBUGGER MODULE -->
+                <section id="module-jwt" class="tab-module">
+                    <div class="grid grid-cols-2">
+                        <div class="card glass">
+                            <div class="card-header">
+                                <h3>JWT Token Settings</h3>
+                                <p>Decode JSON Web Tokens locally. View structured Header and Payload claims.</p>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="jwt-input">JWT Token</label>
+                                    <textarea id="jwt-input" name="token" placeholder="eyJhbGciOiJIUzI1NiIsIn..." rows="10" class="font-mono text-sm"></textarea>
+                                </div>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-primary" onclick="runJWT()">
+                                        <i class="fa-solid fa-key"></i> Decode Token
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="clearJWT()">
+                                        <i class="fa-solid fa-trash-can"></i> Clear
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="jwt-output" class="output-wrapper">
+                            <div class="card glass card-placeholder">
+                                <div class="placeholder-content">
+                                    <i class="fa-solid fa-shield-halved placeholder-icon"></i>
+                                    <p>Paste a JWT token and click "Decode Token" to inspect payload structure.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- EPOCH CONVERTER MODULE -->
+                <section id="module-epoch" class="tab-module">
+                    <div class="grid grid-cols-2">
+                        <div class="card glass">
+                            <div class="card-header">
+                                <h3>Epoch Timestamp Settings</h3>
+                                <p>Convert Unix timestamps to/from ISO, GMT, local timezones and relative intervals.</p>
+                            </div>
+                            <div class="card-body">
+                                <!-- Real-time Clock Panel -->
+                                <div class="live-clock-panel mb-4">
+                                    <div>
+                                        <span class="label text-xs" style="color: var(--text-muted);">Current Unix Timestamp</span>
+                                        <div id="live-epoch-value" class="text-xl font-mono text-accent" style="font-size: 20px; font-weight: 700; color: var(--color-accent);">Loading...</div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button class="btn btn-sm btn-secondary" onclick="copyLiveEpoch()" title="Copy live timestamp">
+                                            <i class="fa-solid fa-copy"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-accent" onclick="useCurrentEpoch()" title="Insert into converter">
+                                            <i class="fa-solid fa-circle-arrow-down"></i> Use
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <form onsubmit="event.preventDefault(); runEpoch();">
+                                    <div class="form-group">
+                                        <label for="epoch-input">Timestamp / Datetime string</label>
+                                        <input type="text" id="epoch-input" name="value" placeholder="e.g. 1781845200, 2026-06-19 12:00:00">
+                                        <small class="form-help" style="display: block; margin-top: 4px; color: var(--text-muted); font-size: 11px;">Supports Unix seconds/milliseconds, and common datetime formats.</small>
+                                    </div>
+
+                                    <div class="btn-group mt-4">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fa-solid fa-clock"></i> Convert Time
+                                        </button>
+                                        <button type="button" class="btn btn-secondary" onclick="clearEpoch()">
+                                            <i class="fa-solid fa-trash-can"></i> Clear
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div id="epoch-output" class="output-wrapper">
+                            <div class="card glass card-placeholder">
+                                <div class="placeholder-content">
+                                    <i class="fa-solid fa-clock placeholder-icon"></i>
+                                    <p>Enter a timestamp value and click "Convert Time" to display details.</p>
                                 </div>
                             </div>
                         </div>
@@ -253,7 +430,7 @@
     <div id="toast-container" class="toast-container"></div>
 
     <!-- JS Scripts -->
-    <script src="/static/js/app.js?v=2"></script>
+    <script src="/static/js/app.js?v=3"></script>
 </body>
 </html>
 {{ end }}
@@ -327,33 +504,286 @@
 
 
 {{ define "qrcode-result" }}
-<div class="card glass animate-fade-in text-center flex-center-card">
-    <div class="card-header">
-        <h4>Generated QR Code</h4>
+</div>
+{{ end }}
+
+
+{{ define "json-result" }}
+<div class="card glass mt-4 animate-fade-in">
+    <div class="card-header flex justify-between items-center">
+        <h4>JSON Result ({{ .Operation }})</h4>
+        <div class="card-actions">
+            {{ if and (not .Error) (ne .Operation "Validate") }}
+            <button class="btn btn-sm btn-primary" onclick="copyToClipboard('json-result-text')">
+                <i class="fa-solid fa-copy"></i> Copy Output
+            </button>
+            {{ end }}
+        </div>
     </div>
-    <div class="card-body flex flex-col items-center gap-4">
+    <div class="card-body">
         {{ if .Error }}
         <div class="alert alert-error">
             <i class="fa-solid fa-circle-exclamation"></i>
             <div>{{ .Error }}</div>
         </div>
         {{ else }}
-        <div class="qr-image-wrapper">
-            <img src="{{ .ImageURL }}" alt="QR Code" class="qr-image" id="qr-code-img">
+            {{ if eq .Operation "Validate" }}
+            <div class="alert alert-success" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 12px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 10px; color: var(--success);">
+                <i class="fa-solid fa-circle-check"></i>
+                <div>{{ .Result }}</div>
+            </div>
+            {{ else }}
+            <div class="result-box">
+                <pre id="json-result-text" class="result-text">{{ .Result }}</pre>
+            </div>
+            {{ end }}
+        {{ end }}
+    </div>
+</div>
+{{ end }}
+
+
+{{ define "url-result" }}
+<div class="card glass mt-4 animate-fade-in">
+    <div class="card-header flex justify-between items-center">
+        <h4>URL Result ({{ .Operation }})</h4>
+        <div class="card-actions">
+            {{ if and (not .Error) (ne .Operation "Parse") (ne .Operation "ParseQueryString") }}
+            <button class="btn btn-sm btn-primary" onclick="copyToClipboard('url-result-text')">
+                <i class="fa-solid fa-copy"></i> Copy Output
+            </button>
+            {{ end }}
         </div>
+    </div>
+    <div class="card-body">
+        {{ if .Error }}
+        <div class="alert alert-error">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <div>{{ .Error }}</div>
+        </div>
+        {{ else }}
+            {{ if or (eq .Operation "Parse") (eq .Operation "ParseQueryString") }}
+                <div class="url-parts-info">
+                    {{ if eq .Operation "Parse" }}
+                    <div class="grid grid-cols-3 gap-2 mb-4" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
+                        <div class="info-block" style="background: rgba(0, 0, 0, 0.2); border: 1px solid var(--card-border); padding: 8px 12px; border-radius: var(--radius-sm);">
+                            <span class="label" style="display: block; font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Scheme</span>
+                            <span class="value" style="font-family: var(--font-mono); font-size: 13px;">{{ if .Scheme }}{{ .Scheme }}{{ else }}N/A{{ end }}</span>
+                        </div>
+                        <div class="info-block" style="background: rgba(0, 0, 0, 0.2); border: 1px solid var(--card-border); padding: 8px 12px; border-radius: var(--radius-sm);">
+                            <span class="label" style="display: block; font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Host</span>
+                            <span class="value" style="font-family: var(--font-mono); font-size: 13px;">{{ if .Host }}{{ .Host }}{{ else }}N/A{{ end }}</span>
+                        </div>
+                        <div class="info-block" style="background: rgba(0, 0, 0, 0.2); border: 1px solid var(--card-border); padding: 8px 12px; border-radius: var(--radius-sm);">
+                            <span class="label" style="display: block; font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Path</span>
+                            <span class="value" style="font-family: var(--font-mono); font-size: 13px;">{{ if .Path }}{{ .Path }}{{ else }}N/A{{ end }}</span>
+                        </div>
+                    </div>
+                    {{ end }}
+
+                    <h5 style="margin-bottom: 8px; font-size: 14px;">Query Parameters ({{ len .Params }})</h5>
+                    {{ if eq (len .Params) 0 }}
+                    <p class="text-muted mt-2" style="color: var(--text-muted); font-size: 13px;">No query parameters found.</p>
+                    {{ else }}
+                    <div class="table-container mt-2" data-scheme="{{ .Scheme }}" data-host="{{ .Host }}" data-path="{{ .Path }}" data-op="{{ .Operation }}">
+                        <table class="params-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 35%;">Parameter Key</th>
+                                    <th style="width: 50%;">Value</th>
+                                    <th style="width: 15%;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{ range $index, $param := .Params }}
+                                <tr>
+                                    <td><input type="text" class="table-input param-key" value="{{ $param.Key }}" oninput="rebuildURL()"></td>
+                                    <td><input type="text" class="table-input param-value" value="{{ $param.Value }}" oninput="rebuildURL()"></td>
+                                    <td>
+                                        <button class="btn-copy-inline" onclick="copyTableValue(this)" title="Copy Value">
+                                            <i class="fa-regular fa-copy"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {{ end }}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="form-group mt-4">
+                        <label style="display: block; margin-bottom: 6px;">Reconstructed URL / Query String</label>
+                        <div class="reconstructed-wrapper">
+                            <pre id="reconstructed-url" class="result-text"></pre>
+                            <button class="btn btn-sm btn-secondary" onclick="copyToClipboard('reconstructed-url')">
+                                <i class="fa-solid fa-copy"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+                    <script>
+                        // Initialize reconstruction with a slight delay
+                        setTimeout(rebuildURL, 50);
+                    </script>
+                    {{ end }}
+                </div>
+            {{ else }}
+                <div class="result-box">
+                    <pre id="url-result-text" class="result-text">{{ .Result }}</pre>
+                </div>
+            {{ end }}
+        {{ end }}
+    </div>
+</div>
+{{ end }}
+
+
+{{ define "jwt-result" }}
+<div class="card glass mt-4 animate-fade-in">
+    <div class="card-header">
+        <h4>Decoded JSON Web Token</h4>
+    </div>
+    <div class="card-body">
+        {{ if .Error }}
+        <div class="alert alert-error">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <div>{{ .Error }}</div>
+        </div>
+        {{ else }}
         
-        <div class="qr-payload-text">
-            <strong>Payload:</strong> 
-            <span class="truncated-payload" title="{{ .Text }}">{{ .Text }}</span>
+        <!-- Status Badges -->
+        <div class="jwt-status-badges mb-4 flex gap-2 flex-wrap" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+            {{ if .HasExp }}
+                {{ if .IsExpired }}
+                <span class="badge badge-error">
+                    <i class="fa-solid fa-circle-xmark"></i> Token Expired ({{ .ExpIn }})
+                </span>
+                {{ else }}
+                <span class="badge badge-success">
+                    <i class="fa-solid fa-circle-check"></i> Token Active ({{ .ExpIn }})
+                </span>
+                {{ end }}
+            {{ else }}
+            <span class="badge badge-warning">
+                <i class="fa-solid fa-triangle-exclamation"></i> No Expiration Claim (exp)
+            </span>
+            {{ end }}
+            
+            {{ if .IssuedAt }}
+            <span class="badge badge-info">
+                <i class="fa-solid fa-calendar-days"></i> Issued: {{ .IssuedAt }}
+            </span>
+            {{ end }}
+            
+            {{ if .ExpTime }}
+            <span class="badge badge-secondary">
+                <i class="fa-solid fa-clock"></i> Exp: {{ .ExpTime }}
+            </span>
+            {{ end }}
         </div>
 
-        <div class="btn-group justify-center">
-            <button class="btn btn-primary btn-sm" onclick="copyQRCodeImage()">
-                <i class="fa-solid fa-copy"></i> Copy Image
-            </button>
-            <a href="{{ .ImageURL }}" download="qrcode.png" class="btn btn-accent btn-sm">
-                <i class="fa-solid fa-download"></i> Download PNG
-            </a>
+        <div class="jwt-segments-grid">
+            <div class="jwt-segment">
+                <div class="segment-header text-red">
+                    <h5 style="font-size: 13px; font-weight: 700;">HEADER <span class="text-xs text-muted" style="font-size: 11px; color: var(--text-muted); font-weight: 400;">(ALGORITHM & TOKEN TYPE)</span></h5>
+                    <button class="btn-copy-inline" onclick="copyToClipboard('jwt-header-text')" title="Copy Header">
+                        <i class="fa-regular fa-copy"></i>
+                    </button>
+                </div>
+                <div class="result-box result-box-red">
+                    <pre id="jwt-header-text" class="result-text">{{ .Header }}</pre>
+                </div>
+            </div>
+
+            <div class="jwt-segment mt-4">
+                <div class="segment-header text-cyan">
+                    <h5 style="font-size: 13px; font-weight: 700;">PAYLOAD <span class="text-xs text-muted" style="font-size: 11px; color: var(--text-muted); font-weight: 400;">(DATA / CLAIMS)</span></h5>
+                    <button class="btn-copy-inline" onclick="copyToClipboard('jwt-payload-text')" title="Copy Payload">
+                        <i class="fa-regular fa-copy"></i>
+                    </button>
+                </div>
+                <div class="result-box result-box-cyan">
+                    <pre id="jwt-payload-text" class="result-text">{{ .Payload }}</pre>
+                </div>
+            </div>
+
+            <div class="jwt-segment mt-4">
+                <div class="segment-header text-green">
+                    <h5 style="font-size: 13px; font-weight: 700;">SIGNATURE <span class="text-xs text-muted" style="font-size: 11px; color: var(--text-muted); font-weight: 400;">(HMAC/RSA SHA-256)</span></h5>
+                    <button class="btn-copy-inline" onclick="copyToClipboard('jwt-signature-text')" title="Copy Signature">
+                        <i class="fa-regular fa-copy"></i>
+                    </button>
+                </div>
+                <div class="result-box result-box-green">
+                    <pre id="jwt-signature-text" class="result-text" style="word-break: break-all; white-space: pre-wrap;">{{ .Signature }}</pre>
+                </div>
+            </div>
+        </div>
+        {{ end }}
+    </div>
+</div>
+{{ end }}
+
+
+{{ define "epoch-result" }}
+<div class="card glass mt-4 animate-fade-in">
+    <div class="card-header">
+        <h4>Conversion Results</h4>
+    </div>
+    <div class="card-body">
+        {{ if .Error }}
+        <div class="alert alert-error">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <div>{{ .Error }}</div>
+        </div>
+        {{ else }}
+        <div class="grid grid-cols-2 gap-4" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+            <div class="form-group">
+                <label>Epoch Seconds (10-digit)</label>
+                <div class="flex gap-2" style="display: flex; gap: 8px;">
+                    <span id="epoch-sec-val" class="result-text-inline font-mono">{{ .Seconds }}</span>
+                    <button class="btn btn-sm btn-secondary" onclick="copyToClipboard('epoch-sec-val')">
+                        <i class="fa-solid fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Epoch Milliseconds (13-digit)</label>
+                <div class="flex gap-2" style="display: flex; gap: 8px;">
+                    <span id="epoch-ms-val" class="result-text-inline font-mono">{{ .Millis }}</span>
+                    <button class="btn btn-sm btn-secondary" onclick="copyToClipboard('epoch-ms-val')">
+                        <i class="fa-solid fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <hr class="divider">
+
+        <div class="form-group">
+            <label>GMT / UTC Time</label>
+            <div class="flex gap-2" style="display: flex; gap: 8px;">
+                <span id="epoch-utc-val" class="result-text-inline font-mono">{{ .UTC }}</span>
+                <button class="btn btn-sm btn-secondary" onclick="copyToClipboard('epoch-utc-val')">
+                    <i class="fa-solid fa-copy"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="form-group mt-3" style="margin-top: 12px;">
+            <label>Local Time (Your system timezone)</label>
+            <div class="flex gap-2" style="display: flex; gap: 8px;">
+                <span id="epoch-local-val" class="result-text-inline font-mono">{{ .Local }}</span>
+                <button class="btn btn-sm btn-secondary" onclick="copyToClipboard('epoch-local-val')">
+                    <i class="fa-solid fa-copy"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="form-group mt-3" style="margin-top: 12px;">
+            <label style="margin-bottom: 4px;">Relative Time</label>
+            <div>
+                <span class="badge badge-accent font-semibold" style="font-weight: 600;">{{ .Relative }}</span>
+            </div>
         </div>
         {{ end }}
     </div>
