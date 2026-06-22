@@ -154,8 +154,10 @@ func HTMXJSONToYAML(c *gin.Context) {
 	}
 
 	c.HTML(http.StatusOK, "yaml-result", gin.H{
-		"Result":    result,
-		"Operation": "JSON to YAML",
+		"Result":     result,
+		"Operation":  "JSON to YAML",
+		"ResultID":   "json-to-yaml-result-text",
+		"ResultMode": "text/x-yaml",
 	})
 }
 
@@ -174,8 +176,10 @@ func HTMXYAMLToJSON(c *gin.Context) {
 	}
 
 	c.HTML(http.StatusOK, "yaml-result", gin.H{
-		"Result":    result,
-		"Operation": "Convert to JSON",
+		"Result":     result,
+		"Operation":  "Convert to JSON",
+		"ResultID":   "yaml-to-json-result-text",
+		"ResultMode": "application/json",
 	})
 }
 
@@ -194,8 +198,10 @@ func HTMXPrettifyYAML(c *gin.Context) {
 	}
 
 	c.HTML(http.StatusOK, "yaml-result", gin.H{
-		"Result":    result,
-		"Operation": "Format",
+		"Result":     result,
+		"Operation":  "Format",
+		"ResultID":   "yaml-prettify-result-text",
+		"ResultMode": "text/x-yaml",
 	})
 }
 

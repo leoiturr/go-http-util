@@ -31,10 +31,10 @@ func getVersion() string {
 	if err == nil {
 		commit := strings.TrimSpace(string(out))
 		if commit != "" {
-			return "v1.0.1-" + commit
+			return "v1.0.2-" + commit
 		}
 	}
-	return "v1.0.1"
+	return "v1.0.2"
 }
 
 func main() {

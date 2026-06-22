@@ -127,7 +127,7 @@
                         <div class="card-body">
                             <div class="form-group">
                                 <label for="base64-input">Input Data</label>
-                                <textarea id="base64-input" name="text" placeholder="Type or paste plain text/base64 here..." rows="6"></textarea>
+                                <textarea id="base64-input" name="text" placeholder="Type or paste plain text/base64 here..." rows="6">Hello, DevUtils! This is a base64 encoding test.</textarea>
                             </div>
                             <div class="btn-group">
                                 <button type="button" class="btn btn-primary" onclick="runBase64('encode')">
@@ -406,7 +406,7 @@ metadata:
                             <div class="card-body">
                                 <div class="form-group">
                                     <label for="url-input">URL / String Payload</label>
-                                    <textarea id="url-input" name="text" placeholder="https://example.com/search?q=query&category=dev" rows="8"></textarea>
+                                    <textarea id="url-input" name="text" placeholder="https://example.com/search?q=query&category=dev" rows="8">https://example.com/search?q=developer tools&category=web dev&status=active</textarea>
                                 </div>
                                 <div class="btn-group">
                                     <button type="button" class="btn btn-primary" onclick="runURL('encode')">
@@ -671,7 +671,7 @@ metadata:
         <h4>JSON Result ({{ .Operation }})</h4>
         <div class="card-actions">
             {{ if and (not .Error) (ne .Operation "Validate") }}
-            <button class="btn btn-sm btn-primary" onclick="copyToClipboard('json-result-text')">
+            <button class="btn btn-sm btn-primary" onclick="copyToClipboard('{{ if .ResultID }}{{ .ResultID }}{{ else }}json-result-text{{ end }}')">
                 <i class="fa-solid fa-copy"></i> Copy Output
             </button>
             {{ end }}
@@ -691,7 +691,7 @@ metadata:
             </div>
             {{ else }}
             <div class="result-box">
-                <pre id="json-result-text" class="result-text">{{ .Result }}</pre>
+                <textarea id="{{ if .ResultID }}{{ .ResultID }}{{ else }}json-result-text{{ end }}" class="result-text" data-mode="application/json" readonly>{{ .Result }}</textarea>
             </div>
             {{ end }}
         {{ end }}
@@ -706,7 +706,7 @@ metadata:
         <h4>YAML Result ({{ .Operation }})</h4>
         <div class="card-actions">
             {{ if and (not .Error) (ne .Operation "Validate") }}
-            <button class="btn btn-sm btn-primary" onclick="copyToClipboard('yaml-result-text')">
+            <button class="btn btn-sm btn-primary" onclick="copyToClipboard('{{ if .ResultID }}{{ .ResultID }}{{ else }}yaml-result-text{{ end }}')">
                 <i class="fa-solid fa-copy"></i> Copy Output
             </button>
             {{ end }}
@@ -726,7 +726,7 @@ metadata:
             </div>
             {{ else }}
             <div class="result-box">
-                <pre id="yaml-result-text" class="result-text">{{ .Result }}</pre>
+                <textarea id="{{ if .ResultID }}{{ .ResultID }}{{ else }}yaml-result-text{{ end }}" class="result-text" data-mode="{{ if .ResultMode }}{{ .ResultMode }}{{ else }}text/x-yaml{{ end }}" readonly>{{ .Result }}</textarea>
             </div>
             {{ end }}
         {{ end }}
