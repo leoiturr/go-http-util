@@ -63,6 +63,7 @@ function switchTab(tabId, updateHistory = true) {
         'guid': 'GUID Generator',
         'qrcode': 'QR Code Generator',
         'json': 'JSON Formatter & Validator',
+        'yaml': 'YAML Formatter & JSON to YAML',
         'url': 'URL Encoder / Decoder & Parser',
         'jwt': 'JWT Debugger',
         'epoch': 'Epoch Timestamp Converter',
@@ -73,6 +74,14 @@ function switchTab(tabId, updateHistory = true) {
     // Update browser history state
     if (updateHistory) {
         history.pushState({ tabId: tabId }, '', '#' + tabId);
+    }
+
+    // Refresh CodeMirror editors when showing their tabs to calculate container heights correctly
+    if (tabId === 'json' && window.jsonEditor) {
+        setTimeout(() => window.jsonEditor.refresh(), 50);
+    }
+    if (tabId === 'yaml' && window.yamlEditor) {
+        setTimeout(() => window.yamlEditor.refresh(), 50);
     }
 }
 
@@ -111,11 +120,34 @@ function clearBase64() {
 // Clear helper for JSON Formatter
 function clearJSON() {
     document.getElementById('json-input').value = '';
+    if (window.jsonEditor) {
+        window.jsonEditor.setValue('');
+    }
     const outputDiv = document.getElementById('json-output');
     if (outputDiv) {
         outputDiv.innerHTML = '';
     }
     showToast('JSON inputs cleared', 'success');
+}
+
+// Clear helper for YAML Tools
+function clearYAML() {
+    document.getElementById('yaml-input').value = '';
+    if (window.yamlEditor) {
+        window.yamlEditor.setValue('');
+    }
+    const outputDiv = document.getElementById('yaml-output');
+    if (outputDiv) {
+        outputDiv.innerHTML = `
+            <div class="card glass card-placeholder">
+                <div class="placeholder-content">
+                    <i class="fa-solid fa-file-lines placeholder-icon"></i>
+                    <p>Enter payload and select an operation to view output.</p>
+                </div>
+            </div>
+        `;
+    }
+    showToast('YAML inputs cleared', 'success');
 }
 
 // Clear helper for URL Encoder
@@ -1191,9 +1223,26 @@ function loadHistoryItem(operation, details) {
             updateRangeVal(count);
             showToast('Restored settings to GUID panel', 'success');
         }
+    } else if (operation.includes('JSON to YAML')) {
+        switchTab('json');
+        document.getElementById('json-input').value = details;
+        if (window.jsonEditor) {
+            window.jsonEditor.setValue(details);
+        }
+        showToast('Restored payload to JSON panel', 'success');
+    } else if (operation.includes('YAML to JSON')) {
+        switchTab('yaml');
+        document.getElementById('yaml-input').value = details;
+        if (window.yamlEditor) {
+            window.yamlEditor.setValue(details);
+        }
+        showToast('Restored payload to YAML panel', 'success');
     } else if (operation.includes('JSON')) {
         switchTab('json');
         document.getElementById('json-input').value = details;
+        if (window.jsonEditor) {
+            window.jsonEditor.setValue(details);
+        }
         showToast('Restored payload to JSON panel', 'success');
     } else if (operation.includes('URL')) {
         switchTab('url');
@@ -1207,6 +1256,13 @@ function loadHistoryItem(operation, details) {
         switchTab('epoch');
         document.getElementById('epoch-input').value = details;
         showToast('Restored timestamp to Epoch panel', 'success');
+    } else if (operation.includes('YAML')) {
+        switchTab('yaml');
+        document.getElementById('yaml-input').value = details;
+        if (window.yamlEditor) {
+            window.yamlEditor.setValue(details);
+        }
+        showToast('Restored payload to YAML panel', 'success');
     }
 }
 
@@ -1225,9 +1281,47 @@ window.addEventListener('popstate', function(event) {
     switchTab(tabId, false);
 });
 
+// Global editor references
+window.jsonEditor = null;
+window.yamlEditor = null;
+
 // Initialize active tab on page load based on URL hash
 document.addEventListener('DOMContentLoaded', () => {
     const initialTab = window.location.hash.substring(1) || 'base64';
     switchTab(initialTab, false);
     history.replaceState({ tabId: initialTab }, '', '#' + initialTab);
+
+    // Initialize CodeMirror for JSON Input
+    const jsonInput = document.getElementById('json-input');
+    if (jsonInput) {
+        window.jsonEditor = CodeMirror.fromTextArea(jsonInput, {
+            mode: "application/json",
+            theme: "material-ocean",
+            lineNumbers: true,
+            tabSize: 2,
+            indentWithTabs: false,
+            lineWrapping: true,
+            viewportMargin: Infinity
+        });
+        window.jsonEditor.on('change', function(cm) {
+            cm.save();
+        });
+    }
+
+    // Initialize CodeMirror for YAML Input
+    const yamlInput = document.getElementById('yaml-input');
+    if (yamlInput) {
+        window.yamlEditor = CodeMirror.fromTextArea(yamlInput, {
+            mode: "text/x-yaml",
+            theme: "material-ocean",
+            lineNumbers: true,
+            tabSize: 2,
+            indentWithTabs: false,
+            lineWrapping: true,
+            viewportMargin: Infinity
+        });
+        window.yamlEditor.on('change', function(cm) {
+            cm.save();
+        });
+    }
 });

@@ -27,7 +27,13 @@
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <!-- Custom Vanilla CSS -->
-    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="/static/css/styles.css?v={{ .Version }}">
+    <!-- CodeMirror 5 Styles & Scripts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/material-ocean.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/yaml/yaml.min.js"></script>
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
 </head>
@@ -65,6 +71,10 @@
                     <i class="fa-solid fa-file-code"></i>
                     <span>JSON Formatter</span>
                 </button>
+                <button class="nav-item" onclick="switchTab('yaml')">
+                    <i class="fa-solid fa-file-lines"></i>
+                    <span>YAML Tools</span>
+                </button>
                 <button class="nav-item" onclick="switchTab('url')">
                     <i class="fa-solid fa-link"></i>
                     <span>URL Encoder</span>
@@ -89,7 +99,7 @@
                     <span class="pulse-dot"></span>
                     <span>System Online</span>
                 </div>
-                <div class="credits">v1.0.0 &bull; Premium Tools</div>
+                <div class="credits">{{ .Version }} &bull; Premium Tools</div>
             </div>
         </aside>
 
@@ -247,32 +257,50 @@
                                 <p>Prettify, minify, or validate raw JSON payload data.</p>
                             </div>
                             <div class="card-body">
-                                <div class="form-group">
-                                    <label for="json-input">JSON Payload</label>
-                                    <textarea id="json-input" name="text" placeholder='{"key": "value"}' rows="10"></textarea>
-                                </div>
-                                <div class="form-group">
-                                    <label for="json-indent">Prettify Indentation</label>
-                                    <select id="json-indent" name="indent">
-                                        <option value="2">2 Spaces</option>
-                                        <option value="4">4 Spaces</option>
-                                        <option value="tab">Tab</option>
-                                    </select>
-                                </div>
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-primary" onclick="runJSON('prettify')">
-                                        <i class="fa-solid fa-align-left"></i> Prettify
-                                    </button>
-                                    <button type="button" class="btn btn-accent" onclick="runJSON('minify')">
-                                        <i class="fa-solid fa-compress"></i> Minify
-                                    </button>
-                                    <button type="button" class="btn btn-secondary" onclick="runJSON('validate')">
-                                        <i class="fa-solid fa-check-double"></i> Validate
-                                    </button>
-                                    <button type="button" class="btn btn-secondary" onclick="clearJSON()">
-                                        <i class="fa-solid fa-trash-can"></i> Clear
-                                    </button>
-                                </div>
+                                <form id="json-form" onsubmit="return false;">
+                                    <div class="form-group">
+                                        <label for="json-input">JSON Payload</label>
+                                        <textarea id="json-input" name="text" placeholder='{"key": "value"}' rows="10">{
+  "project": "DevUtils",
+  "status": "active",
+  "metadata": {
+    "version": "1.0.0",
+    "environment": "development"
+  }
+}</textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="json-indent">Prettify Indentation</label>
+                                        <select id="json-indent" name="indent">
+                                            <option value="2">2 Spaces</option>
+                                            <option value="4">4 Spaces</option>
+                                            <option value="tab">Tab</option>
+                                        </select>
+                                    </div>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-primary" onclick="runJSON('prettify')">
+                                            <i class="fa-solid fa-align-left"></i> Prettify
+                                        </button>
+                                        <button type="button" class="btn btn-accent" onclick="runJSON('minify')">
+                                            <i class="fa-solid fa-compress"></i> Minify
+                                        </button>
+                                        <button type="button" class="btn btn-secondary" onclick="runJSON('validate')">
+                                            <i class="fa-solid fa-check-double"></i> Validate
+                                        </button>
+                                        <button type="button" class="btn btn-accent"
+                                                hx-post="/api/htmx/yaml/json2yaml" 
+                                                hx-target="#json-output" 
+                                                hx-include="#json-form"
+                                                hx-indicator="#json-loader"
+                                                onclick="saveToHistory('JSON to YAML', truncateString(document.getElementById('json-input').value, 20))">
+                                            <i class="fa-solid fa-exchange-alt"></i> Convert to YAML
+                                        </button>
+                                        <button type="button" class="btn btn-secondary" onclick="clearJSON()">
+                                            <i class="fa-solid fa-trash-can"></i> Clear
+                                        </button>
+                                        <div id="json-loader" class="htmx-indicator loader"></div>
+                                    </div>
+                                </form>
                             </div>
                         </div>
 
@@ -281,6 +309,86 @@
                                 <div class="placeholder-content">
                                     <i class="fa-solid fa-file-code placeholder-icon"></i>
                                     <p>Enter JSON payload and select an operation to view output.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- YAML FORMATTER & JSON TO YAML MODULE -->
+                <section id="module-yaml" class="tab-module">
+                    <div class="grid grid-cols-2">
+                        <div class="card glass">
+                            <div class="card-header">
+                                <h3>YAML Settings</h3>
+                                <p>Prettify, validate, or convert YAML payloads to formatted JSON.</p>
+                            </div>
+                            <div class="card-body">
+                                <form id="yaml-form" onsubmit="return false;">
+                                    <div class="form-group">
+                                        <label for="yaml-input">YAML Payload</label>
+                                        <textarea id="yaml-input" name="text" placeholder='Paste YAML here to format, validate, or convert to JSON...' rows="10">project: DevUtils
+status: active
+metadata:
+  version: 1.0.0
+  environment: development</textarea>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-4" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                                        <div class="form-group" style="margin-bottom: 0;">
+                                            <label for="yaml-indent">Indentation</label>
+                                            <select id="yaml-indent" name="indent">
+                                                <option value="2">2 Spaces</option>
+                                                <option value="4">4 Spaces</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group" style="margin-bottom: 0;">
+                                            <label for="yaml-quotes">Quoting Style</label>
+                                            <select id="yaml-quotes" name="quotes">
+                                                <option value="default">Default Quotes</option>
+                                                <option value="single">Single Quotes</option>
+                                                <option value="double">Double Quotes</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-accent"
+                                                hx-post="/api/htmx/yaml/yaml2json" 
+                                                hx-target="#yaml-output" 
+                                                hx-include="#yaml-form"
+                                                hx-indicator="#yaml-loader"
+                                                onclick="saveToHistory('YAML to JSON', truncateString(document.getElementById('yaml-input').value, 20))">
+                                            <i class="fa-solid fa-exchange-alt"></i> Convert to JSON
+                                        </button>
+                                        <button type="button" class="btn btn-primary"
+                                                hx-post="/api/htmx/yaml/prettify" 
+                                                hx-target="#yaml-output" 
+                                                hx-include="#yaml-form"
+                                                hx-indicator="#yaml-loader"
+                                                onclick="saveToHistory('YAML Prettify', truncateString(document.getElementById('yaml-input').value, 20))">
+                                            <i class="fa-solid fa-align-left"></i> Prettify
+                                        </button>
+                                        <button type="button" class="btn btn-secondary"
+                                                hx-post="/api/htmx/yaml/validate" 
+                                                hx-target="#yaml-output" 
+                                                hx-include="#yaml-form"
+                                                hx-indicator="#yaml-loader"
+                                                onclick="saveToHistory('YAML Validate', truncateString(document.getElementById('yaml-input').value, 20))">
+                                            <i class="fa-solid fa-check-double"></i> Validate
+                                        </button>
+                                        <button type="button" class="btn btn-secondary" onclick="clearYAML()">
+                                            <i class="fa-solid fa-trash-can"></i> Clear
+                                        </button>
+                                        <div id="yaml-loader" class="htmx-indicator loader"></div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div id="yaml-output" class="output-wrapper">
+                            <div class="card glass card-placeholder">
+                                <div class="placeholder-content">
+                                    <i class="fa-solid fa-file-lines placeholder-icon"></i>
+                                    <p>Enter payload and select an operation to view output.</p>
                                 </div>
                             </div>
                         </div>
@@ -339,7 +447,7 @@
                             <div class="card-body">
                                 <div class="form-group">
                                     <label for="jwt-input">JWT Token</label>
-                                    <textarea id="jwt-input" name="token" placeholder="eyJhbGciOiJIUzI1NiIsIn..." rows="10" class="font-mono text-sm"></textarea>
+                                    <textarea id="jwt-input" name="token" placeholder="eyJhbGciOiJIUzI1NiIsIn..." rows="10" class="font-mono text-sm">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE5NTc3ODQ2MjJ9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</textarea>
                                 </div>
                                 <div class="btn-group">
                                     <button type="button" class="btn btn-primary" onclick="runJWT()">
@@ -450,7 +558,7 @@
     <div id="toast-container" class="toast-container"></div>
 
     <!-- JS Scripts -->
-    <script src="/static/js/app.js?v=3"></script>
+    <script src="/static/js/app.js?v={{ .Version }}"></script>
 </body>
 </html>
 {{ end }}
@@ -584,6 +692,41 @@
             {{ else }}
             <div class="result-box">
                 <pre id="json-result-text" class="result-text">{{ .Result }}</pre>
+            </div>
+            {{ end }}
+        {{ end }}
+    </div>
+</div>
+{{ end }}
+
+
+{{ define "yaml-result" }}
+<div class="card glass mt-4 animate-fade-in">
+    <div class="card-header flex justify-between items-center">
+        <h4>YAML Result ({{ .Operation }})</h4>
+        <div class="card-actions">
+            {{ if and (not .Error) (ne .Operation "Validate") }}
+            <button class="btn btn-sm btn-primary" onclick="copyToClipboard('yaml-result-text')">
+                <i class="fa-solid fa-copy"></i> Copy Output
+            </button>
+            {{ end }}
+        </div>
+    </div>
+    <div class="card-body">
+        {{ if .Error }}
+        <div class="alert alert-error">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <div><pre style="white-space: pre-wrap; font-family: inherit; margin: 0; padding: 0; background: transparent; border: none; color: inherit; font-size: inherit;">{{ .Error }}</pre></div>
+        </div>
+        {{ else }}
+            {{ if eq .Operation "Validate" }}
+            <div class="alert alert-success" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 12px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 10px; color: var(--success);">
+                <i class="fa-solid fa-circle-check"></i>
+                <div>{{ .Result }}</div>
+            </div>
+            {{ else }}
+            <div class="result-box">
+                <pre id="yaml-result-text" class="result-text">{{ .Result }}</pre>
             </div>
             {{ end }}
         {{ end }}

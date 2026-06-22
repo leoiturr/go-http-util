@@ -1215,3 +1215,72 @@ input[type="range"]::-webkit-slider-thumb:hover {
     align-items: center;
 }
 
+/* CodeMirror Styles overrides for premium theme and mobile-first responsiveness */
+.CodeMirror,
+.CodeMirror * {
+    font-family: 'Lilex', var(--font-mono), monospace !important;
+}
+
+.CodeMirror {
+    width: 100%;
+    height: auto;
+    min-height: 250px;
+    max-height: 400px;
+    background: rgba(0, 0, 0, 0.25) !important;
+    border: 1px solid var(--card-border) !important;
+    border-radius: var(--radius-md);
+    color: var(--text-primary) !important;
+    font-size: 13px !important;
+    line-height: 1.6 !important;
+}
+
+.CodeMirror-focused {
+    border-color: var(--color-primary) !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+    background: rgba(0, 0, 0, 0.35) !important;
+}
+
+.CodeMirror-gutters {
+    background: rgba(0, 0, 0, 0.15) !important;
+    border-right: 1px solid var(--card-border) !important;
+}
+
+.CodeMirror-linenumber {
+    color: var(--text-muted) !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+}
+
+.CodeMirror-scroll {
+    max-height: 400px;
+}
+
+/* Specific theme color overrides for material-ocean to fit dashboard design */
+.cm-s-material-ocean.CodeMirror {
+    background-color: rgba(0, 0, 0, 0.25) !important;
+    color: #f8f8f2 !important;
+}
+.cm-s-material-ocean .CodeMirror-gutters {
+    background-color: rgba(0, 0, 0, 0.15) !important;
+}
+.cm-s-material-ocean .CodeMirror-cursor {
+    border-left: 2px solid var(--color-primary) !important;
+}
+
+/* Adjustments for mobile responsiveness (under 768px) */
+@media (max-width: 768px) {
+    .CodeMirror {
+        min-height: 180px;
+        max-height: 300px;
+        font-size: 12px !important;
+    }
+    .CodeMirror-scroll {
+        max-height: 300px;
+    }
+    .CodeMirror-linenumber {
+        padding-left: 4px !important;
+        padding-right: 4px !important;
+    }
+}
+
+

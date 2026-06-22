@@ -285,6 +285,162 @@
         }
       }
     },
+    "/yaml/json2yaml": {
+      "post": {
+        "summary": "Convert JSON to YAML",
+        "description": "Converts strict or loose JSON payload into formatted YAML, preserving key order.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/YAMLRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/YAMLRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "YAML output",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/YAMLFormattingResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/429Error"
+          }
+        }
+      }
+    },
+    "/yaml/yaml2json": {
+      "post": {
+        "summary": "Convert YAML to JSON",
+        "description": "Converts YAML payload into formatted JSON, preserving key order.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/YAMLRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/YAMLRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "JSON output",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/YAMLFormattingResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/429Error"
+          }
+        }
+      }
+    },
+    "/yaml/prettify": {
+      "post": {
+        "summary": "Prettify YAML data",
+        "description": "Formats raw YAML data into prettified spacing, with option to force quote styles.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/YAMLRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/YAMLRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prettified YAML output",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/YAMLFormattingResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/429Error"
+          }
+        }
+      }
+    },
+    "/yaml/validate": {
+      "post": {
+        "summary": "Validate YAML format",
+        "description": "Validates the syntax and correctness of raw YAML payloads.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/YAMLRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/YAMLRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Validation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/YAMLValidationResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/429Error"
+          }
+        }
+      }
+    },
     "/url/encode": {
       "post": {
         "summary": "URL Encode query text",
@@ -665,6 +821,63 @@
             "enum": [
               "Validate"
             ]
+          }
+        }
+      },
+      "YAMLRequest": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Raw string block target"
+          },
+          "indent": {
+            "type": "string",
+            "enum": [
+              "2",
+              "4"
+            ],
+            "default": "2"
+          },
+          "quotes": {
+            "type": "string",
+            "enum": [
+              "default",
+              "single",
+              "double"
+            ],
+            "default": "default"
+          }
+        }
+      },
+      "YAMLFormattingResult": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "string",
+            "description": "Processed YAML output string"
+          },
+          "operation": {
+            "type": "string"
+          }
+        }
+      },
+      "YAMLValidationResult": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "string",
+            "description": "Validation details or error block"
+          },
+          "is_valid": {
+            "type": "boolean",
+            "description": "Verification compliance status"
+          },
+          "operation": {
+            "type": "string"
           }
         }
       },

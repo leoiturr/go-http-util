@@ -5,12 +5,37 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"strconv"
+	"strings"
 
 	"gin-example/handlers"
 	"gin-example/middleware"
 	"github.com/gin-gonic/gin"
 )
+
+var appVersion = getVersion()
+
+func getVersion() string {
+	// Check Render.com injected environment variable first
+	if renderCommit := os.Getenv("RENDER_GIT_COMMIT"); renderCommit != "" {
+		if len(renderCommit) > 7 {
+			return "v1.0.1-" + renderCommit[:7]
+		}
+		return "v1.0.1-" + renderCommit
+	}
+
+	// Fallback to local git CLI command execution (useful in local dev)
+	cmd := exec.Command("git", "rev-parse", "--short", "HEAD")
+	out, err := cmd.Output()
+	if err == nil {
+		commit := strings.TrimSpace(string(out))
+		if commit != "" {
+			return "v1.0.1-" + commit
+		}
+	}
+	return "v1.0.1"
+}
 
 func main() {
 	// Create Gin router
@@ -39,12 +64,12 @@ func main() {
 
 	// Docs Web Route
 	r.GET("/docs", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "docs", gin.H{})
+		c.HTML(http.StatusOK, "docs", gin.H{"Version": appVersion})
 	})
 
 	// Main web interface route
 	r.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index", gin.H{})
+		c.HTML(http.StatusOK, "index", gin.H{"Version": appVersion})
 	})
 
 	// Set up rate limiter middleware from environment variables with safe defaults
@@ -94,6 +119,12 @@ func main() {
 
 		// Epoch / Unix Timestamp Converter API
 		htmxGroup.POST("/epoch/convert", handlers.HTMXConvertEpoch)
+
+		// YAML Tools API (JSON to YAML, YAML to JSON, YAML Formatter, YAML Validator)
+		htmxGroup.POST("/yaml/json2yaml", handlers.HTMXJSONToYAML)
+		htmxGroup.POST("/yaml/yaml2json", handlers.HTMXYAMLToJSON)
+		htmxGroup.POST("/yaml/prettify", handlers.HTMXPrettifyYAML)
+		htmxGroup.POST("/yaml/validate", handlers.HTMXValidateYAML)
 	}
 
 	// REST v1 JSON API Route Group with Rate Limiting
@@ -125,6 +156,12 @@ func main() {
 
 		// Epoch / Unix Timestamp Converter API
 		v1Group.POST("/epoch/convert", handlers.V1ConvertEpoch)
+
+		// YAML Tools API (JSON to YAML, YAML to JSON, YAML Formatter, YAML Validator)
+		v1Group.POST("/yaml/json2yaml", handlers.V1JSONToYAML)
+		v1Group.POST("/yaml/yaml2json", handlers.V1YAMLToJSON)
+		v1Group.POST("/yaml/prettify", handlers.V1PrettifyYAML)
+		v1Group.POST("/yaml/validate", handlers.V1ValidateYAML)
 	}
 
 	// Start Gin server on the configured port (Render uses the PORT environment variable)
