@@ -467,11 +467,12 @@ function runJSON(operation) {
                 </div>
                 <div class="card-body">
                     <div class="result-box">
-                        <pre id="json-result-text" class="result-text">${escapeHTML(result)}</pre>
+                        <textarea id="json-result-text" class="result-text" readonly>${escapeHTML(result)}</textarea>
                     </div>
                 </div>
             </div>
         `;
+        initResultEditor('json-result-text', 'application/json');
     }
 }
 
@@ -1049,8 +1050,8 @@ function copyToClipboard(elementId) {
     const element = document.getElementById(elementId);
     if (!element) return;
 
-    // Get either innerText or textContent (for pre-tags)
-    const textToCopy = element.innerText || element.textContent;
+    // Get either value (for textareas) or innerText/textContent (for other tags)
+    const textToCopy = element.value !== undefined ? element.value : (element.innerText || element.textContent);
 
     navigator.clipboard.writeText(textToCopy)
         .then(() => {
@@ -1323,5 +1324,62 @@ document.addEventListener('DOMContentLoaded', () => {
         window.yamlEditor.on('change', function(cm) {
             cm.save();
         });
+    }
+});
+
+// Initialize read-only result CodeMirror editor
+function initResultEditor(elementId, mode) {
+    const textarea = document.getElementById(elementId);
+    if (textarea && !textarea.classList.contains('cm-initialized')) {
+        const editor = CodeMirror.fromTextArea(textarea, {
+            mode: mode,
+            theme: "material-ocean",
+            lineNumbers: true,
+            readOnly: true,
+            lineWrapping: true,
+            viewportMargin: Infinity
+        });
+        textarea.CodeMirror = editor;
+        textarea.classList.add('cm-initialized');
+    }
+}
+
+// Global HTMX afterSettle listener to initialize syntax highlighting on returned output textareas
+document.addEventListener('htmx:afterSettle', function(evt) {
+    const target = evt.detail.target;
+    if (target && typeof target.querySelectorAll === 'function') {
+        // Find and initialize any result textarea inside the target
+        target.querySelectorAll('textarea.result-text').forEach(textarea => {
+            if (!textarea.classList.contains('cm-initialized')) {
+                const mode = textarea.getAttribute('data-mode') || 'text/x-yaml';
+                const editor = CodeMirror.fromTextArea(textarea, {
+                    mode: mode,
+                    theme: "material-ocean",
+                    lineNumbers: true,
+                    readOnly: true,
+                    lineWrapping: true,
+                    viewportMargin: Infinity
+                });
+                textarea.CodeMirror = editor;
+                textarea.classList.add('cm-initialized');
+            }
+        });
+    }
+
+    // Fallback checking for specific hardcoded IDs (e.g. if loaded initially or outside standard swap target)
+    if (document.getElementById('json-result-text')) {
+        initResultEditor('json-result-text', 'application/json');
+    }
+    if (document.getElementById('yaml-result-text')) {
+        initResultEditor('yaml-result-text', 'text/x-yaml');
+    }
+    if (document.getElementById('json-to-yaml-result-text')) {
+        initResultEditor('json-to-yaml-result-text', 'text/x-yaml');
+    }
+    if (document.getElementById('yaml-to-json-result-text')) {
+        initResultEditor('yaml-to-json-result-text', 'application/json');
+    }
+    if (document.getElementById('yaml-prettify-result-text')) {
+        initResultEditor('yaml-prettify-result-text', 'text/x-yaml');
     }
 });
