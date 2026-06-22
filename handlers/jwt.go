@@ -16,37 +16,39 @@ type JWTRequest struct {
 	Token string `form:"token" json:"token"`
 }
 
-// DecodeJWT decodes a JWT without checking signatures (client-facing details tool)
-func DecodeJWT(c *gin.Context) {
-	var req JWTRequest
-	if err := c.ShouldBind(&req); err != nil {
-		c.HTML(http.StatusBadRequest, "jwt-result", gin.H{"Error": "Invalid request parameters"})
-		return
-	}
+// DecodedJWTResult holds the parsed components and validation information of a JWT
+type DecodedJWTResult struct {
+	Header    string `json:"header"`
+	Payload   string `json:"payload"`
+	Signature string `json:"signature"`
+	HasExp    bool   `json:"has_exp"`
+	IsExpired bool   `json:"is_expired"`
+	ExpTime   string `json:"exp_time,omitempty"`
+	ExpIn     string `json:"exp_in,omitempty"`
+	IssuedAt  string `json:"issued_at,omitempty"`
+}
 
-	token := strings.TrimSpace(req.Token)
+// DecodeJWTLogic parses a JWT's Header, Payload, and Signature, and extracts basic claims
+func DecodeJWTLogic(token string) (DecodedJWTResult, error) {
+	token = strings.TrimSpace(token)
 	if token == "" {
-		c.HTML(http.StatusOK, "jwt-result", gin.H{"Error": "JWT token input is empty"})
-		return
+		return DecodedJWTResult{}, fmt.Errorf("JWT token input is empty")
 	}
 
 	// JWT format: header.payload.signature
 	parts := strings.Split(token, ".")
 	if len(parts) != 3 {
-		c.HTML(http.StatusOK, "jwt-result", gin.H{"Error": "Invalid JWT format. A valid token must have exactly three segments separated by dots (header.payload.signature)."})
-		return
+		return DecodedJWTResult{}, fmt.Errorf("invalid JWT format. A valid token must have exactly three segments separated by dots (header.payload.signature)")
 	}
 
 	headerDec, err := decodeBase64URL(parts[0])
 	if err != nil {
-		c.HTML(http.StatusOK, "jwt-result", gin.H{"Error": fmt.Sprintf("Failed to decode token header: %v", err)})
-		return
+		return DecodedJWTResult{}, fmt.Errorf("failed to decode token header: %v", err)
 	}
 
 	payloadDec, err := decodeBase64URL(parts[1])
 	if err != nil {
-		c.HTML(http.StatusOK, "jwt-result", gin.H{"Error": fmt.Sprintf("Failed to decode token payload: %v", err)})
-		return
+		return DecodedJWTResult{}, fmt.Errorf("failed to decode token payload: %v", err)
 	}
 
 	// Prettify JSON header
@@ -73,7 +75,7 @@ func DecodeJWT(c *gin.Context) {
 		payloadPretty = string(payloadDec)
 	}
 
-	// Extract standard claims: exp, iat, nbf, sub, iss
+	// Extract standard claims: exp, iat
 	var hasExp bool
 	var isExpired bool
 	var expTimeStr string
@@ -125,16 +127,59 @@ func DecodeJWT(c *gin.Context) {
 		}
 	}
 
+	return DecodedJWTResult{
+		Header:    headerPretty,
+		Payload:   payloadPretty,
+		Signature: parts[2],
+		HasExp:    hasExp,
+		IsExpired: isExpired,
+		ExpTime:   expTimeStr,
+		ExpIn:     expInStr,
+		IssuedAt:  issuedAtStr,
+	}, nil
+}
+
+// HTMXDecodeJWT handles decoding requests from HTMX
+func HTMXDecodeJWT(c *gin.Context) {
+	var req JWTRequest
+	if err := c.ShouldBind(&req); err != nil {
+		c.HTML(http.StatusBadRequest, "jwt-result", gin.H{"Error": "Invalid request parameters"})
+		return
+	}
+
+	res, err := DecodeJWTLogic(req.Token)
+	if err != nil {
+		c.HTML(http.StatusOK, "jwt-result", gin.H{"Error": err.Error()})
+		return
+	}
+
 	c.HTML(http.StatusOK, "jwt-result", gin.H{
-		"Header":    headerPretty,
-		"Payload":   payloadPretty,
-		"Signature": parts[2],
-		"HasExp":    hasExp,
-		"IsExpired": isExpired,
-		"ExpTime":   expTimeStr,
-		"ExpIn":     expInStr,
-		"IssuedAt":  issuedAtStr,
+		"Header":    res.Header,
+		"Payload":   res.Payload,
+		"Signature": res.Signature,
+		"HasExp":    res.HasExp,
+		"IsExpired": res.IsExpired,
+		"ExpTime":   res.ExpTime,
+		"ExpIn":     res.ExpIn,
+		"IssuedAt":  res.IssuedAt,
 	})
+}
+
+// V1DecodeJWT handles JSON REST API requests to decode a JWT
+func V1DecodeJWT(c *gin.Context) {
+	var req JWTRequest
+	if err := c.ShouldBind(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request parameters"})
+		return
+	}
+
+	res, err := DecodeJWTLogic(req.Token)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, res)
 }
 
 // decodeBase64URL decodes base64url padding-less encoded data (standard JWT strings)

@@ -15,15 +15,19 @@ type EpochRequest struct {
 	Value string `form:"value" json:"value"`
 }
 
-// ConvertEpoch converts epoch integer strings or date strings to various formats
-func ConvertEpoch(c *gin.Context) {
-	var req EpochRequest
-	if err := c.ShouldBind(&req); err != nil {
-		c.HTML(http.StatusBadRequest, "epoch-result", gin.H{"Error": "Invalid request parameters"})
-		return
-	}
+// EpochResult holds converted datetime string formats and numeric timestamps
+type EpochResult struct {
+	Seconds  int64  `json:"seconds"`
+	Millis   int64  `json:"millis"`
+	UTC      string `json:"utc"`
+	Local    string `json:"local"`
+	Relative string `json:"relative"`
+	Value    string `json:"value"`
+}
 
-	val := strings.TrimSpace(req.Value)
+// ConvertEpochLogic converts raw epoch values (seconds/millis) or human-readable dates to output components
+func ConvertEpochLogic(val string) (EpochResult, error) {
+	val = strings.TrimSpace(val)
 	if val == "" {
 		// Fallback to current Unix epoch
 		val = strconv.FormatInt(time.Now().Unix(), 10)
@@ -70,10 +74,7 @@ func ConvertEpoch(c *gin.Context) {
 	}
 
 	if !parsed {
-		c.HTML(http.StatusOK, "epoch-result", gin.H{
-			"Error": "Could not parse date/time value. We support Unix epoch integers (seconds or milliseconds), ISO8601 strings, YYYY-MM-DD HH:MM:SS, and common RFC formats.",
-		})
-		return
+		return EpochResult{}, fmt.Errorf("could not parse date/time value. Supported formats: Unix integers, ISO8601, YYYY-MM-DD HH:MM:SS, and common RFC formats")
 	}
 
 	// Prepare result metrics
@@ -109,12 +110,55 @@ func ConvertEpoch(c *gin.Context) {
 		}
 	}
 
+	return EpochResult{
+		Seconds:  seconds,
+		Millis:   millis,
+		UTC:      utcStr,
+		Local:    localStr,
+		Relative: relative,
+		Value:    val,
+	}, nil
+}
+
+// HTMXConvertEpoch handles convert requests from HTMX
+func HTMXConvertEpoch(c *gin.Context) {
+	var req EpochRequest
+	if err := c.ShouldBind(&req); err != nil {
+		c.HTML(http.StatusBadRequest, "epoch-result", gin.H{"Error": "Invalid request parameters"})
+		return
+	}
+
+	res, err := ConvertEpochLogic(req.Value)
+	if err != nil {
+		c.HTML(http.StatusOK, "epoch-result", gin.H{
+			"Error": err.Error(),
+		})
+		return
+	}
+
 	c.HTML(http.StatusOK, "epoch-result", gin.H{
-		"Seconds":  seconds,
-		"Millis":   millis,
-		"UTC":      utcStr,
-		"Local":    localStr,
-		"Relative": relative,
-		"Value":    val,
+		"Seconds":  res.Seconds,
+		"Millis":   res.Millis,
+		"UTC":      res.UTC,
+		"Local":    res.Local,
+		"Relative": res.Relative,
+		"Value":    res.Value,
 	})
+}
+
+// V1ConvertEpoch handles JSON REST API requests to convert epoch
+func V1ConvertEpoch(c *gin.Context) {
+	var req EpochRequest
+	if err := c.ShouldBind(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request parameters"})
+		return
+	}
+
+	res, err := ConvertEpochLogic(req.Value)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, res)
 }

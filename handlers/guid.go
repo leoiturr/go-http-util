@@ -19,18 +19,10 @@ type GUIDRequest struct {
 	Prefix string `form:"prefix" json:"prefix"`
 }
 
-// GenerateGUIDs handles the generation request
-func GenerateGUIDs(c *gin.Context) {
-	var req GUIDRequest
-	if err := c.ShouldBind(&req); err != nil {
-		c.HTML(http.StatusBadRequest, "guid-result", gin.H{
-			"Error": "Invalid request parameters",
-		})
-		return
-	}
-
+// GenerateGUIDsLogic performs the core GUID generation logic
+func GenerateGUIDsLogic(countStr, typeName, prefix string) ([]string, int, string, error) {
 	// Parse and clamp count between 10 and 100
-	count, err := strconv.Atoi(req.Count)
+	count, err := strconv.Atoi(countStr)
 	if err != nil {
 		count = 10 // Default fallback
 	}
@@ -47,7 +39,7 @@ func GenerateGUIDs(c *gin.Context) {
 	for i := 0; i < count; i++ {
 		var val string
 		var err error
-		switch req.Type {
+		switch typeName {
 		case "v7":
 			id, errV7 := uuid.NewV7()
 			if errV7 != nil {
@@ -61,13 +53,13 @@ func GenerateGUIDs(c *gin.Context) {
 				genErr = errHex
 				break
 			}
-			cleanPrefix := strings.TrimSpace(req.Prefix)
+			cleanPrefix := strings.TrimSpace(prefix)
 			if cleanPrefix == "" {
 				cleanPrefix = "GUID"
 			}
 			val = fmt.Sprintf("%s-%s", cleanPrefix, suffix)
 		case "prefixed_guid":
-			val, err = generatePrefixedGUID(req.Prefix)
+			val, err = generatePrefixedGUID(prefix)
 			if err != nil {
 				genErr = err
 				break
@@ -84,8 +76,26 @@ func GenerateGUIDs(c *gin.Context) {
 	}
 
 	if genErr != nil {
+		return nil, 0, "", genErr
+	}
+
+	return guids, count, typeName, nil
+}
+
+// HTMXGenerateGUIDs handles the generation request from HTMX
+func HTMXGenerateGUIDs(c *gin.Context) {
+	var req GUIDRequest
+	if err := c.ShouldBind(&req); err != nil {
+		c.HTML(http.StatusBadRequest, "guid-result", gin.H{
+			"Error": "Invalid request parameters",
+		})
+		return
+	}
+
+	guids, count, typeName, err := GenerateGUIDsLogic(req.Count, req.Type, req.Prefix)
+	if err != nil {
 		c.HTML(http.StatusInternalServerError, "guid-result", gin.H{
-			"Error": fmt.Sprintf("Failed to generate GUIDs: %v", genErr),
+			"Error": fmt.Sprintf("Failed to generate GUIDs: %v", err),
 		})
 		return
 	}
@@ -93,9 +103,33 @@ func GenerateGUIDs(c *gin.Context) {
 	c.HTML(http.StatusOK, "guid-result", gin.H{
 		"GUIDs":     guids,
 		"Count":     count,
-		"Type":      req.Type,
+		"Type":      typeName,
 		"Prefix":    req.Prefix,
 		"Timestamp": true,
+	})
+}
+
+// V1GenerateGUIDs handles JSON REST API requests to generate GUIDs
+func V1GenerateGUIDs(c *gin.Context) {
+	var req GUIDRequest
+	if err := c.ShouldBind(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request parameters"})
+		return
+	}
+
+	guids, count, typeName, err := GenerateGUIDsLogic(req.Count, req.Type, req.Prefix)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": fmt.Sprintf("Failed to generate GUIDs: %v", err),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"guids":  guids,
+		"count":  count,
+		"type":   typeName,
+		"prefix": req.Prefix,
 	})
 }
 

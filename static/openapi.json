@@ -1,0 +1,803 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "DevUtils Utility API",
+    "description": "High-performance, developer-focused utility APIs for encoding/decoding, generation, and parsing.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "/api/v1",
+      "description": "Current environment v1 base path"
+    }
+  ],
+  "paths": {
+    "/base64/encode": {
+      "post": {
+        "summary": "Encode plain text to Base64",
+        "description": "Encodes standard UTF-8 string data into base64 format.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TextPayload"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/TextPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful conversion",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Base64Result"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/429Error"
+          }
+        }
+      }
+    },
+    "/base64/decode": {
+      "post": {
+        "summary": "Decode Base64 text to plain text",
+        "description": "Decodes base64-encoded strings (standard or URL-safe) back into readable text.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TextPayload"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/TextPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful conversion",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Base64Result"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/429Error"
+          }
+        }
+      }
+    },
+    "/guid/generate": {
+      "post": {
+        "summary": "Generate batch UUIDs/GUIDs",
+        "description": "Generates a batch of UUID v4 (random), UUID v7 (time-ordered), or custom prefixed identifiers.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GUIDRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/GUIDRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful batch generation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GUIDResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/429Error"
+          }
+        }
+      }
+    },
+    "/qrcode/generate": {
+      "post": {
+        "summary": "Generate QR Code",
+        "description": "Creates a PNG QR code representing the text or URL provided, returning base64-encoded visual formats.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TextPayload"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/TextPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful image creation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QRCodeResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/429Error"
+          }
+        }
+      }
+    },
+    "/json/prettify": {
+      "post": {
+        "summary": "Prettify JSON data",
+        "description": "Formats raw, compact JSON into beautified readable spacing.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JSONRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/JSONRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Formatted response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JSONFormattingResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/429Error"
+          }
+        }
+      }
+    },
+    "/json/minify": {
+      "post": {
+        "summary": "Minify JSON data",
+        "description": "Compacts JSON into a single line removing unnecessary whitespace.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TextPayload"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/TextPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Minified response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JSONFormattingResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/429Error"
+          }
+        }
+      }
+    },
+    "/json/validate": {
+      "post": {
+        "summary": "Validate JSON format",
+        "description": "Validates the correctness of a raw JSON schema structure.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TextPayload"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/TextPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Validation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JSONValidationResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/429Error"
+          }
+        }
+      }
+    },
+    "/url/encode": {
+      "post": {
+        "summary": "URL Encode query text",
+        "description": "Converts plain text into a percent-encoded query parameter format.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TextPayload"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/TextPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "URL-safe response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/URLFormattingResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/429Error"
+          }
+        }
+      }
+    },
+    "/url/decode": {
+      "post": {
+        "summary": "URL Decode percent-encoded text",
+        "description": "Decodes percent-encoded character strings back to clear text.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TextPayload"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/TextPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Decoded response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/URLFormattingResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/429Error"
+          }
+        }
+      }
+    },
+    "/url/parse": {
+      "post": {
+        "summary": "Dissect and Parse a URL",
+        "description": "Extracts the Scheme, Host, Path, and individual Query Parameters of a full URL or query string.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TextPayload"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/TextPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Parsed details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParsedURLResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/429Error"
+          }
+        }
+      }
+    },
+    "/jwt/decode": {
+      "post": {
+        "summary": "Decode JSON Web Token",
+        "description": "Locally inspects standard JSON Web Token (JWT) Header, Payload, Claims, and Expiration parameters without checking signatures.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JWTRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/JWTRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Parsed JWT details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecodedJWTResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/429Error"
+          }
+        }
+      }
+    },
+    "/epoch/convert": {
+      "post": {
+        "summary": "Convert Epoch Timestamp / DateTime",
+        "description": "Transforms numeric timestamps (seconds/millis) or human-readable dates into UTC, Local, Relative, and reciprocal epoch formats.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EpochRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/EpochRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Converted representation metrics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EpochResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/429Error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "400Error": {
+        "description": "Malformed payloads or missing variables",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/GenericError"
+            }
+          }
+        }
+      },
+      "429Error": {
+        "description": "Too many requests to endpoints (rate limited)",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/GenericError"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "TextPayload": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Base utility string contents input payload"
+          }
+        }
+      },
+      "GenericError": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error details description string"
+          }
+        }
+      },
+      "Base64Result": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "string",
+            "description": "Standard base64 encoded or decoded text output"
+          },
+          "original": {
+            "type": "string",
+            "description": "Source text provided during execution request"
+          },
+          "operation": {
+            "type": "string",
+            "enum": [
+              "Encode",
+              "Decode"
+            ]
+          }
+        }
+      },
+      "GUIDRequest": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "string",
+            "description": "Batch quantity size (clamped 10 - 100). Default '10'.",
+            "default": "10"
+          },
+          "type": {
+            "type": "string",
+            "description": "Type of ID generation algorithm schema style",
+            "enum": [
+              "v4",
+              "v7",
+              "prefixed",
+              "prefixed_guid"
+            ],
+            "default": "v4"
+          },
+          "prefix": {
+            "type": "string",
+            "description": "Optional prefix text tag (used with prefixed/prefixed_guid modes)"
+          }
+        }
+      },
+      "GUIDResult": {
+        "type": "object",
+        "properties": {
+          "guids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array list containing generated identifiers"
+          },
+          "count": {
+            "type": "integer",
+            "description": "Total amount generated"
+          },
+          "type": {
+            "type": "string",
+            "description": "ID format style"
+          },
+          "prefix": {
+            "type": "string",
+            "description": "Requested prefix value"
+          }
+        }
+      },
+      "QRCodeResult": {
+        "type": "object",
+        "properties": {
+          "image_url": {
+            "type": "string",
+            "description": "Standard inline image Data URL (data:image/png;base64,...)"
+          },
+          "text": {
+            "type": "string",
+            "description": "Input payload encoded within the QR code graphic grid"
+          },
+          "raw_base64": {
+            "type": "string",
+            "description": "Base64 payload representation minus HTTP url decoration"
+          }
+        }
+      },
+      "JSONRequest": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Raw JSON string block target"
+          },
+          "indent": {
+            "type": "string",
+            "enum": [
+              "2",
+              "4",
+              "tab"
+            ],
+            "default": "2"
+          }
+        }
+      },
+      "JSONFormattingResult": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "string",
+            "description": "Formatted (compacted or expanded) JSON string"
+          },
+          "operation": {
+            "type": "string",
+            "enum": [
+              "Prettify",
+              "Minify"
+            ]
+          }
+        }
+      },
+      "JSONValidationResult": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "string",
+            "description": "Validation description phrase"
+          },
+          "is_valid": {
+            "type": "boolean",
+            "description": "Verification compliance boolean status indicator"
+          },
+          "operation": {
+            "type": "string",
+            "enum": [
+              "Validate"
+            ]
+          }
+        }
+      },
+      "URLFormattingResult": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "string",
+            "description": "URL processed query string output"
+          },
+          "operation": {
+            "type": "string",
+            "enum": [
+              "Encode",
+              "Decode"
+            ]
+          }
+        }
+      },
+      "QueryParam": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "ParsedURLResult": {
+        "type": "object",
+        "properties": {
+          "operation": {
+            "type": "string",
+            "enum": [
+              "Parse",
+              "ParseQueryString"
+            ]
+          },
+          "scheme": {
+            "type": "string"
+          },
+          "host": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "params": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QueryParam"
+            }
+          }
+        }
+      },
+      "JWTRequest": {
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Standard alphanumeric token payload string separated by dots (header.payload.signature)"
+          }
+        }
+      },
+      "DecodedJWTResult": {
+        "type": "object",
+        "properties": {
+          "header": {
+            "type": "string",
+            "description": "Prettified JSON formatted algorithm definition headers segment"
+          },
+          "payload": {
+            "type": "string",
+            "description": "Prettified JSON payload metadata attributes claims segment"
+          },
+          "signature": {
+            "type": "string",
+            "description": "Inverted raw signature components segment"
+          },
+          "has_exp": {
+            "type": "boolean"
+          },
+          "is_expired": {
+            "type": "boolean"
+          },
+          "exp_time": {
+            "type": "string"
+          },
+          "exp_in": {
+            "type": "string"
+          },
+          "issued_at": {
+            "type": "string"
+          }
+        }
+      },
+      "EpochRequest": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "Epoch numeric string (seconds or milliseconds) or standard YYYY-MM-DD DateTime layout value"
+          }
+        }
+      },
+      "EpochResult": {
+        "type": "object",
+        "properties": {
+          "seconds": {
+            "type": "integer"
+          },
+          "millis": {
+            "type": "integer"
+          },
+          "utc": {
+            "type": "string"
+          },
+          "local": {
+            "type": "string"
+          },
+          "relative": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

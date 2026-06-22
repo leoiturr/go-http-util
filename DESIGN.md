@@ -15,6 +15,12 @@ This document outlines the core architecture, layout design, and implementation 
   }
   ```
   This is optimized for hosting providers like **Render.com** that assign random listening ports.
+- **Route Separation**: Routes are split into separate groups:
+  - `/api/htmx/*`: Endpoint group returning HTML template fragments for HTMX-driven views (e.g., GUID and QR Code generation columns).
+  - `/api/v1/*`: Versioned JSON REST API endpoint group supporting standard REST clients.
+- **API Documentation & Specs**:
+  - The OpenAPI 3.0.3 specification is defined statically in `static/openapi.json`.
+  - An interactive REST API docs site is hosted at `/docs` rendering Swagger UI customized to match the dashboard's dark-theme aesthetic.
 
 ### API Rate Limiting
 - **Implementation**: Located in `middleware/ratelimit.go`. Utilizes a custom, in-memory **Token Bucket** algorithm.

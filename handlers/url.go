@@ -16,69 +16,46 @@ type URLRequest struct {
 
 // QueryParam represents a key-value parameter in a URL query string
 type QueryParam struct {
-	Key   string
-	Value string
+	Key   string `json:"key"`
+	Value string `json:"value"`
 }
 
-// EncodeURL encodes query parameters to be URL-safe
-func EncodeURL(c *gin.Context) {
-	var req URLRequest
-	if err := c.ShouldBind(&req); err != nil {
-		c.HTML(http.StatusBadRequest, "url-result", gin.H{"Error": "Invalid request"})
-		return
-	}
-
-	trimmed := strings.TrimSpace(req.Text)
-	if trimmed == "" {
-		c.HTML(http.StatusOK, "url-result", gin.H{"Error": "Input is empty"})
-		return
-	}
-
-	encoded := url.QueryEscape(trimmed)
-	c.HTML(http.StatusOK, "url-result", gin.H{
-		"Result":    encoded,
-		"Operation": "Encode",
-	})
+// ParsedURLResult contains the results of dissecting a URL/query string
+type ParsedURLResult struct {
+	Operation string       `json:"operation"`
+	Scheme    string       `json:"scheme,omitempty"`
+	Host      string       `json:"host,omitempty"`
+	Path      string       `json:"path,omitempty"`
+	Params    []QueryParam `json:"params"`
 }
 
-// DecodeURL decodes percent-encoded URL query strings back to raw strings
-func DecodeURL(c *gin.Context) {
-	var req URLRequest
-	if err := c.ShouldBind(&req); err != nil {
-		c.HTML(http.StatusBadRequest, "url-result", gin.H{"Error": "Invalid request"})
-		return
-	}
-
-	trimmed := strings.TrimSpace(req.Text)
+// EncodeURLLogic URL-encodes a string
+func EncodeURLLogic(text string) (string, error) {
+	trimmed := strings.TrimSpace(text)
 	if trimmed == "" {
-		c.HTML(http.StatusOK, "url-result", gin.H{"Error": "Input is empty"})
-		return
+		return "", fmt.Errorf("input is empty")
 	}
+	return url.QueryEscape(trimmed), nil
+}
 
+// DecodeURLLogic URL-decodes a percent-encoded string
+func DecodeURLLogic(text string) (string, error) {
+	trimmed := strings.TrimSpace(text)
+	if trimmed == "" {
+		return "", fmt.Errorf("input is empty")
+	}
 	decoded, err := url.QueryUnescape(trimmed)
 	if err != nil {
-		c.HTML(http.StatusOK, "url-result", gin.H{"Error": fmt.Sprintf("Failed to decode URL: %v", err)})
-		return
+		return "", fmt.Errorf("failed to decode URL: %v", err)
 	}
-
-	c.HTML(http.StatusOK, "url-result", gin.H{
-		"Result":    decoded,
-		"Operation": "Decode",
-	})
+	return decoded, nil
 }
 
-// ParseURL dissects a URL or raw query string into scheme, host, path, and detailed key-value query parameters
-func ParseURL(c *gin.Context) {
-	var req URLRequest
-	if err := c.ShouldBind(&req); err != nil {
-		c.HTML(http.StatusBadRequest, "url-result", gin.H{"Error": "Invalid request"})
-		return
-	}
-
-	trimmed := strings.TrimSpace(req.Text)
+// ParseURLLogic dissects a URL or query string
+func ParseURLLogic(text string) (ParsedURLResult, error) {
+	trimmed := strings.TrimSpace(text)
 	if trimmed == "" {
-		c.HTML(http.StatusOK, "url-result", gin.H{"Error": "Input is empty"})
-		return
+		return ParsedURLResult{}, fmt.Errorf("input is empty")
 	}
 
 	// Try parsing standard URL
@@ -87,8 +64,7 @@ func ParseURL(c *gin.Context) {
 		// Fallback: Try parsing as raw query parameters if it doesn't look like a full URL
 		queryParams, errQ := url.ParseQuery(trimmed)
 		if errQ != nil {
-			c.HTML(http.StatusOK, "url-result", gin.H{"Error": fmt.Sprintf("Failed to parse URL/Query: %v", err)})
-			return
+			return ParsedURLResult{}, fmt.Errorf("failed to parse URL/Query: %v", err)
 		}
 
 		var params []QueryParam
@@ -97,11 +73,10 @@ func ParseURL(c *gin.Context) {
 				params = append(params, QueryParam{Key: k, Value: v})
 			}
 		}
-		c.HTML(http.StatusOK, "url-result", gin.H{
-			"Operation": "ParseQueryString",
-			"Params":    params,
-		})
-		return
+		return ParsedURLResult{
+			Operation: "ParseQueryString",
+			Params:    params,
+		}, nil
 	}
 
 	// Succeeded standard URL parsing
@@ -113,11 +88,131 @@ func ParseURL(c *gin.Context) {
 		}
 	}
 
+	return ParsedURLResult{
+		Operation: "Parse",
+		Scheme:    u.Scheme,
+		Host:      u.Host,
+		Path:      u.Path,
+		Params:    params,
+	}, nil
+}
+
+// HTMXEncodeURL handles encode requests from HTMX
+func HTMXEncodeURL(c *gin.Context) {
+	var req URLRequest
+	if err := c.ShouldBind(&req); err != nil {
+		c.HTML(http.StatusBadRequest, "url-result", gin.H{"Error": "Invalid request"})
+		return
+	}
+
+	encoded, err := EncodeURLLogic(req.Text)
+	if err != nil {
+		c.HTML(http.StatusOK, "url-result", gin.H{"Error": err.Error()})
+		return
+	}
+
 	c.HTML(http.StatusOK, "url-result", gin.H{
-		"Operation": "Parse",
-		"Scheme":    u.Scheme,
-		"Host":      u.Host,
-		"Path":      u.Path,
-		"Params":    params,
+		"Result":    encoded,
+		"Operation": "Encode",
 	})
+}
+
+// V1EncodeURL handles JSON REST API requests to encode a URL
+func V1EncodeURL(c *gin.Context) {
+	var req URLRequest
+	if err := c.ShouldBind(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
+	encoded, err := EncodeURLLogic(req.Text)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"result":    encoded,
+		"operation": "Encode",
+	})
+}
+
+// HTMXDecodeURL handles decode requests from HTMX
+func HTMXDecodeURL(c *gin.Context) {
+	var req URLRequest
+	if err := c.ShouldBind(&req); err != nil {
+		c.HTML(http.StatusBadRequest, "url-result", gin.H{"Error": "Invalid request"})
+		return
+	}
+
+	decoded, err := DecodeURLLogic(req.Text)
+	if err != nil {
+		c.HTML(http.StatusOK, "url-result", gin.H{"Error": err.Error()})
+		return
+	}
+
+	c.HTML(http.StatusOK, "url-result", gin.H{
+		"Result":    decoded,
+		"Operation": "Decode",
+	})
+}
+
+// V1DecodeURL handles JSON REST API requests to decode a URL
+func V1DecodeURL(c *gin.Context) {
+	var req URLRequest
+	if err := c.ShouldBind(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
+	decoded, err := DecodeURLLogic(req.Text)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"result":    decoded,
+		"operation": "Decode",
+	})
+}
+
+// HTMXParseURL handles parse requests from HTMX
+func HTMXParseURL(c *gin.Context) {
+	var req URLRequest
+	if err := c.ShouldBind(&req); err != nil {
+		c.HTML(http.StatusBadRequest, "url-result", gin.H{"Error": "Invalid request"})
+		return
+	}
+
+	res, err := ParseURLLogic(req.Text)
+	if err != nil {
+		c.HTML(http.StatusOK, "url-result", gin.H{"Error": err.Error()})
+		return
+	}
+
+	c.HTML(http.StatusOK, "url-result", gin.H{
+		"Operation": res.Operation,
+		"Scheme":    res.Scheme,
+		"Host":      res.Host,
+		"Path":      res.Path,
+		"Params":    res.Params,
+	})
+}
+
+// V1ParseURL handles JSON REST API requests to parse a URL
+func V1ParseURL(c *gin.Context) {
+	var req URLRequest
+	if err := c.ShouldBind(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
+	res, err := ParseURLLogic(req.Text)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, res)
 }

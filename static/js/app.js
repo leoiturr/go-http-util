@@ -65,7 +65,8 @@ function switchTab(tabId, updateHistory = true) {
         'json': 'JSON Formatter & Validator',
         'url': 'URL Encoder / Decoder & Parser',
         'jwt': 'JWT Debugger',
-        'epoch': 'Epoch Timestamp Converter'
+        'epoch': 'Epoch Timestamp Converter',
+        'docs': 'REST API Reference'
     };
     document.getElementById('current-tab-title').innerText = titleMap[tabId] || 'DevUtils';
 
@@ -313,6 +314,32 @@ function runBase64(operation) {
     }
 }
 
+function cleanLooseJSON(input) {
+    let cleaned = input;
+    
+    // 1. Strip block comments
+    cleaned = cleaned.replace(/\/\*[\s\S]*?\*\//g, '');
+    
+    // 2. Strip single line comments (ignore :// in URLs)
+    cleaned = cleaned.replace(/(?:^|[^:])\/\/.*$/gm, function(match) {
+        if (match.trim().startsWith('://')) {
+            return match;
+        }
+        return '';
+    });
+
+    // 3. Convert single quotes to double quotes
+    cleaned = cleaned.replace(/'([^'\\]*(?:\\.[^'\\]*)*)'/g, '"$1"');
+
+    // 4. Wrap unquoted keys
+    cleaned = cleaned.replace(/([{,]\s*)([a-zA-Z_$][a-zA-Z0-9_$-]*)\s*:/g, '$1"$2":');
+
+    // 5. Strip trailing commas
+    cleaned = cleaned.replace(/,\s*([}\]])/g, '$1');
+
+    return cleaned;
+}
+
 function runJSON(operation) {
     const input = document.getElementById('json-input').value.trim();
     const outputDiv = document.getElementById('json-output');
@@ -337,11 +364,18 @@ function runJSON(operation) {
 
     let parsed = null;
     let error = '';
+    let isLoose = false;
 
     try {
         parsed = JSON.parse(input);
-    } catch (e) {
-        error = e.message;
+    } catch (strictErr) {
+        try {
+            const cleaned = cleanLooseJSON(input);
+            parsed = JSON.parse(cleaned);
+            isLoose = true;
+        } catch (looseErr) {
+            error = strictErr.message;
+        }
     }
 
     if (error) {
@@ -362,6 +396,9 @@ function runJSON(operation) {
     }
 
     if (operation === 'validate') {
+        const msg = isLoose 
+            ? "Valid JavaScript Object / Loose JSON (cleaned successfully)!" 
+            : "JSON is valid and well-formed!";
         outputDiv.innerHTML = `
             <div class="card glass mt-4 animate-fade-in">
                 <div class="card-header flex justify-between items-center">
@@ -370,7 +407,7 @@ function runJSON(operation) {
                 <div class="card-body">
                     <div class="alert alert-success" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 12px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 10px; color: var(--success);">
                         <i class="fa-solid fa-circle-check"></i>
-                        <div>JSON is valid and well-formed!</div>
+                        <div>${escapeHTML(msg)}</div>
                     </div>
                 </div>
             </div>

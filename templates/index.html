@@ -77,6 +77,10 @@
                     <i class="fa-solid fa-clock"></i>
                     <span>Epoch Converter</span>
                 </button>
+                <button class="nav-item" onclick="switchTab('docs')">
+                    <i class="fa-solid fa-book"></i>
+                    <span>API Reference</span>
+                </button>
             </nav>
 
             <!-- Quick Info / Status -->
@@ -143,7 +147,7 @@
                                 <p>Generate batch UUIDs with options for v4 (unordered), v7 (time-ordered), or custom prefix structures.</p>
                             </div>
                             <div class="card-body">
-                                <form hx-post="/api/guid/generate" 
+                                <form hx-post="/api/htmx/guid/generate" 
                                       hx-target="#guid-output" 
                                       hx-indicator="#guid-loader"
                                       onsubmit="saveToHistory('GUID Generation', document.getElementById('guid-type').value + ' x' + document.getElementById('guid-count').value)">
@@ -202,7 +206,7 @@
                                 <p>Generate standard high-contrast QR codes from any web link, plain text, or configuration payload.</p>
                             </div>
                             <div class="card-body">
-                                <form hx-post="/api/qrcode/generate" 
+                                <form hx-post="/api/htmx/qrcode/generate" 
                                       hx-target="#qrcode-output" 
                                       hx-indicator="#qrcode-loader"
                                       onsubmit="saveToHistory('QR Code Gen', truncateString(document.getElementById('qrcode-text').value, 20))">
@@ -219,6 +223,15 @@
                                         <div id="qrcode-loader" class="htmx-indicator loader"></div>
                                     </div>
                                 </form>
+                            </div>
+                        </div>
+
+                        <div id="qrcode-output" class="output-wrapper">
+                            <div class="card glass card-placeholder">
+                                <div class="placeholder-content">
+                                    <i class="fa-solid fa-qrcode placeholder-icon"></i>
+                                    <p>Enter text or a URL and click "Generate QR Code" to display output here.</p>
+                                </div>
                             </div>
                         </div>
 
@@ -404,6 +417,13 @@
                         </div>
                     </div>
                 </section>
+
+                <!-- API REFERENCE DOCS MODULE -->
+                <section id="module-docs" class="tab-module">
+                    <div class="card glass" style="height: calc(100vh - 160px); padding: 0; overflow: hidden; border-radius: var(--radius-lg); border: 1px solid var(--card-border);">
+                        <iframe src="/docs" style="width: 100%; height: 100%; border: none;"></iframe>
+                    </div>
+                </section>
             </div>
         </main>
 
@@ -504,6 +524,35 @@
 
 
 {{ define "qrcode-result" }}
+<div class="card glass animate-fade-in full-height-card">
+    <div class="card-header flex justify-between items-center" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h4>QR Code Result</h4>
+        </div>
+        <div class="card-actions">
+            {{ if not .Error }}
+            <button class="btn btn-sm btn-primary" onclick="copyToClipboard('qrcode-raw-base64')">
+                <i class="fa-solid fa-copy"></i> Copy Base64
+            </button>
+            {{ end }}
+        </div>
+    </div>
+    <div class="card-body flex flex-col items-center justify-center" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; min-height: 250px; padding: 24px;">
+        {{ if .Error }}
+        <div class="alert alert-error">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <div>{{ .Error }}</div>
+        </div>
+        {{ else }}
+        <div class="qrcode-image-container" style="background: white; padding: 16px; border-radius: var(--radius-md); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); display: inline-block;">
+            <img src="{{ .ImageURL }}" alt="Generated QR Code" style="display: block; width: 200px; height: 200px;" />
+        </div>
+        <div style="display: none;">
+            <textarea id="qrcode-raw-base64">{{ .RawBase64 }}</textarea>
+        </div>
+        <p class="text-sm text-muted" style="text-align: center; max-width: 85%; word-break: break-all; color: var(--text-muted); font-size: 13px;">Payload: <code>{{ .Text }}</code></p>
+        {{ end }}
+    </div>
 </div>
 {{ end }}
 

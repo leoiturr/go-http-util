@@ -37,6 +37,11 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
 
+	// Docs Web Route
+	r.GET("/docs", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "docs", gin.H{})
+	})
+
 	// Main web interface route
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index", gin.H{})
@@ -60,35 +65,66 @@ func main() {
 
 	limiter := middleware.NewRateLimiter(rps, burst)
 
-	// API Route Group with Rate Limiting
-	api := r.Group("/api")
-	api.Use(limiter.Limit())
+	// HTMX API Route Group with Rate Limiting
+	htmxGroup := r.Group("/api/htmx")
+	htmxGroup.Use(limiter.Limit())
 	{
 		// Base64 Converter API
-		api.POST("/base64/encode", handlers.EncodeBase64)
-		api.POST("/base64/decode", handlers.DecodeBase64)
+		htmxGroup.POST("/base64/encode", handlers.HTMXEncodeBase64)
+		htmxGroup.POST("/base64/decode", handlers.HTMXDecodeBase64)
 
 		// GUID Generator API
-		api.POST("/guid/generate", handlers.GenerateGUIDs)
+		htmxGroup.POST("/guid/generate", handlers.HTMXGenerateGUIDs)
 
 		// QR Code Generator API
-		api.POST("/qrcode/generate", handlers.GenerateQRCode)
+		htmxGroup.POST("/qrcode/generate", handlers.HTMXGenerateQRCode)
 
 		// JSON Prettifier / Minifier / Validator API
-		api.POST("/json/prettify", handlers.PrettifyJSON)
-		api.POST("/json/minify", handlers.MinifyJSON)
-		api.POST("/json/validate", handlers.ValidateJSON)
+		htmxGroup.POST("/json/prettify", handlers.HTMXPrettifyJSON)
+		htmxGroup.POST("/json/minify", handlers.HTMXMinifyJSON)
+		htmxGroup.POST("/json/validate", handlers.HTMXValidateJSON)
 
 		// URL Encoder / Decoder / Parser API
-		api.POST("/url/encode", handlers.EncodeURL)
-		api.POST("/url/decode", handlers.DecodeURL)
-		api.POST("/url/parse", handlers.ParseURL)
+		htmxGroup.POST("/url/encode", handlers.HTMXEncodeURL)
+		htmxGroup.POST("/url/decode", handlers.HTMXDecodeURL)
+		htmxGroup.POST("/url/parse", handlers.HTMXParseURL)
 
 		// JWT Debugger API
-		api.POST("/jwt/decode", handlers.DecodeJWT)
+		htmxGroup.POST("/jwt/decode", handlers.HTMXDecodeJWT)
 
 		// Epoch / Unix Timestamp Converter API
-		api.POST("/epoch/convert", handlers.ConvertEpoch)
+		htmxGroup.POST("/epoch/convert", handlers.HTMXConvertEpoch)
+	}
+
+	// REST v1 JSON API Route Group with Rate Limiting
+	v1Group := r.Group("/api/v1")
+	v1Group.Use(limiter.Limit())
+	{
+		// Base64 Converter API
+		v1Group.POST("/base64/encode", handlers.V1EncodeBase64)
+		v1Group.POST("/base64/decode", handlers.V1DecodeBase64)
+
+		// GUID Generator API
+		v1Group.POST("/guid/generate", handlers.V1GenerateGUIDs)
+
+		// QR Code Generator API
+		v1Group.POST("/qrcode/generate", handlers.V1GenerateQRCode)
+
+		// JSON Prettifier / Minifier / Validator API
+		v1Group.POST("/json/prettify", handlers.V1PrettifyJSON)
+		v1Group.POST("/json/minify", handlers.V1MinifyJSON)
+		v1Group.POST("/json/validate", handlers.V1ValidateJSON)
+
+		// URL Encoder / Decoder / Parser API
+		v1Group.POST("/url/encode", handlers.V1EncodeURL)
+		v1Group.POST("/url/decode", handlers.V1DecodeURL)
+		v1Group.POST("/url/parse", handlers.V1ParseURL)
+
+		// JWT Debugger API
+		v1Group.POST("/jwt/decode", handlers.V1DecodeJWT)
+
+		// Epoch / Unix Timestamp Converter API
+		v1Group.POST("/epoch/convert", handlers.V1ConvertEpoch)
 	}
 
 	// Start Gin server on the configured port (Render uses the PORT environment variable)
