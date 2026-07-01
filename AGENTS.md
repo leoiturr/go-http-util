@@ -5,6 +5,21 @@ Welcome! This document provides guidelines for AI agents contributing to the **D
 ## Formatting Rules
 - **Go Code**: Always run `go fmt ./...` to format all Go source files before committing.
 - **JavaScript & HTML**: Do not use automatic formatters (like Prettier). Keep the formatting clean but unformatted.
+- **SQL**: Format SQL queries using standard trailing commas and new lines for keywords. For example:
+  ```sql
+  SELECT
+    id,
+    name,
+    email
+  FROM
+    users
+  WHERE
+    status = 'active'
+  ORDER BY
+    created_at DESC
+  LIMIT
+    10;
+  ```
 
 ## Tech Stack Overview
 - **Backend**: Go (using the **Gin** Web Framework).

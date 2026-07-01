@@ -34,6 +34,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/yaml/yaml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/sql/sql.min.js"></script>
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
 </head>
@@ -74,6 +75,10 @@
                 <button class="nav-item" onclick="switchTab('yaml')">
                     <i class="fa-solid fa-file-lines"></i>
                     <span>YAML Tools</span>
+                </button>
+                <button class="nav-item" onclick="switchTab('sql')">
+                    <i class="fa-solid fa-database"></i>
+                    <span>SQL Formatter</span>
                 </button>
                 <button class="nav-item" onclick="switchTab('url')">
                     <i class="fa-solid fa-link"></i>
@@ -309,6 +314,57 @@
                                 <div class="placeholder-content">
                                     <i class="fa-solid fa-file-code placeholder-icon"></i>
                                     <p>Enter JSON payload and select an operation to view output.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SQL FORMATTER & MINIFIER MODULE -->
+                <section id="module-sql" class="tab-module">
+                    <div class="grid grid-cols-2">
+                        <div class="card glass">
+                            <div class="card-header">
+                                <h3>SQL Settings</h3>
+                                <p>Format or minify SQL queries and statements.</p>
+                            </div>
+                            <div class="card-body">
+                                <form id="sql-form" onsubmit="return false;">
+                                    <div class="form-group">
+                                        <label for="sql-input">SQL Query</label>
+                                        <textarea id="sql-input" name="text" placeholder="SELECT * FROM users WHERE id=1;" rows="10">SELECT id, name, email FROM users WHERE status = 'active' ORDER BY created_at DESC LIMIT 10;</textarea>
+                                    </div>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-primary"
+                                                hx-post="/api/htmx/sql/prettify" 
+                                                hx-target="#sql-output" 
+                                                hx-include="#sql-form"
+                                                hx-indicator="#sql-loader"
+                                                onclick="saveToHistory('SQL Prettify', truncateString(document.getElementById('sql-input').value, 20))">
+                                            <i class="fa-solid fa-align-left"></i> Prettify
+                                        </button>
+                                        <button type="button" class="btn btn-accent"
+                                                hx-post="/api/htmx/sql/minify" 
+                                                hx-target="#sql-output" 
+                                                hx-include="#sql-form"
+                                                hx-indicator="#sql-loader"
+                                                onclick="saveToHistory('SQL Minify', truncateString(document.getElementById('sql-input').value, 20))">
+                                            <i class="fa-solid fa-compress"></i> Minify
+                                        </button>
+                                        <button type="button" class="btn btn-secondary" onclick="clearSQL()">
+                                            <i class="fa-solid fa-trash-can"></i> Clear
+                                        </button>
+                                        <div id="sql-loader" class="htmx-indicator loader"></div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div id="sql-output" class="output-wrapper">
+                            <div class="card glass card-placeholder">
+                                <div class="placeholder-content">
+                                    <i class="fa-solid fa-database placeholder-icon"></i>
+                                    <p>Enter SQL query and select an operation to view output.</p>
                                 </div>
                             </div>
                         </div>
@@ -976,6 +1032,34 @@ metadata:
             <div>
                 <span class="badge badge-accent font-semibold" style="font-weight: 600;">{{ .Relative }}</span>
             </div>
+        </div>
+        {{ end }}
+    </div>
+</div>
+{{ end }}
+
+
+{{ define "sql-result" }}
+<div class="card glass mt-4 animate-fade-in">
+    <div class="card-header flex justify-between items-center">
+        <h4>SQL Result ({{ .Operation }})</h4>
+        <div class="card-actions">
+            {{ if not .Error }}
+            <button class="btn btn-sm btn-primary" onclick="copyToClipboard('{{ if .ResultID }}{{ .ResultID }}{{ else }}sql-result-text{{ end }}')">
+                <i class="fa-solid fa-copy"></i> Copy Output
+            </button>
+            {{ end }}
+        </div>
+    </div>
+    <div class="card-body">
+        {{ if .Error }}
+        <div class="alert alert-error">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <div><pre style="white-space: pre-wrap; font-family: inherit; margin: 0; padding: 0; background: transparent; border: none; color: inherit; font-size: inherit;">{{ .Error }}</pre></div>
+        </div>
+        {{ else }}
+        <div class="result-box">
+            <textarea id="{{ if .ResultID }}{{ .ResultID }}{{ else }}sql-result-text{{ end }}" class="result-text" data-mode="text/x-sql" readonly>{{ .Result }}</textarea>
         </div>
         {{ end }}
     </div>

@@ -125,6 +125,10 @@ func main() {
 		htmxGroup.POST("/yaml/yaml2json", handlers.HTMXYAMLToJSON)
 		htmxGroup.POST("/yaml/prettify", handlers.HTMXPrettifyYAML)
 		htmxGroup.POST("/yaml/validate", handlers.HTMXValidateYAML)
+
+		// SQL Tools API
+		htmxGroup.POST("/sql/prettify", handlers.HTMXPrettifySQL)
+		htmxGroup.POST("/sql/minify", handlers.HTMXMinifySQL)
 	}
 
 	// REST v1 JSON API Route Group with Rate Limiting
@@ -162,6 +166,10 @@ func main() {
 		v1Group.POST("/yaml/yaml2json", handlers.V1YAMLToJSON)
 		v1Group.POST("/yaml/prettify", handlers.V1PrettifyYAML)
 		v1Group.POST("/yaml/validate", handlers.V1ValidateYAML)
+
+		// SQL Tools API
+		v1Group.POST("/sql/prettify", handlers.V1PrettifySQL)
+		v1Group.POST("/sql/minify", handlers.V1MinifySQL)
 	}
 
 	// Start Gin server on the configured port (Render uses the PORT environment variable)

@@ -64,6 +64,7 @@ function switchTab(tabId, updateHistory = true) {
         'qrcode': 'QR Code Generator',
         'json': 'JSON Formatter & Validator',
         'yaml': 'YAML Formatter & JSON to YAML',
+        'sql': 'SQL Formatter & Minifier',
         'url': 'URL Encoder / Decoder & Parser',
         'jwt': 'JWT Debugger',
         'epoch': 'Epoch Timestamp Converter',
@@ -82,6 +83,9 @@ function switchTab(tabId, updateHistory = true) {
     }
     if (tabId === 'yaml' && window.yamlEditor) {
         setTimeout(() => window.yamlEditor.refresh(), 50);
+    }
+    if (tabId === 'sql' && window.sqlEditor) {
+        setTimeout(() => window.sqlEditor.refresh(), 50);
     }
 }
 
@@ -128,6 +132,26 @@ function clearJSON() {
         outputDiv.innerHTML = '';
     }
     showToast('JSON inputs cleared', 'success');
+}
+
+// Clear helper for SQL Formatter
+function clearSQL() {
+    document.getElementById('sql-input').value = '';
+    if (window.sqlEditor) {
+        window.sqlEditor.setValue('');
+    }
+    const outputDiv = document.getElementById('sql-output');
+    if (outputDiv) {
+        outputDiv.innerHTML = `
+            <div class="card glass card-placeholder">
+                <div class="placeholder-content">
+                    <i class="fa-solid fa-database placeholder-icon"></i>
+                    <p>Enter SQL query and select an operation to view output.</p>
+                </div>
+            </div>
+        `;
+    }
+    showToast('SQL inputs cleared', 'success');
 }
 
 // Clear helper for YAML Tools
@@ -1264,6 +1288,13 @@ function loadHistoryItem(operation, details) {
             window.yamlEditor.setValue(details);
         }
         showToast('Restored payload to YAML panel', 'success');
+    } else if (operation.includes('SQL')) {
+        switchTab('sql');
+        document.getElementById('sql-input').value = details;
+        if (window.sqlEditor) {
+            window.sqlEditor.setValue(details);
+        }
+        showToast('Restored query to SQL panel', 'success');
     }
 }
 
@@ -1285,6 +1316,7 @@ window.addEventListener('popstate', function(event) {
 // Global editor references
 window.jsonEditor = null;
 window.yamlEditor = null;
+window.sqlEditor = null;
 
 // Initialize active tab on page load based on URL hash
 document.addEventListener('DOMContentLoaded', () => {
@@ -1322,6 +1354,23 @@ document.addEventListener('DOMContentLoaded', () => {
             viewportMargin: Infinity
         });
         window.yamlEditor.on('change', function(cm) {
+            cm.save();
+        });
+    }
+
+    // Initialize CodeMirror for SQL Input
+    const sqlInput = document.getElementById('sql-input');
+    if (sqlInput) {
+        window.sqlEditor = CodeMirror.fromTextArea(sqlInput, {
+            mode: "text/x-sql",
+            theme: "material-ocean",
+            lineNumbers: true,
+            tabSize: 4,
+            indentWithTabs: false,
+            lineWrapping: true,
+            viewportMargin: Infinity
+        });
+        window.sqlEditor.on('change', function(cm) {
             cm.save();
         });
     }
@@ -1381,5 +1430,11 @@ document.addEventListener('htmx:afterSettle', function(evt) {
     }
     if (document.getElementById('yaml-prettify-result-text')) {
         initResultEditor('yaml-prettify-result-text', 'text/x-yaml');
+    }
+    if (document.getElementById('sql-prettify-result-text')) {
+        initResultEditor('sql-prettify-result-text', 'text/x-sql');
+    }
+    if (document.getElementById('sql-minify-result-text')) {
+        initResultEditor('sql-minify-result-text', 'text/x-sql');
     }
 });

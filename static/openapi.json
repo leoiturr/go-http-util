@@ -441,6 +441,84 @@
         }
       }
     },
+    "/sql/prettify": {
+      "post": {
+        "summary": "Prettify SQL",
+        "description": "Formats raw SQL payload with correct indentation.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SQLRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/SQLRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Formatted SQL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SQLResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/429Error"
+          }
+        }
+      }
+    },
+    "/sql/minify": {
+      "post": {
+        "summary": "Minify SQL",
+        "description": "Compresses SQL query by removing unnecessary whitespace and newlines.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SQLRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/SQLRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Minified SQL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SQLResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/429Error"
+          }
+        }
+      }
+    },
     "/url/encode": {
       "post": {
         "summary": "URL Encode query text",
@@ -821,6 +899,27 @@
             "enum": [
               "Validate"
             ]
+          }
+        }
+      },
+      "SQLRequest": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Raw SQL query string"
+          }
+        }
+      },
+      "SQLResult": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "string",
+            "description": "Formatted or minified SQL query"
           }
         }
       },
