@@ -72,6 +72,9 @@ func main() {
 		c.HTML(http.StatusOK, "index", gin.H{"Version": appVersion})
 	})
 
+	// Webhook Receiver Route
+	r.Any("/w/:id", handlers.HandleWebhookReceive)
+
 	// Set up rate limiter middleware from environment variables with safe defaults
 	// Default: 2 requests per second (RPS) with a burst of 4 requests
 	rps := 2.0
@@ -129,6 +132,10 @@ func main() {
 		// SQL Tools API
 		htmxGroup.POST("/sql/prettify", handlers.HTMXPrettifySQL)
 		htmxGroup.POST("/sql/minify", handlers.HTMXMinifySQL)
+
+		// Webhook Tester API
+		htmxGroup.POST("/webhook/generate", handlers.HTMXGenerateWebhook)
+		htmxGroup.GET("/webhook/:id/requests", handlers.HTMXGetWebhookRequests)
 	}
 
 	// REST v1 JSON API Route Group with Rate Limiting

@@ -6,8 +6,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	sqlformatter "github.com/BruceDu521/sql-formatter"
+	"github.com/gin-gonic/gin"
 )
 
 // SQLRequest represents the common payload for SQL tools

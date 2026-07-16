@@ -1,0 +1,76 @@
+{{ define "webhook_active" }}
+<div class="card glass mt-4 animate-fade-in">
+    <div class="card-header flex justify-between items-center">
+        <h4>Active Webhook</h4>
+        <div class="card-actions">
+            <button class="btn btn-sm btn-primary" onclick="copyToClipboard('webhook-url-text')">
+                <i class="fa-solid fa-copy"></i> Copy URL
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="result-box mb-4">
+            <input type="text" id="webhook-url-text" class="result-text" readonly value="{{ .URL }}" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #fff;">
+        </div>
+        
+        <div class="mb-4">
+            <h5>Configuration Cheatsheet</h5>
+            <ul style="list-style: none; padding: 0; margin: 10px 0; color: #aaa;">
+                <li style="margin-bottom: 5px;"><code>?status=500</code> - Respond with HTTP 500 error</li>
+                <li style="margin-bottom: 5px;"><code>?status=400</code> - Respond with HTTP 400 error</li>
+                <li style="margin-bottom: 5px;"><code>?delay=5s</code> - Delay response by 5 seconds (test timeouts)</li>
+            </ul>
+            <p style="font-size: 0.9em; color: #888;">Example: <code>curl -X POST {{ .URL }}?status=400&amp;delay=2s -d '{"hello": "world"}'</code></p>
+        </div>
+
+        <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
+
+        <div class="flex justify-between items-center mb-2">
+            <h4>Incoming Requests</h4>
+            <span class="pulse-dot" style="display: inline-block;"></span>
+        </div>
+        
+        <!-- Polling container -->
+        <div id="webhook-requests-container" 
+             hx-get="/api/htmx/webhook/{{ .ID }}/requests" 
+             hx-trigger="every 2s" 
+             hx-swap="innerHTML">
+             <div class="text-gray-400 text-sm italic py-4">Waiting for incoming webhooks...</div>
+        </div>
+    </div>
+</div>
+{{ end }}
+
+{{ define "webhook_requests" }}
+<div class="requests-list" style="display: flex; flex-direction: column; gap: 10px;">
+    {{ range .Requests }}
+    <div class="request-item" style="background: rgba(0,0,0,0.3); border-radius: 6px; padding: 10px; border-left: 4px solid {{ if eq .Method "GET" }}#4ade80{{ else if eq .Method "POST" }}#60a5fa{{ else if eq .Method "PUT" }}#fbbf24{{ else if eq .Method "DELETE" }}#f87171{{ else }}#a78bfa{{ end }};">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <div>
+                <strong style="color: {{ if eq .Method "GET" }}#4ade80{{ else if eq .Method "POST" }}#60a5fa{{ else if eq .Method "PUT" }}#fbbf24{{ else if eq .Method "DELETE" }}#f87171{{ else }}#a78bfa{{ end }};">{{ .Method }}</strong> 
+                <span>{{ .Path }}{{ if .QueryParams }}?{{ .QueryParams }}{{ end }}</span>
+            </div>
+            <div style="font-size: 0.85em; color: #888;">
+                {{ .Timestamp.Format "15:04:05.000" }} | Status: {{ .StatusCode }}{{ if ne .Delay "0s" }} | Delay: {{ .Delay }}{{ end }}
+            </div>
+        </div>
+        
+        <details style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 4px; margin-bottom: 5px;">
+            <summary style="cursor: pointer; font-size: 0.9em; color: #ccc;">Headers</summary>
+            <pre style="margin: 5px 0 0 0; font-size: 0.8em; overflow-x: auto;">
+{{- range $key, $values := .Headers -}}
+{{ $key }}: {{ range $values }}{{ . }}{{ end }}
+{{ end -}}
+            </pre>
+        </details>
+        
+        {{ if .Body }}
+        <details style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 4px;">
+            <summary style="cursor: pointer; font-size: 0.9em; color: #ccc;">Body</summary>
+            <pre style="margin: 5px 0 0 0; font-size: 0.8em; overflow-x: auto; white-space: pre-wrap;">{{ .Body }}</pre>
+        </details>
+        {{ end }}
+    </div>
+    {{ end }}
+</div>
+{{ end }}

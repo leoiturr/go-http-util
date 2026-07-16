@@ -1,5 +1,6 @@
 # Binaries
 devforge
+devutils_bin
 server
 *.exe
 *.exe~

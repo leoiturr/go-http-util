@@ -68,6 +68,7 @@ function switchTab(tabId, updateHistory = true) {
         'url': 'URL Encoder / Decoder & Parser',
         'jwt': 'JWT Debugger',
         'epoch': 'Epoch Timestamp Converter',
+        'webhook': 'Webhook Tester',
         'docs': 'REST API Reference'
     };
     document.getElementById('current-tab-title').innerText = titleMap[tabId] || 'DevUtils';

@@ -92,6 +92,10 @@
                     <i class="fa-solid fa-clock"></i>
                     <span>Epoch Converter</span>
                 </button>
+                <button class="nav-item" onclick="switchTab('webhook')">
+                    <i class="fa-solid fa-satellite-dish"></i>
+                    <span>Webhook Tester</span>
+                </button>
                 <button class="nav-item" onclick="switchTab('docs')">
                     <i class="fa-solid fa-book"></i>
                     <span>API Reference</span>
@@ -582,7 +586,30 @@ metadata:
                     </div>
                 </section>
 
-                <!-- API REFERENCE DOCS MODULE -->
+                <!-- WEBHOOK TESTER MODULE -->
+                <section id="module-webhook" class="tab-module">
+                    <div class="card glass">
+                        <div class="card-header">
+                            <h3>Webhook Tester</h3>
+                            <p>Generate a unique webhook URL to inspect incoming requests, test timeouts, and simulate custom HTTP responses.</p>
+                        </div>
+                        <div class="card-body">
+                            <form hx-post="/api/htmx/webhook/generate" hx-target="#webhook-result" hx-indicator="#webhook-loading">
+                                <button type="submit" class="btn btn-primary w-full">
+                                    <i class="fa-solid fa-satellite-dish"></i> Generate New Webhook URL
+                                </button>
+                            </form>
+                            
+                            <div id="webhook-loading" class="htmx-indicator mt-4 flex justify-center">
+                                <div class="spinner"></div>
+                            </div>
+                            
+                            <div id="webhook-result"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- API DOCS MODULE -->
                 <section id="module-docs" class="tab-module">
                     <div class="card glass" style="height: calc(100vh - 160px); padding: 0; overflow: hidden; border-radius: var(--radius-lg); border: 1px solid var(--card-border);">
                         <iframe src="/docs" style="width: 100%; height: 100%; border: none;"></iframe>
