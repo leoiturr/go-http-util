@@ -32,9 +32,10 @@
         
         <!-- Polling container -->
         <div id="webhook-requests-container" 
+             hx-ext="morph"
              hx-get="/api/htmx/webhook/{{ .ID }}/requests" 
              hx-trigger="every 2s" 
-             hx-swap="innerHTML">
+             hx-swap="morph:innerHTML">
              <div class="text-gray-400 text-sm italic py-4">Waiting for incoming webhooks...</div>
         </div>
     </div>
@@ -44,7 +45,7 @@
 {{ define "webhook_requests" }}
 <div class="requests-list" style="display: flex; flex-direction: column; gap: 10px;">
     {{ range .Requests }}
-    <div class="request-item" style="background: rgba(0,0,0,0.3); border-radius: 6px; padding: 10px; border-left: 4px solid {{ if eq .Method "GET" }}#4ade80{{ else if eq .Method "POST" }}#60a5fa{{ else if eq .Method "PUT" }}#fbbf24{{ else if eq .Method "DELETE" }}#f87171{{ else }}#a78bfa{{ end }};">
+    <div id="req-{{ .Timestamp.UnixNano }}" class="request-item" style="background: rgba(0,0,0,0.3); border-radius: 6px; padding: 10px; border-left: 4px solid {{ if eq .Method "GET" }}#4ade80{{ else if eq .Method "POST" }}#60a5fa{{ else if eq .Method "PUT" }}#fbbf24{{ else if eq .Method "DELETE" }}#f87171{{ else }}#a78bfa{{ end }};">
         <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
             <div>
                 <strong style="color: {{ if eq .Method "GET" }}#4ade80{{ else if eq .Method "POST" }}#60a5fa{{ else if eq .Method "PUT" }}#fbbf24{{ else if eq .Method "DELETE" }}#f87171{{ else }}#a78bfa{{ end }};">{{ .Method }}</strong> 
@@ -55,7 +56,7 @@
             </div>
         </div>
         
-        <details style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 4px; margin-bottom: 5px;">
+        <details id="headers-{{ .Timestamp.UnixNano }}" style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 4px; margin-bottom: 5px;">
             <summary style="cursor: pointer; font-size: 0.9em; color: #ccc;">Headers</summary>
             <pre style="margin: 5px 0 0 0; font-size: 0.8em; overflow-x: auto;">
 {{- range $key, $values := .Headers -}}
@@ -65,7 +66,7 @@
         </details>
         
         {{ if .Body }}
-        <details style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 4px;">
+        <details id="body-{{ .Timestamp.UnixNano }}" style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 4px;">
             <summary style="cursor: pointer; font-size: 0.9em; color: #ccc;">Body</summary>
             <pre style="margin: 5px 0 0 0; font-size: 0.8em; overflow-x: auto; white-space: pre-wrap;">{{ .Body }}</pre>
         </details>
