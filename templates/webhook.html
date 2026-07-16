@@ -32,14 +32,43 @@
         
         <!-- Polling container -->
         <div id="webhook-requests-container" 
-             hx-ext="morph"
              hx-get="/api/htmx/webhook/{{ .ID }}/requests" 
              hx-trigger="every 2s" 
-             hx-swap="morph:innerHTML">
+             hx-swap="innerHTML">
              <div class="text-gray-400 text-sm italic py-4">Waiting for incoming webhooks...</div>
         </div>
     </div>
 </div>
+
+<script>
+    // Ensure we only bind this once
+    if (!window.webhookStatePreserverBound) {
+        window.webhookStatePreserverBound = true;
+        
+        document.body.addEventListener('htmx:beforeSwap', function(evt) {
+            if (evt.detail.target.id === 'webhook-requests-container') {
+                const details = evt.detail.target.querySelectorAll('details[open]');
+                const openIds = Array.from(details).map(d => d.id).filter(id => id);
+                evt.detail.target.dataset.openIds = JSON.stringify(openIds);
+            }
+        });
+
+        document.body.addEventListener('htmx:afterSwap', function(evt) {
+            if (evt.detail.target.id === 'webhook-requests-container') {
+                const openIdsStr = evt.detail.target.dataset.openIds;
+                if (openIdsStr) {
+                    try {
+                        const openIds = JSON.parse(openIdsStr);
+                        openIds.forEach(id => {
+                            const el = document.getElementById(id);
+                            if (el) el.open = true;
+                        });
+                    } catch (e) {}
+                }
+            }
+        });
+    }
+</script>
 {{ end }}
 
 {{ define "webhook_requests" }}
@@ -65,12 +94,10 @@
             </pre>
         </details>
         
-        {{ if .Body }}
         <details id="body-{{ .Timestamp.UnixNano }}" style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 4px;">
             <summary style="cursor: pointer; font-size: 0.9em; color: #ccc;">Body</summary>
-            <pre style="margin: 5px 0 0 0; font-size: 0.8em; overflow-x: auto; white-space: pre-wrap;">{{ .Body }}</pre>
+            <pre style="margin: 5px 0 0 0; font-size: 0.8em; overflow-x: auto; white-space: pre-wrap; color: {{ if .Body }}inherit{{ else }}#666{{ end }};">{{ if .Body }}{{ .Body }}{{ else }}&lt;Empty Body&gt;{{ end }}</pre>
         </details>
-        {{ end }}
     </div>
     {{ end }}
 </div>
