@@ -198,6 +198,7 @@ function clearJWT() {
 // Clear helper for Epoch Converter
 function clearEpoch() {
     document.getElementById('epoch-input').value = '';
+    document.getElementById('epoch-datetime').value = '';
     const outputDiv = document.getElementById('epoch-output');
     if (outputDiv) {
         outputDiv.innerHTML = '';
@@ -282,6 +283,9 @@ function useCurrentEpoch() {
     const inputEl = document.getElementById('epoch-input');
     if (valEl && inputEl) {
         inputEl.value = valEl.textContent;
+        // Sync datetime picker with the current epoch
+        const now = new Date(parseInt(valEl.textContent) * 1000);
+        syncDateTimePicker(now);
         showToast('Inserted current epoch into input', 'success');
     }
 }
@@ -905,8 +909,14 @@ function formatDuration(sec) {
 
 function runEpoch() {
     let input = document.getElementById('epoch-input').value.trim();
+    const datetimeInput = document.getElementById('epoch-datetime').value;
     const outputDiv = document.getElementById('epoch-output');
     if (!outputDiv) return;
+
+    // If text input is empty but datetime picker has a value, use that
+    if (input === '' && datetimeInput !== '') {
+        input = datetimeInput + ':00'; // Add seconds since datetime-local doesn't include them
+    }
 
     if (input === '') {
         input = Math.floor(Date.now() / 1000).toString();
@@ -1040,6 +1050,63 @@ function runEpoch() {
             </div>
         </div>
     `;
+
+    // Sync the datetime picker with the result
+    syncDateTimePicker(targetTime);
+}
+
+// Sync datetime-local picker with a Date object
+function syncDateTimePicker(date) {
+    const datetimeInput = document.getElementById('epoch-datetime');
+    if (!datetimeInput) return;
+    
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    
+    datetimeInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+// Sync datetime picker from text input value
+function syncDateTimePickerFromText(input) {
+    const textInput = document.getElementById('epoch-input');
+    if (!textInput) return;
+    
+    const val = textInput.value.trim();
+    if (!val) return;
+    
+    let targetTime = null;
+    
+    if (/^\d+$/.test(val)) {
+        const num = parseInt(val);
+        if (val.length > 11) {
+            targetTime = new Date(num);
+        } else {
+            targetTime = new Date(num * 1000);
+        }
+    } else {
+        const parsed = Date.parse(val);
+        if (!isNaN(parsed)) {
+            targetTime = new Date(parsed);
+        }
+    }
+    
+    if (targetTime && !isNaN(targetTime.getTime())) {
+        syncDateTimePicker(targetTime);
+    }
+}
+
+// Sync text input with datetime picker value
+function syncTextInputFromDateTime() {
+    const datetimeInput = document.getElementById('epoch-datetime');
+    const textInput = document.getElementById('epoch-input');
+    if (!datetimeInput || !textInput) return;
+    
+    if (datetimeInput.value !== '') {
+        textInput.value = datetimeInput.value + ':00';
+    }
 }
 
 // Toast Notifications System
@@ -1319,8 +1386,29 @@ window.jsonEditor = null;
 window.yamlEditor = null;
 window.sqlEditor = null;
 
+// Theme Management
+function initTheme() {
+    const saved = safeStorage.getItem('devutils_theme');
+    if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+        document.documentElement.setAttribute('data-theme', 'light');
+    } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+}
+
+function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    safeStorage.setItem('devutils_theme', next);
+}
+
 // Initialize active tab on page load based on URL hash
 document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
+
     const initialTab = window.location.hash.substring(1) || 'base64';
     switchTab(initialTab, false);
     history.replaceState({ tabId: initialTab }, '', '#' + initialTab);

@@ -118,6 +118,10 @@
             <header class="top-bar">
                 <h2 id="current-tab-title">Base64 Converter</h2>
                 <div class="user-actions">
+                    <button class="btn-icon theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">
+                        <i class="fa-solid fa-sun"></i>
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
                     <button class="btn-icon" onclick="toggleHistory()" title="Toggle History Log">
                         <i class="fa-solid fa-clock-rotate-left"></i>
                     </button>
@@ -559,8 +563,13 @@ metadata:
                                 <form onsubmit="event.preventDefault(); runEpoch();">
                                     <div class="form-group">
                                         <label for="epoch-input">Timestamp / Datetime string</label>
-                                        <input type="text" id="epoch-input" name="value" placeholder="e.g. 1781845200, 2026-06-19 12:00:00">
+                                        <input type="text" id="epoch-input" name="value" placeholder="e.g. 1781845200, 2026-06-19 12:00:00" oninput="syncDateTimePickerFromText(this)">
                                         <small class="form-help" style="display: block; margin-top: 4px; color: var(--text-muted); font-size: 11px;">Supports Unix seconds/milliseconds, and common datetime formats.</small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="epoch-datetime">Or pick date & time</label>
+                                        <input type="datetime-local" id="epoch-datetime" name="datetime" onchange="syncTextInputFromDateTime()">
                                     </div>
 
                                     <div class="btn-group mt-4">
@@ -841,15 +850,15 @@ metadata:
                 <div class="url-parts-info">
                     {{ if eq .Operation "Parse" }}
                     <div class="grid grid-cols-3 gap-2 mb-4" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
-                        <div class="info-block" style="background: rgba(0, 0, 0, 0.2); border: 1px solid var(--card-border); padding: 8px 12px; border-radius: var(--radius-sm);">
+                        <div class="info-block" style="background: var(--card-bg); border: 1px solid var(--card-border); padding: 8px 12px; border-radius: var(--radius-sm);">
                             <span class="label" style="display: block; font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Scheme</span>
                             <span class="value" style="font-family: var(--font-mono); font-size: 13px;">{{ if .Scheme }}{{ .Scheme }}{{ else }}N/A{{ end }}</span>
                         </div>
-                        <div class="info-block" style="background: rgba(0, 0, 0, 0.2); border: 1px solid var(--card-border); padding: 8px 12px; border-radius: var(--radius-sm);">
+                        <div class="info-block" style="background: var(--card-bg); border: 1px solid var(--card-border); padding: 8px 12px; border-radius: var(--radius-sm);">
                             <span class="label" style="display: block; font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Host</span>
                             <span class="value" style="font-family: var(--font-mono); font-size: 13px;">{{ if .Host }}{{ .Host }}{{ else }}N/A{{ end }}</span>
                         </div>
-                        <div class="info-block" style="background: rgba(0, 0, 0, 0.2); border: 1px solid var(--card-border); padding: 8px 12px; border-radius: var(--radius-sm);">
+                        <div class="info-block" style="background: var(--card-bg); border: 1px solid var(--card-border); padding: 8px 12px; border-radius: var(--radius-sm);">
                             <span class="label" style="display: block; font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Path</span>
                             <span class="value" style="font-family: var(--font-mono); font-size: 13px;">{{ if .Path }}{{ .Path }}{{ else }}N/A{{ end }}</span>
                         </div>

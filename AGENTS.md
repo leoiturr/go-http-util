@@ -21,6 +21,18 @@ Welcome! This document provides guidelines for AI agents contributing to the **D
     10;
   ```
 
+## Git Commit Guidelines
+- **Oneline commits**: All commit messages must be a single line (max 72 chars).
+- **Conventional commits**: Use `type(scope): description` format.
+  - Types: `feat`, `fix`, `refactor`, `chore`, `docs`, `style`, `test`
+  - Scope: Optional, indicates affected area (e.g., `ui`, `api`, `auth`)
+  - Description: Imperative mood, lowercase, no trailing period
+- **Examples**: 
+  - `feat(ui): add datetime-local picker to Epoch Converter`
+  - `fix(api): handle 429 rate limit in webhook handler`
+  - `refactor: extract token bucket logic to middleware`
+- **Amend instead of new commit**: When fixing a recent commit, use `git commit --amend` to keep history clean.
+
 ## Tech Stack Overview
 - **Backend**: Go (using the **Gin** Web Framework).
 - **Frontend**: HTML5, Vanilla CSS, and **HTMX** for dynamic content swaps without full page reloads.
@@ -35,3 +47,10 @@ Welcome! This document provides guidelines for AI agents contributing to the **D
 4. **HTMX Error Handling**: Always check for non-2xx status codes (like `429 Too Many Requests`) using the global HTMX error handler in `static/js/app.js`.
 5. **Route Separation**: Maintain a clear separation of routes between HTMX layout fragments (`/api/htmx/*`) and REST API endpoints (`/api/v1/*`).
 6. **API Documentation**: The interactive REST API specification is stored in `static/openapi.json` and rendered at `/docs` using custom-themed Swagger UI assets. Any updates to REST endpoints must be reflected in the schema file.
+
+## Theming & Styling Conventions
+- **CSS Variables**: All colors are defined as CSS custom properties in `:root` (dark defaults) and overridden via `[data-theme="light"]` in `static/css/styles.css`. Never use hardcoded hex/rgb values for colors in components; always reference `var(--*)` tokens.
+- **Available Tokens**: `--bg-primary`, `--bg-secondary`, `--sidebar-bg`, `--card-bg`, `--card-border`, `--text-primary`, `--text-muted`, `--text-dark`, `--color-primary`, `--color-accent`, `--color-pink`, `--success`, `--danger`, `--warning`.
+- **Theme Toggle**: The toggle button is in the top bar (`.theme-toggle`). Theme preference is stored in `localStorage` under `devutils_theme` and initialized via `initTheme()` in `static/js/app.js`.
+- **Inline Styles**: Avoid inline color values. If inline styles are necessary, use CSS variables (e.g., `color: var(--text-muted)`). The only exceptions are semantic per-item colors (like HTTP method badges in webhook requests) that are identical in both themes.
+- **New Components**: Always use existing CSS variable tokens. If a new color is needed, add it to both `:root` and `[data-theme="light"]` in `styles.css`.

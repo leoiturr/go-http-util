@@ -34,6 +34,31 @@
     --font-mono: 'Lilex', 'Google Sans Mono', 'Google Sans Code', monospace;
 }
 
+/* Light Theme Overrides */
+[data-theme="light"] {
+    --bg-primary: #f8fafc;
+    --bg-secondary: #ffffff;
+    --sidebar-bg: rgba(255, 255, 255, 0.85);
+    --card-bg: rgba(255, 255, 255, 0.7);
+    --card-border: rgba(0, 0, 0, 0.08);
+
+    --text-primary: #1e293b;
+    --text-muted: #64748b;
+    --text-dark: #94a3b8;
+
+    /* Muted Accent Colors for Light Mode */
+    --color-primary: #4f46e5;
+    --color-primary-glow: rgba(79, 70, 229, 0.15);
+    --color-accent: #0891b2;
+    --color-accent-glow: rgba(8, 145, 178, 0.15);
+    --color-pink: #c026d3;
+    --color-pink-glow: rgba(192, 38, 211, 0.15);
+
+    --success: #059669;
+    --danger: #dc2626;
+    --warning: #d97706;
+}
+
 /* Reset & Base Styles */
 * {
     margin: 0;
@@ -112,6 +137,166 @@ body.dark-theme {
     100% {
         transform: translate(-40px, 60px) scale(0.9);
     }
+}
+
+/* Light Mode: Reduce glow orb opacity */
+[data-theme="light"] .glow-bg {
+    opacity: 0.1;
+}
+
+/* Light Mode: Override hardcoded dark colors */
+[data-theme="light"] .brand h1 {
+    background: linear-gradient(120deg, #1e293b, #4f46e5, #0891b2);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+[data-theme="light"] .brand-logo i {
+    color: #fff;
+}
+
+[data-theme="light"] .nav-item:hover {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .nav-item.active {
+    color: #1e293b;
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(8, 145, 178, 0.05) 100%);
+    border: 1px solid rgba(79, 70, 229, 0.25);
+    box-shadow: inset 0 0 12px rgba(79, 70, 229, 0.06);
+}
+
+[data-theme="light"] .nav-item.active i {
+    color: var(--color-primary);
+    text-shadow: none;
+}
+
+[data-theme="light"] .top-bar h2 {
+    color: #1e293b;
+}
+
+[data-theme="light"] .card.glass {
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .card:hover {
+    border-color: rgba(0, 0, 0, 0.12);
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .card-header h3,
+[data-theme="light"] .card-header h4 {
+    color: #1e293b;
+}
+
+[data-theme="light"] textarea,
+[data-theme="light"] input[type="text"],
+[data-theme="light"] select {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] textarea:focus,
+[data-theme="light"] input[type="text"]:focus,
+[data-theme="light"] select:focus {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .result-box {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .alert {
+    background: rgba(239, 68, 68, 0.06);
+    color: #991b1b;
+}
+
+[data-theme="light"] .loader {
+    border: 3px solid rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .toast {
+    background: rgba(255, 255, 255, 0.95);
+    color: #1e293b;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15), 0 0 8px var(--color-primary-glow);
+}
+
+[data-theme="light"] .history-panel {
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: -8px 0 32px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="light"] .panel-header h3 {
+    color: #1e293b;
+}
+
+[data-theme="light"] .guid-item {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .guid-item:hover {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .btn-icon:hover {
+    color: #1e293b;
+    background: rgba(0, 0, 0, 0.06);
+    border-color: rgba(0, 0, 0, 0.12);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .scrollable-body::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="light"] .scrollable-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="light"] .CodeMirror {
+    background: rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-theme="light"] .CodeMirror-focused {
+    background: rgba(0, 0, 0, 0.06) !important;
+}
+
+[data-theme="light"] .CodeMirror-gutters {
+    background: rgba(0, 0, 0, 0.03) !important;
+}
+
+[data-theme="light"] .cm-s-material-ocean.CodeMirror {
+    background-color: rgba(0, 0, 0, 0.04) !important;
+    color: #1e293b !important;
+}
+
+[data-theme="light"] .cm-s-material-ocean .CodeMirror-gutters {
+    background-color: rgba(0, 0, 0, 0.03) !important;
+}
+
+[data-theme="light"] .table-container {
+    background: rgba(0, 0, 0, 0.01);
+}
+
+[data-theme="light"] .params-table th {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .reconstructed-wrapper {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .result-text-inline {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .truncated-payload {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .live-clock-panel {
+    background: rgba(8, 145, 178, 0.04);
+    border-color: rgba(8, 145, 178, 0.2);
 }
 
 /* Layout App Container */
@@ -372,6 +557,42 @@ body.dark-theme {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
+/* Theme Toggle Button */
+.theme-toggle {
+    position: relative;
+    overflow: hidden;
+}
+
+.theme-toggle i {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.theme-toggle .fa-sun,
+.theme-toggle .fa-moon {
+    position: absolute;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.theme-toggle .fa-sun {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.5);
+}
+
+.theme-toggle .fa-moon {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+}
+
+[data-theme="light"] .theme-toggle .fa-sun {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+}
+
+[data-theme="light"] .theme-toggle .fa-moon {
+    opacity: 0;
+    transform: rotate(90deg) scale(0.5);
+}
+
 /* Cards & Glassmorphism */
 .card {
     background: var(--card-bg);
@@ -436,7 +657,7 @@ body.dark-theme {
     letter-spacing: 0.5px;
 }
 
-textarea, input[type="text"], select {
+textarea, input[type="text"], input[type="datetime-local"], select {
     width: 100%;
     background: rgba(0, 0, 0, 0.25);
     border: 1px solid var(--card-border);
@@ -449,7 +670,7 @@ textarea, input[type="text"], select {
     transition: var(--transition-fast);
 }
 
-textarea:focus, input[type="text"]:focus, select:focus {
+textarea:focus, input[type="text"]:focus, input[type="datetime-local"]:focus, select:focus {
     border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
     background: rgba(0, 0, 0, 0.4);
