@@ -6,9 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DevUtils REST API Reference</title>
     <style>
+        :root {
+            --bg-primary: #080c14;
+        }
+        [data-theme="light"] {
+            --bg-primary: #f8fafc;
+        }
         body {
             margin: 0;
-            background-color: #080c14; /* Matches --bg-primary */
+            background-color: var(--bg-primary);
         }
         /* Custom scrollbar matching DevUtils */
         ::-webkit-scrollbar {
@@ -26,6 +32,20 @@
             background: rgba(0, 245, 255, 0.4);
         }
     </style>
+    <script>
+        (function() {
+            try {
+                var saved = localStorage.getItem('devutils_theme');
+                if (saved) {
+                    document.documentElement.setAttribute('data-theme', saved);
+                } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                }
+            } catch (e) {}
+        })();
+    </script>
 </head>
 <body>
     <script

@@ -10,20 +10,20 @@
     </div>
     <div class="card-body">
         <div class="result-box mb-4">
-            <input type="text" id="webhook-url-text" class="result-text" readonly value="{{ .URL }}" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #fff;">
+            <input type="text" id="webhook-url-text" class="result-text" readonly value="{{ .URL }}" style="width: 100%; padding: 10px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 4px; color: var(--text-primary);">
         </div>
         
         <div class="mb-4">
             <h5>Configuration Cheatsheet</h5>
-            <ul style="list-style: none; padding: 0; margin: 10px 0; color: #aaa;">
+            <ul style="list-style: none; padding: 0; margin: 10px 0; color: var(--text-muted);">
                 <li style="margin-bottom: 5px;"><code>?status=500</code> - Respond with HTTP 500 error</li>
                 <li style="margin-bottom: 5px;"><code>?status=400</code> - Respond with HTTP 400 error</li>
                 <li style="margin-bottom: 5px;"><code>?delay=5s</code> - Delay response by 5 seconds (test timeouts)</li>
             </ul>
-            <p style="font-size: 0.9em; color: #888;">Example: <code>curl -X POST {{ .URL }}?status=400&amp;delay=2s -d '{"hello": "world"}'</code></p>
+            <p style="font-size: 0.9em; color: var(--text-muted);">Example: <code>curl -X POST {{ .URL }}?status=400&amp;delay=2s -d '{"hello": "world"}'</code></p>
         </div>
 
-        <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
+        <hr style="border-color: var(--card-border); margin: 20px 0;">
 
         <div class="flex justify-between items-center mb-2">
             <h4>Incoming Requests</h4>
@@ -74,19 +74,19 @@
 {{ define "webhook_requests" }}
 <div class="requests-list" style="display: flex; flex-direction: column; gap: 10px;">
     {{ range .Requests }}
-    <div id="req-{{ .Timestamp.UnixNano }}" class="request-item" style="background: rgba(0,0,0,0.3); border-radius: 6px; padding: 10px; border-left: 4px solid {{ if eq .Method "GET" }}#4ade80{{ else if eq .Method "POST" }}#60a5fa{{ else if eq .Method "PUT" }}#fbbf24{{ else if eq .Method "DELETE" }}#f87171{{ else }}#a78bfa{{ end }};">
+    <div id="req-{{ .Timestamp.UnixNano }}" class="request-item" style="background: var(--card-bg); border-radius: 6px; padding: 10px; border-left: 4px solid {{ if eq .Method "GET" }}#4ade80{{ else if eq .Method "POST" }}#60a5fa{{ else if eq .Method "PUT" }}#fbbf24{{ else if eq .Method "DELETE" }}#f87171{{ else }}#a78bfa{{ end }};">
         <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
             <div>
                 <strong style="color: {{ if eq .Method "GET" }}#4ade80{{ else if eq .Method "POST" }}#60a5fa{{ else if eq .Method "PUT" }}#fbbf24{{ else if eq .Method "DELETE" }}#f87171{{ else }}#a78bfa{{ end }};">{{ .Method }}</strong> 
                 <span>{{ .Path }}{{ if .QueryParams }}?{{ .QueryParams }}{{ end }}</span>
             </div>
-            <div style="font-size: 0.85em; color: #888;">
+            <div style="font-size: 0.85em; color: var(--text-muted);">
                 {{ .Timestamp.Format "15:04:05.000" }} | Status: {{ .StatusCode }}{{ if ne .Delay "0s" }} | Delay: {{ .Delay }}{{ end }}
             </div>
         </div>
         
-        <details id="headers-{{ .Timestamp.UnixNano }}" style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 4px; margin-bottom: 5px;">
-            <summary style="cursor: pointer; font-size: 0.9em; color: #ccc;">Headers</summary>
+        <details id="headers-{{ .Timestamp.UnixNano }}" style="background: var(--card-bg); padding: 8px; border-radius: 4px; margin-bottom: 5px;">
+            <summary style="cursor: pointer; font-size: 0.9em; color: var(--text-muted);">Headers</summary>
             <pre style="margin: 5px 0 0 0; font-size: 0.8em; overflow-x: auto;">
 {{- range $key, $values := .Headers -}}
 {{ $key }}: {{ range $values }}{{ . }}{{ end }}
@@ -94,9 +94,9 @@
             </pre>
         </details>
         
-        <details id="body-{{ .Timestamp.UnixNano }}" style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 4px;">
-            <summary style="cursor: pointer; font-size: 0.9em; color: #ccc;">Body</summary>
-            <pre style="margin: 5px 0 0 0; font-size: 0.8em; overflow-x: auto; white-space: pre-wrap; color: {{ if .Body }}inherit{{ else }}#666{{ end }};">{{ if .Body }}{{ .Body }}{{ else }}&lt;Empty Body&gt;{{ end }}</pre>
+        <details id="body-{{ .Timestamp.UnixNano }}" style="background: var(--card-bg); padding: 8px; border-radius: 4px;">
+            <summary style="cursor: pointer; font-size: 0.9em; color: var(--text-muted);">Body</summary>
+            <pre style="margin: 5px 0 0 0; font-size: 0.8em; overflow-x: auto; white-space: pre-wrap; color: {{ if .Body }}inherit{{ else }}var(--text-dark){{ end }};">{{ if .Body }}{{ .Body }}{{ else }}&lt;Empty Body&gt;{{ end }}</pre>
         </details>
     </div>
     {{ end }}

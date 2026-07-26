@@ -46,7 +46,10 @@ This document outlines the core architecture, layout design, and implementation 
 - Non-2xx status codes (like the rate limiter's `429`) are caught globally in `app.js` using the `htmx:responseError` listener and shown as clean toast notifications.
 
 ### Visual Styling & Theme
-- **Theme**: Premium glowing dark mode theme, featuring neon accent gradients and card drop shadows.
+- **Theme**: Dual-theme support (light and dark modes) with a premium glowing aesthetic in dark mode.
+- **Theme Switching**: A toggle button in the top bar switches between light and dark modes. The preference is persisted in `localStorage` under the key `devutils_theme`. On first visit, the user's system preference (`prefers-color-scheme`) is respected, defaulting to dark if unavailable.
+- **CSS Variables**: All colors are defined as CSS custom properties on `:root` (dark defaults) and overridden via `[data-theme="light"]`. This ensures all components automatically adapt to the active theme.
+- **Glow Orbs**: The decorative animated background orbs are reduced to 10% opacity in light mode for a cleaner appearance.
 - **Typography**: 
   - Sans-serif: `Plus Jakarta Sans` (sleek, geometric, modern look).
   - Monospace: `Lilex` (developer font with coding ligatures).

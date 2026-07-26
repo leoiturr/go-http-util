@@ -70,7 +70,7 @@ func HandleWebhookReceive(c *gin.Context) {
 	if delayStr != "" {
 		if d, err := time.ParseDuration(delayStr); err == nil {
 			// Limit delay to {maxDelayPerWebhook} seconds max
-			if d > maxDelayPerWebhook * time.Second {
+			if d > maxDelayPerWebhook*time.Second {
 				d = maxDelayPerWebhook * time.Second
 			}
 			delayDuration = d
