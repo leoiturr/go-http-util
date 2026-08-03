@@ -123,6 +123,9 @@ func main() {
 		// Epoch / Unix Timestamp Converter API
 		htmxGroup.POST("/epoch/convert", handlers.HTMXConvertEpoch)
 
+		// Cron Expression Parser API
+		htmxGroup.POST("/cron/parse", handlers.HTMXParseCron)
+
 		// YAML Tools API (JSON to YAML, YAML to JSON, YAML Formatter, YAML Validator)
 		htmxGroup.POST("/yaml/json2yaml", handlers.HTMXJSONToYAML)
 		htmxGroup.POST("/yaml/yaml2json", handlers.HTMXYAMLToJSON)
@@ -167,6 +170,9 @@ func main() {
 
 		// Epoch / Unix Timestamp Converter API
 		v1Group.POST("/epoch/convert", handlers.V1ConvertEpoch)
+
+		// Cron Expression Parser API
+		v1Group.POST("/cron/parse", handlers.V1ParseCron)
 
 		// YAML Tools API (JSON to YAML, YAML to JSON, YAML Formatter, YAML Validator)
 		v1Group.POST("/yaml/json2yaml", handlers.V1JSONToYAML)

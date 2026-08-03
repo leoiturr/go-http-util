@@ -713,6 +713,45 @@
           }
         }
       }
+    },
+    "/cron/parse": {
+      "post": {
+        "summary": "Parse Cron Expression",
+        "description": "Parses standard 5-field, 6-field (with seconds), or descriptor (e.g. @daily) cron expressions, returning a human-readable description and a list of upcoming execution times.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CronRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/CronRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Parsed cron schedule analysis",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CronResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/429Error"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1106,6 +1145,55 @@
             "type": "string"
           },
           "value": {
+            "type": "string"
+          }
+        }
+      },
+      "CronRequest": {
+        "type": "object",
+        "properties": {
+          "expression": {
+            "type": "string",
+            "description": "Standard 5-field cron (min hour dom month dow), 6-field with seconds, or a descriptor alias like @daily, @hourly"
+          },
+          "count": {
+            "type": "string",
+            "description": "Number of upcoming execution times to return (1-50, default 5)"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone name (e.g. UTC, America/New_York). Defaults to local time."
+          }
+        }
+      },
+      "CronResult": {
+        "type": "object",
+        "properties": {
+          "expression": {
+            "type": "string"
+          },
+          "is_valid": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "next_runs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "fields": {
+            "type": "string"
+          },
+          "standard_format": {
             "type": "string"
           }
         }

@@ -92,6 +92,10 @@
                     <i class="fa-solid fa-clock"></i>
                     <span>Epoch Converter</span>
                 </button>
+                <button class="nav-item" onclick="switchTab('cron')">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <span>Cron Parser</span>
+                </button>
                 <button class="nav-item" onclick="switchTab('webhook')">
                     <i class="fa-solid fa-satellite-dish"></i>
                     <span>Webhook Tester</span>
@@ -589,6 +593,91 @@ metadata:
                                 <div class="placeholder-content">
                                     <i class="fa-solid fa-clock placeholder-icon"></i>
                                     <p>Enter a timestamp value and click "Convert Time" to display details.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- CRON EXPRESSION PARSER MODULE -->
+                <section id="module-cron" class="tab-module">
+                    <div class="grid grid-cols-2">
+                        <div class="card glass">
+                            <div class="card-header">
+                                <h3>Cron Expression Parser</h3>
+                                <p>Parse, validate, and preview cron schedules. Supports standard 5-field, 6-field (with seconds), and aliases like @daily, @hourly.</p>
+                            </div>
+                            <div class="card-body">
+                                <form hx-post="/api/htmx/cron/parse" 
+                                      hx-target="#cron-output" 
+                                      hx-indicator="#cron-loader"
+                                      onsubmit="saveToHistory('Cron Parse', document.getElementById('cron-expression').value)">
+                                    <div class="form-group">
+                                        <label for="cron-expression">Cron Expression</label>
+                                        <input type="text" id="cron-expression" name="expression" placeholder="* * * * *  or  0 0 * * *  or  @daily" required>
+                                        <small class="form-help">Standard 5-field (min hour dom month dow), 6-field with seconds, or aliases (@yearly, @monthly, @weekly, @daily, @hourly)</small>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-4" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                                        <div class="form-group" style="margin-bottom: 0;">
+                                            <label for="cron-count">Next Runs to Show (1-50)</label>
+                                            <input type="number" id="cron-count" name="count" value="10" min="1" max="50" style="width: 100%;">
+                                        </div>
+                                        <div class="form-group" style="margin-bottom: 0;">
+                                            <label for="cron-timezone">Timezone</label>
+                                            <select id="cron-timezone" name="timezone" style="width: 100%;">
+                                                <option value="Local" selected>Local (Browser)</option>
+                                                <option value="UTC">UTC</option>
+                                                <option value="America/New_York">America/New_York (EST/EDT)</option>
+                                                <option value="America/Los_Angeles">America/Los_Angeles (PST/PDT)</option>
+                                                <option value="Europe/London">Europe/London (GMT/BST)</option>
+                                                <option value="Europe/Paris">Europe/Paris (CET/CEST)</option>
+                                                <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
+                                                <option value="Asia/Shanghai">Asia/Shanghai (CST)</option>
+                                                <option value="Australia/Sydney">Australia/Sydney (AEST/AEDT)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="btn-group">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fa-solid fa-calendar-days"></i> Parse & Preview
+                                        </button>
+                                        <div id="cron-loader" class="htmx-indicator loader"></div>
+                                    </div>
+                                </form>
+
+                                <hr class="divider" style="margin-top: 20px; margin-bottom: 20px;">
+
+                                <div class="form-group">
+                                    <label>Quick Reference</label>
+                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; font-size: 12px;">
+                                        <code style="background: var(--card-bg); padding: 6px 10px; border-radius: var(--radius-sm); border: 1px solid var(--card-border);">* * * * *</code>
+                                        <code style="background: var(--card-bg); padding: 6px 10px; border-radius: var(--radius-sm); border: 1px solid var(--card-border);">0 * * * *</code>
+                                        <code style="background: var(--card-bg); padding: 6px 10px; border-radius: var(--radius-sm); border: 1px solid var(--card-border);">0 0 * * *</code>
+                                        <code style="background: var(--card-bg); padding: 6px 10px; border-radius: var(--radius-sm); border: 1px solid var(--card-border);">0 0 * * 0</code>
+                                        <code style="background: var(--card-bg); padding: 6px 10px; border-radius: var(--radius-sm); border: 1px solid var(--card-border);">0 0 1 * *</code>
+                                        <code style="background: var(--card-bg); padding: 6px 10px; border-radius: var(--radius-sm); border: 1px solid var(--card-border);">0 0 1 1 *</code>
+                                        <code style="background: var(--card-bg); padding: 6px 10px; border-radius: var(--radius-sm); border: 1px solid var(--card-border);">*/5 * * * *</code>
+                                        <code style="background: var(--card-bg); padding: 6px 10px; border-radius: var(--radius-sm); border: 1px solid var(--card-border);">0 9-17 * * 1-5</code>
+                                        <span class="text-muted" style="display: flex; align-items: center;">Every minute</span>
+                                        <span class="text-muted" style="display: flex; align-items: center;">Hourly</span>
+                                        <span class="text-muted" style="display: flex; align-items: center;">Daily midnight</span>
+                                        <span class="text-muted" style="display: flex; align-items: center;">Weekly (Sun)</span>
+                                        <span class="text-muted" style="display: flex; align-items: center;">Monthly 1st</span>
+                                        <span class="text-muted" style="display: flex; align-items: center;">Yearly Jan 1</span>
+                                        <span class="text-muted" style="display: flex; align-items: center;">Every 5 min</span>
+                                        <span class="text-muted" style="display: flex; align-items: center;">Weekdays 9-5</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="cron-output" class="output-wrapper">
+                            <div class="card glass card-placeholder">
+                                <div class="placeholder-content">
+                                    <i class="fa-solid fa-calendar-days placeholder-icon"></i>
+                                    <p>Enter a cron expression and click "Parse & Preview" to see the schedule.</p>
                                 </div>
                             </div>
                         </div>
@@ -1096,6 +1185,72 @@ metadata:
         {{ else }}
         <div class="result-box">
             <textarea id="{{ if .ResultID }}{{ .ResultID }}{{ else }}sql-result-text{{ end }}" class="result-text" data-mode="text/x-sql" readonly>{{ .Result }}</textarea>
+        </div>
+        {{ end }}
+    </div>
+</div>
+{{ end }}
+
+
+{{ define "cron-result" }}
+<div class="card glass mt-4 animate-fade-in">
+    <div class="card-header flex justify-between items-center">
+        <h4>Cron Expression Analysis</h4>
+        <div class="card-actions">
+            {{ if .IsValid }}
+            <button class="btn btn-sm btn-primary" onclick="copyAllCronRuns()">
+                <i class="fa-solid fa-copy"></i> Copy All Runs
+            </button>
+            {{ end }}
+        </div>
+    </div>
+    <div class="card-body">
+        {{ if .Error }}
+        <div class="alert alert-error">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <div>{{ .Error }}</div>
+        </div>
+        {{ else }}
+        <div class="mb-4">
+            <div class="form-group mb-3">
+                <label>Expression</label>
+                <div class="flex gap-2" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <code class="result-text-inline font-mono" style="flex: 1; min-width: 200px;">{{ .StandardFormat }}</code>
+                    {{ if ne .Expression .StandardFormat }}
+                    <span class="badge badge-info" title="Expanded from alias">{{ .Expression }}</span>
+                    {{ end }}
+                </div>
+            </div>
+            <div class="form-group mb-3">
+                <label>Schedule Description</label>
+                <p style="color: var(--text-primary);">{{ .Description }}</p>
+            </div>
+            <div class="form-group mb-3">
+                <label>Fields</label>
+                <code class="font-mono" style="font-size: 12px; color: var(--text-muted);">{{ .Fields }}</code>
+            </div>
+            <div class="form-group">
+                <label>Timezone</label>
+                <code class="font-mono" style="font-size: 12px;">{{ .Timezone }}</code>
+            </div>
+        </div>
+
+        <hr class="divider">
+
+        <div class="form-group">
+            <label>Next {{ if .Count }}{{ .Count }}{{ else }}5{{ end }} Execution Times</label>
+            <div class="cron-runs-list" style="display: flex; flex-direction: column; gap: 6px;">
+                {{ range $index, $run := .NextRuns }}
+                <div class="cron-run-item" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius-sm);">
+                    <span class="run-index badge badge-secondary" style="min-width: 28px; text-align: center;">{{ add $index 1 }}</span>
+                    <span class="run-time font-mono" style="flex: 1; word-break: break-all;">{{ $run }}</span>
+                    <button class="btn-copy-inline" onclick="copyToClipboard('cron-run-{{ $index }}')" title="Copy this time">
+                        <i class="fa-regular fa-copy"></i>
+                    </button>
+                    <span id="cron-run-{{ $index }}" style="display: none;">{{ $run }}</span>
+                </div>
+                {{ end }}
+            </div>
         </div>
         {{ end }}
     </div>

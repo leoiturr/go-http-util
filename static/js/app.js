@@ -68,6 +68,7 @@ function switchTab(tabId, updateHistory = true) {
         'url': 'URL Encoder / Decoder & Parser',
         'jwt': 'JWT Debugger',
         'epoch': 'Epoch Timestamp Converter',
+        'cron': 'Cron Expression Parser',
         'webhook': 'Webhook Tester',
         'docs': 'REST API Reference'
     };
@@ -204,6 +205,23 @@ function clearEpoch() {
         outputDiv.innerHTML = '';
     }
     showToast('Epoch inputs cleared', 'success');
+}
+
+// Clear helper for Cron Parser
+function clearCron() {
+    document.getElementById('cron-expression').value = '';
+    const outputDiv = document.getElementById('cron-output');
+    if (outputDiv) {
+        outputDiv.innerHTML = `
+            <div class="card glass card-placeholder">
+                <div class="placeholder-content">
+                    <i class="fa-solid fa-calendar-days placeholder-icon"></i>
+                    <p>Enter a cron expression and click "Parse & Preview" to see the schedule.</p>
+                </div>
+            </div>
+        `;
+    }
+    showToast('Cron inputs cleared', 'success');
 }
 
 // URL query parameters builder helpers
@@ -1174,6 +1192,26 @@ function copyAllGUIDs() {
         });
 }
 
+// Copy All Cron Runs
+function copyAllCronRuns() {
+    const runElements = document.querySelectorAll('[id^="cron-run-"]');
+    if (runElements.length === 0) return;
+
+    const runs = Array.from(runElements).map(el => el.textContent).filter(t => t);
+    if (runs.length === 0) return;
+
+    const joined = runs.join('\n');
+
+    navigator.clipboard.writeText(joined)
+        .then(() => {
+            showToast(`Copied all ${runs.length} cron runs!`, 'success');
+        })
+        .catch(err => {
+            showToast('Failed to copy cron runs', 'error');
+            console.error('Copy all failed:', err);
+        });
+}
+
 // Copy QR Code Image to Clipboard
 function copyQRCodeImage() {
     const img = document.getElementById('qr-code-img');
@@ -1349,6 +1387,10 @@ function loadHistoryItem(operation, details) {
         switchTab('epoch');
         document.getElementById('epoch-input').value = details;
         showToast('Restored timestamp to Epoch panel', 'success');
+    } else if (operation.includes('Cron')) {
+        switchTab('cron');
+        document.getElementById('cron-expression').value = details;
+        showToast('Restored expression to Cron panel', 'success');
     } else if (operation.includes('YAML')) {
         switchTab('yaml');
         document.getElementById('yaml-input').value = details;
