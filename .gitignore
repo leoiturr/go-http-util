@@ -7,6 +7,7 @@ server
 *.dll
 *.so
 *.dylib
+devutils
 
 # Test artifacts
 *.test
