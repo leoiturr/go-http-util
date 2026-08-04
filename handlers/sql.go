@@ -92,8 +92,10 @@ func V1MinifySQL(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"result": minified})
 }
 
-// minifySQL is a simple helper to compress SQL by removing newlines and extra spaces
+// minifySQL is a simple helper to compress SQL by stripping comments and extra whitespace
 func minifySQL(sql string) string {
+	sql = stripComments(sql)
+
 	// Remove newlines and tabs
 	sql = strings.ReplaceAll(sql, "\n", " ")
 	sql = strings.ReplaceAll(sql, "\r", " ")
@@ -105,4 +107,73 @@ func minifySQL(sql string) string {
 
 	// Optionally trim spaces around brackets/parentheses if needed, but simple space compression is safe
 	return strings.TrimSpace(sql)
+}
+
+// stripComments removes both line comments (--) and block comments (/* */) from SQL,
+// while leaving string literals untouched.
+func stripComments(sql string) string {
+	var b strings.Builder
+	b.Grow(len(sql))
+
+	i := 0
+	n := len(sql)
+	for i < n {
+		c := sql[i]
+
+		// Preserve string literals so comment markers inside them are not stripped
+		if c == '\'' || c == '"' || c == '`' {
+			quote := c
+			b.WriteByte(c)
+			i++
+			for i < n {
+				if sql[i] == '\\' && quote != '`' && i+1 < n {
+					b.WriteByte(sql[i])
+					b.WriteByte(sql[i+1])
+					i += 2
+					continue
+				}
+				b.WriteByte(sql[i])
+				if sql[i] == quote {
+					// Handle escaped quotes by doubling (standard SQL)
+					if i+1 < n && sql[i+1] == quote {
+						b.WriteByte(sql[i+1])
+						i += 2
+						continue
+					}
+					i++
+					break
+				}
+				i++
+			}
+			continue
+		}
+
+		// Line comment: -- until end of line
+		if c == '-' && i+1 < n && sql[i+1] == '-' {
+			i += 2
+			for i < n && sql[i] != '\n' && sql[i] != '\r' {
+				i++
+			}
+			continue
+		}
+
+		// Block comment: /* ... */
+		if c == '/' && i+1 < n && sql[i+1] == '*' {
+			i += 2
+			for i+1 < n && !(sql[i] == '*' && sql[i+1] == '/') {
+				i++
+			}
+			if i+1 < n {
+				i += 2
+			} else {
+				i = n
+			}
+			continue
+		}
+
+		b.WriteByte(c)
+		i++
+	}
+
+	return b.String()
 }
