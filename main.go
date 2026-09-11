@@ -20,9 +20,9 @@ func getVersion() string {
 	// Check Render.com injected environment variable first
 	if renderCommit := os.Getenv("RENDER_GIT_COMMIT"); renderCommit != "" {
 		if len(renderCommit) > 7 {
-			return "v1.0.2-" + renderCommit[:7]
+			return "v1.0.3-" + renderCommit[:7]
 		}
-		return "v1.0.2-" + renderCommit
+		return "v1.0.3-" + renderCommit
 	}
 
 	// Fallback to local git CLI command execution (useful in local dev)
@@ -31,10 +31,10 @@ func getVersion() string {
 	if err == nil {
 		commit := strings.TrimSpace(string(out))
 		if commit != "" {
-			return "v1.0.2-" + commit
+			return "v1.0.3-" + commit
 		}
 	}
-	return "v1.0.2"
+	return "v1.0.3"
 }
 
 func main() {
