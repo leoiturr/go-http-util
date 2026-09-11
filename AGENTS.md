@@ -33,6 +33,15 @@ Welcome! This document provides guidelines for AI agents contributing to the **D
   - `refactor: extract token bucket logic to middleware`
 - **Amend instead of new commit**: When fixing a recent commit, use `git commit --amend` to keep history clean.
 
+## Versioning Guidelines
+- **Application Version**: The application version string is defined in `main.go` inside the `getVersion()` function.
+  - When bumping versions (e.g. to `v1.0.3`), update all version prefixes in `main.go`:
+    1. The Render environment variable branch: `"v<VERSION>-" + renderCommit[:7]` and `"v<VERSION>-" + renderCommit`
+    2. The local git commit branch: `"v<VERSION>-" + commit`
+    3. The final fallback return value: `"v<VERSION>"`
+  - Format Go code (`go fmt ./...`) and run tests (`go test ./...`) before committing.
+  - Commit using conventional commit format: `chore: bump version to <VERSION>` (e.g., `chore: bump version to 1.0.3`).
+
 ## Tech Stack Overview
 - **Backend**: Go (using the **Gin** Web Framework).
 - **Frontend**: HTML5, Vanilla CSS, and **HTMX 4.x** for dynamic content swaps without full page reloads.
