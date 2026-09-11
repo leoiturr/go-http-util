@@ -1348,6 +1348,90 @@ input[type="range"]::-webkit-slider-thumb:hover {
     color: #6ee7b7;
 }
 
+/* JWT input syntax highlighting (overlay technique) */
+.jwt-input-wrap {
+    position: relative;
+    width: 100%;
+}
+
+/* The global `* { font-family }` reset overrides inherited fonts on the
+   highlight spans, so font props must be applied to them directly */
+.jwt-input-highlight,
+.jwt-input-highlight * {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.jwt-input-highlight {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    padding: 12px 16px;
+    box-sizing: border-box;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow: hidden;
+    scrollbar-gutter: stable;
+    pointer-events: none;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    transition: var(--transition-fast);
+}
+
+.jwt-input-wrap textarea,
+.jwt-input-wrap textarea:focus {
+    position: relative;
+    z-index: 1;
+    display: block;
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    color: transparent;
+    caret-color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-all;
+    resize: vertical;
+    scrollbar-gutter: stable;
+}
+
+.jwt-input-wrap textarea::placeholder {
+    color: var(--text-dark);
+    opacity: 1;
+}
+
+.jwt-input-wrap textarea::selection {
+    background: rgba(163, 230, 53, 0.3);
+    color: transparent;
+}
+
+.jwt-input-wrap:focus-within .jwt-input-highlight {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(163, 230, 53, 0.2);
+    background: rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="light"] .jwt-input-highlight {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .jwt-input-wrap:focus-within .jwt-input-highlight {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+.jwt-seg-header { color: #f87171; }
+.jwt-seg-payload { color: #5eead4; }
+.jwt-seg-signature { color: #6ee7b7; }
+.jwt-seg-dot { color: var(--text-muted); }
+
 /* URL table parser */
 .table-container {
     width: 100%;

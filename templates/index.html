@@ -515,7 +515,10 @@ metadata:
                             <div class="card-body">
                                 <div class="form-group">
                                     <label for="jwt-input">JWT Token</label>
-                                    <textarea id="jwt-input" name="token" placeholder="eyJhbGciOiJIUzI1NiIsIn..." rows="10" class="font-mono text-sm">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE5NTc3ODQ2MjJ9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</textarea>
+                                    <div class="jwt-input-wrap">
+                                        <pre id="jwt-input-highlight" class="jwt-input-highlight" aria-hidden="true"></pre>
+                                        <textarea id="jwt-input" name="token" placeholder="eyJhbGciOiJIUzI1NiIsIn..." rows="10" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE5NTc3ODQ2MjJ9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</textarea>
+                                    </div>
                                 </div>
                                 <div class="btn-group">
                                     <button type="button" class="btn btn-primary" onclick="runJWT()">

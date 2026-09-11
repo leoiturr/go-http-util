@@ -186,9 +186,42 @@ function clearURL() {
     showToast('URL inputs cleared', 'success');
 }
 
+// Keep the highlight overlay's scroll position in sync with the textarea
+function syncJWTScroll() {
+    const textarea = document.getElementById('jwt-input');
+    const highlight = document.getElementById('jwt-input-highlight');
+    if (!textarea || !highlight) return;
+    highlight.scrollTop = textarea.scrollTop;
+    highlight.scrollLeft = textarea.scrollLeft;
+}
+
+// Syntax-highlight the JWT input by coloring its dot-separated segments
+function highlightJWTInput() {
+    const textarea = document.getElementById('jwt-input');
+    const highlight = document.getElementById('jwt-input-highlight');
+    if (!textarea || !highlight) return;
+
+    const parts = textarea.value.split('.');
+    const classes = ['jwt-seg-header', 'jwt-seg-payload', 'jwt-seg-signature'];
+
+    let html = '';
+    parts.forEach((part, i) => {
+        if (i > 0) {
+            html += '<span class="jwt-seg-dot">.</span>';
+        }
+        if (part === '') return;
+        const cls = classes[i] || 'jwt-seg-signature';
+        html += `<span class="${cls}">${escapeHTML(part)}</span>`;
+    });
+
+    highlight.innerHTML = html;
+    syncJWTScroll();
+}
+
 // Clear helper for JWT Debugger
 function clearJWT() {
     document.getElementById('jwt-input').value = '';
+    highlightJWTInput();
     const outputDiv = document.getElementById('jwt-output');
     if (outputDiv) {
         outputDiv.innerHTML = '';
@@ -1382,6 +1415,7 @@ function loadHistoryItem(operation, details) {
     } else if (operation.includes('JWT')) {
         switchTab('jwt');
         document.getElementById('jwt-input').value = details;
+        highlightJWTInput();
         showToast('Restored token to JWT panel', 'success');
     } else if (operation.includes('Epoch')) {
         switchTab('epoch');
@@ -1504,6 +1538,16 @@ document.addEventListener('DOMContentLoaded', () => {
         window.sqlEditor.on('change', function(cm) {
             cm.save();
         });
+    }
+
+    // Initialize JWT input syntax highlighting
+    const jwtInput = document.getElementById('jwt-input');
+    if (jwtInput) {
+        jwtInput.addEventListener('input', highlightJWTInput);
+        jwtInput.addEventListener('scroll', syncJWTScroll);
+        jwtInput.addEventListener('keyup', syncJWTScroll);
+        jwtInput.addEventListener('click', syncJWTScroll);
+        highlightJWTInput();
     }
 });
 
