@@ -45,7 +45,7 @@
     if (!window.webhookStatePreserverBound) {
         window.webhookStatePreserverBound = true;
         
-        document.body.addEventListener('htmx:beforeSwap', function(evt) {
+        document.body.addEventListener('htmx:before:swap', function(evt) {
             if (evt.detail.target.id === 'webhook-requests-container') {
                 const details = evt.detail.target.querySelectorAll('details[open]');
                 const openIds = Array.from(details).map(d => d.id).filter(id => id);
@@ -53,7 +53,7 @@
             }
         });
 
-        document.body.addEventListener('htmx:afterSwap', function(evt) {
+        document.body.addEventListener('htmx:after:swap', function(evt) {
             if (evt.detail.target.id === 'webhook-requests-container') {
                 const openIdsStr = evt.detail.target.dataset.openIds;
                 if (openIdsStr) {

@@ -1409,8 +1409,8 @@ function loadHistoryItem(operation, details) {
 }
 
 // Global HTMX Error Handling
-document.addEventListener('htmx:responseError', function(evt) {
-    if (evt.detail.xhr.status === 429) {
+document.addEventListener('htmx:response:error', function(evt) {
+    if (evt.detail.ctx.response.status === 429) {
         showToast('Too many requests. Please wait a moment.', 'error');
     } else {
         showToast('An error occurred during request processing.', 'error');
@@ -1525,7 +1525,7 @@ function initResultEditor(elementId, mode) {
 }
 
 // Global HTMX afterSettle listener to initialize syntax highlighting on returned output textareas
-document.addEventListener('htmx:afterSettle', function(evt) {
+document.addEventListener('htmx:after:settle', function(evt) {
     const target = evt.detail.target;
     if (target && typeof target.querySelectorAll === 'function') {
         // Find and initialize any result textarea inside the target
