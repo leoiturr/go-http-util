@@ -1,5 +1,12 @@
 /* CSS Design System for DevForge */
 
+@font-face {
+    font-family: 'Comic Shanns';
+    src: url('https://cdn.jsdelivr.net/gh/shannpersand/comic-shanns@master/v2/comic%20shanns%202.ttf') format('truetype');
+    font-weight: 400;
+    font-display: swap;
+}
+
 :root {
     --bg-primary: #0a0e0f;
     --bg-secondary: #12181a;
@@ -31,7 +38,7 @@
     --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     
     /* Font Families */
-    --font-mono: 'Lilex', 'Google Sans Mono', 'Google Sans Code', monospace;
+    --font-mono: 'Comic Shanns', 'Google Sans Mono', 'Google Sans Code', monospace;
 }
 
 /* Light Theme Overrides */
@@ -1528,7 +1535,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 /* CodeMirror Styles overrides for premium theme and mobile-first responsiveness */
 .CodeMirror,
 .CodeMirror * {
-    font-family: 'Lilex', var(--font-mono), monospace !important;
+    font-family: 'Comic Shanns', var(--font-mono), monospace !important;
 }
 
 .CodeMirror {

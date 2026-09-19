@@ -47,7 +47,7 @@ Welcome! This document provides guidelines for AI agents contributing to the **D
 - **Frontend**: HTML5, Vanilla CSS, and **HTMX 4.x** for dynamic content swaps without full page reloads.
 - **Fonts**: Loaded via **Bunny Fonts** (GDPR compliant). 
   - Sans-serif: `Plus Jakarta Sans`
-  - Monospace: `Lilex` (developer-focused font with coding ligatures)
+  - Monospace: `Comic Shanns` (self-served via jsDelivr; Comic Sans-inspired monospace)
 
 ## Architectural Guidelines
 1. **Dynamic Port Binding**: The application must bind to the port defined by the `PORT` environment variable (injected by Render/Heroku) and fall back to `8080` in local environments.

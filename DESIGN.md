@@ -51,9 +51,8 @@ This document outlines the core architecture, layout design, and implementation 
 - **CSS Variables**: All colors are defined as CSS custom properties on `:root` (dark defaults) and overridden via `[data-theme="light"]`. This ensures all components automatically adapt to the active theme.
 - **Glow Orbs**: The decorative animated background orbs are reduced to 10% opacity in light mode for a cleaner appearance.
 - **Typography**: 
-  - Sans-serif: `Plus Jakarta Sans` (sleek, geometric, modern look).
-  - Monospace: `Lilex` (developer font with coding ligatures).
-  - Loaded via **Bunny Fonts** (GDPR compliant).
+  - Sans-serif: `Plus Jakarta Sans` (sleek, geometric, modern look), loaded via **Bunny Fonts** (GDPR compliant).
+  - Monospace: `Comic Shanns` (Comic Sans-inspired monospace), served via `@font-face` from jsDelivr (MIT licensed, not available on Bunny Fonts).
 
 ### Mobile-First Responsive Design
 - **Mobile-First CSS**: Designed base CSS rules to fit mobile screens (vertical stacked layouts, full-width sidebars serving as top menus, scrollable nav menus, and compact card/grid spacing).
