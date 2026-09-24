@@ -517,7 +517,7 @@ function runJSON(operation) {
                     <h4>JSON Result (Validate)</h4>
                 </div>
                 <div class="card-body">
-                    <div class="alert alert-success" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 12px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 10px; color: var(--success);">
+                    <div class="alert alert-success" style="background: color-mix(in srgb, var(--success) 10%, transparent); border: 1px solid color-mix(in srgb, var(--success) 28%, transparent); padding: 12px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 10px;">
                         <i class="fa-solid fa-circle-check"></i>
                         <div>${escapeHTML(msg)}</div>
                     </div>

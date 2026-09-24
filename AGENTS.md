@@ -46,8 +46,9 @@ Welcome! This document provides guidelines for AI agents contributing to the **D
 - **Backend**: Go (using the **Gin** Web Framework).
 - **Frontend**: HTML5, Vanilla CSS, and **HTMX 4.x** for dynamic content swaps without full page reloads.
 - **Fonts**: Loaded via **Bunny Fonts** (GDPR compliant). 
-  - Sans-serif: `Plus Jakarta Sans`
-  - Monospace: `Comic Shanns` (self-served via jsDelivr; Comic Sans-inspired monospace)
+  - Display/headings: `Fraunces` (warm editorial serif; `--font-display`)
+  - Sans-serif: `Plus Jakarta Sans` (UI/body; `--font-sans`)
+  - Monospace: `Comic Shanns` (self-served via jsDelivr; Comic Sans-inspired monospace; `--font-mono`)
 
 ## Architectural Guidelines
 1. **Dynamic Port Binding**: The application must bind to the port defined by the `PORT` environment variable (injected by Render/Heroku) and fall back to `8080` in local environments.
@@ -60,8 +61,9 @@ Welcome! This document provides guidelines for AI agents contributing to the **D
 6. **API Documentation**: The interactive REST API specification is stored in `static/openapi.json` and rendered at `/docs` using custom-themed Swagger UI assets. Any updates to REST endpoints must be reflected in the schema file.
 
 ## Theming & Styling Conventions
-- **CSS Variables**: All colors are defined as CSS custom properties in `:root` (dark defaults) and overridden via `[data-theme="light"]` in `static/css/styles.css`. Never use hardcoded hex/rgb values for colors in components; always reference `var(--*)` tokens.
-- **Available Tokens**: `--bg-primary`, `--bg-secondary`, `--sidebar-bg`, `--card-bg`, `--card-border`, `--text-primary`, `--text-muted`, `--text-dark`, `--color-primary`, `--color-accent`, `--color-pink`, `--success`, `--danger`, `--warning`.
+- **Design System**: The UI follows a **Warm Paper Workbench** aesthetic (see `DESIGN.md`): warm muted surfaces, paper-grain texture over soft warm washes, and a single bold **vermilion** accent (`--color-primary`). Dark mode is the default; light mode (`[data-theme="light"]`) is a cream paper variant.
+- **CSS Variables**: All colors are defined as CSS custom properties in `:root` (dark defaults) and overridden via `[data-theme="light"]` in `static/css/styles.css`. Never use hardcoded hex/rgb values for colors in components; always reference `var(--*)` tokens. Derived tints should use `color-mix(in srgb, var(--token) X%, transparent)` and never hardcode the channel colors.
+- **Available Tokens**: `--bg-primary`, `--bg-secondary`, `--sidebar-bg`, `--card-bg`, `--card-border`, `--card-border-hover`, `--text-primary`, `--text-muted`, `--text-dark`, `--color-primary` (vermilion), `--color-accent`, `--color-pink`, `--success`, `--danger`, `--warning`, plus font tokens `--font-display`. `--font-sans`, `--font-mono`, and layout tokens `--radius-lg`, `--radius-md`, `--radius-sm`, `--transition-fast`, `--transition-normal`.
 - **Theme Toggle**: The toggle button is in the top bar (`.theme-toggle`). Theme preference is stored in `localStorage` under `devutils_theme` and initialized via `initTheme()` in `static/js/app.js`.
-- **Inline Styles**: Avoid inline color values. If inline styles are necessary, use CSS variables (e.g., `color: var(--text-muted)`). The only exceptions are semantic per-item colors (like HTTP method badges in webhook requests) that are identical in both themes.
+- **Inline Styles**: Avoid inline color values. If inline styles are necessary, use CSS variables (e.g., `color: var(--text-muted)`) or `color-mix()` with tokens. The only exceptions are semantic per-item colors (like HTTP method badges in webhook requests) that are identical in both themes.
 - **New Components**: Always use existing CSS variable tokens. If a new color is needed, add it to both `:root` and `[data-theme="light"]` in `styles.css`.

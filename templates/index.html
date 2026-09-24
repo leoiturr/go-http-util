@@ -4,27 +4,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DevUtils - Premium Developer Utility Dashboard</title>
-    <meta name="description" content="DevUtils - Premium, high-performance developer utility suite containing Base64 converter, GUID generator, and QR code generator.">
-    <meta name="keywords" content="developer tools, utilities, base64 encoder, base64 decoder, guid generator, uuid generator, qr code generator, htmx, go, gin">
+    <title>DevUtils - Developer Utility Workbench</title>
+    <meta name="description" content="DevUtils - a warm, focused developer utility workbench with Base64 converter, GUID generator, JSON, YAML, SQL formatters, JWT debugger, epoch converter, cron parser and more.">
+    <meta name="keywords" content="developer tools, utilities, base64 encoder, base64 decoder, guid generator, uuid generator, qr code generator, json formatter, yaml, sql, jwt debugger, epoch converter, cron parser, webhook tester, htmx, go, gin">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="DevUtils - Premium Developer Utility Suite">
-    <meta property="og:description" content="A lightweight, high-performance web dashboard with essential developer tools like Base64 conversion, GUID generation, and QR Code creation.">
+    <meta property="og:title" content="DevUtils - Developer Utility Workbench">
+    <meta property="og:description" content="A warm, focused developer workbench with essential tools: Base64 conversion, GUID generation, JSON/YAML/SQL formatting, JWT debugging and more.">
     <meta property="og:image" content="/static/logo-large.png">
     
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="DevUtils - Premium Developer Utility Suite">
-    <meta name="twitter:description" content="A lightweight, high-performance web dashboard with essential developer tools.">
+    <meta name="twitter:title" content="DevUtils - Developer Utility Workbench">
+    <meta name="twitter:description" content="A warm, focused developer workbench with essential dev tools.">
     <meta name="twitter:image" content="/static/logo-large.png">
     
     <link rel="icon" type="image/png" href="/static/favicon.png">
-    <!-- Bunny Fonts: Plus Jakarta Sans -->
+    <!-- Bunny Fonts: Fraunces (display) + Plus Jakarta Sans (UI) -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link href="https://fonts.bunny.net/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.bunny.net/css2?family=fraunces:wght@400..800&display=swap" rel="stylesheet">
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <!-- Custom Vanilla CSS -->
@@ -44,6 +45,7 @@
         <div class="glow-orb orb-1"></div>
         <div class="glow-orb orb-2"></div>
         <div class="glow-orb orb-3"></div>
+        <div class="paper-grain"></div>
     </div>
 
     <div class="app-container">
@@ -53,58 +55,76 @@
                 <div class="brand-logo">
                     <i class="fa-solid fa-wand-magic-sparkles"></i>
                 </div>
-                <h1>DevUtils</h1>
+                <div class="brand-text">
+                    <h1>DevUtils</h1>
+                    <span class="brand-sub">Developer Workbench</span>
+                </div>
             </div>
             
             <nav class="nav-menu">
-                <button class="nav-item active" onclick="switchTab('base64')">
-                    <i class="fa-solid fa-code"></i>
-                    <span>Base64 Encoder</span>
-                </button>
-                <button class="nav-item" onclick="switchTab('guid')">
-                    <i class="fa-solid fa-fingerprint"></i>
-                    <span>GUID Generator</span>
-                </button>
-                <button class="nav-item" onclick="switchTab('qrcode')">
-                    <i class="fa-solid fa-qrcode"></i>
-                    <span>QR Code Gen</span>
-                </button>
-                <button class="nav-item" onclick="switchTab('json')">
-                    <i class="fa-solid fa-file-code"></i>
-                    <span>JSON Formatter</span>
-                </button>
-                <button class="nav-item" onclick="switchTab('yaml')">
-                    <i class="fa-solid fa-file-lines"></i>
-                    <span>YAML Tools</span>
-                </button>
-                <button class="nav-item" onclick="switchTab('sql')">
-                    <i class="fa-solid fa-database"></i>
-                    <span>SQL Formatter</span>
-                </button>
-                <button class="nav-item" onclick="switchTab('url')">
-                    <i class="fa-solid fa-link"></i>
-                    <span>URL Encoder</span>
-                </button>
-                <button class="nav-item" onclick="switchTab('jwt')">
-                    <i class="fa-solid fa-shield-halved"></i>
-                    <span>JWT Debugger</span>
-                </button>
-                <button class="nav-item" onclick="switchTab('epoch')">
-                    <i class="fa-solid fa-clock"></i>
-                    <span>Epoch Converter</span>
-                </button>
-                <button class="nav-item" onclick="switchTab('cron')">
-                    <i class="fa-solid fa-calendar-days"></i>
-                    <span>Cron Parser</span>
-                </button>
-                <button class="nav-item" onclick="switchTab('webhook')">
-                    <i class="fa-solid fa-satellite-dish"></i>
-                    <span>Webhook Tester</span>
-                </button>
-                <button class="nav-item" onclick="switchTab('docs')">
-                    <i class="fa-solid fa-book"></i>
-                    <span>API Reference</span>
-                </button>
+                <div class="nav-group">
+                    <span class="nav-group-label">Transform</span>
+                    <button class="nav-item active" onclick="switchTab('base64')">
+                        <i class="fa-solid fa-code"></i>
+                        <span>Base64 Encoder</span>
+                    </button>
+                    <button class="nav-item" onclick="switchTab('url')">
+                        <i class="fa-solid fa-link"></i>
+                        <span>URL Encoder</span>
+                    </button>
+                    <button class="nav-item" onclick="switchTab('epoch')">
+                        <i class="fa-solid fa-clock"></i>
+                        <span>Epoch Converter</span>
+                    </button>
+                </div>
+
+                <div class="nav-group">
+                    <span class="nav-group-label">Generate</span>
+                    <button class="nav-item" onclick="switchTab('guid')">
+                        <i class="fa-solid fa-fingerprint"></i>
+                        <span>GUID Generator</span>
+                    </button>
+                    <button class="nav-item" onclick="switchTab('qrcode')">
+                        <i class="fa-solid fa-qrcode"></i>
+                        <span>QR Code Gen</span>
+                    </button>
+                    <button class="nav-item" onclick="switchTab('cron')">
+                        <i class="fa-solid fa-calendar-days"></i>
+                        <span>Cron Parser</span>
+                    </button>
+                </div>
+
+                <div class="nav-group">
+                    <span class="nav-group-label">Inspect &amp; Format</span>
+                    <button class="nav-item" onclick="switchTab('json')">
+                        <i class="fa-solid fa-file-code"></i>
+                        <span>JSON Formatter</span>
+                    </button>
+                    <button class="nav-item" onclick="switchTab('yaml')">
+                        <i class="fa-solid fa-file-lines"></i>
+                        <span>YAML Tools</span>
+                    </button>
+                    <button class="nav-item" onclick="switchTab('sql')">
+                        <i class="fa-solid fa-database"></i>
+                        <span>SQL Formatter</span>
+                    </button>
+                    <button class="nav-item" onclick="switchTab('jwt')">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>JWT Debugger</span>
+                    </button>
+                </div>
+
+                <div class="nav-group">
+                    <span class="nav-group-label">Develop</span>
+                    <button class="nav-item" onclick="switchTab('webhook')">
+                        <i class="fa-solid fa-satellite-dish"></i>
+                        <span>Webhook Tester</span>
+                    </button>
+                    <button class="nav-item" onclick="switchTab('docs')">
+                        <i class="fa-solid fa-book"></i>
+                        <span>API Reference</span>
+                    </button>
+                </div>
             </nav>
 
             <!-- Quick Info / Status -->
@@ -113,7 +133,7 @@
                     <span class="pulse-dot"></span>
                     <span>System Online</span>
                 </div>
-                <div class="credits">{{ .Version }} &bull; Premium Tools</div>
+                <div class="credits">{{ .Version }} &bull; Workbench Suite</div>
             </div>
         </aside>
 
@@ -870,7 +890,7 @@ metadata:
         </div>
         {{ else }}
             {{ if eq .Operation "Validate" }}
-            <div class="alert alert-success" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 12px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 10px; color: var(--success);">
+            <div class="alert alert-success" style="background: color-mix(in srgb, var(--success) 10%, transparent); border: 1px solid color-mix(in srgb, var(--success) 28%, transparent); padding: 12px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 10px;">
                 <i class="fa-solid fa-circle-check"></i>
                 <div>{{ .Result }}</div>
             </div>
@@ -905,7 +925,7 @@ metadata:
         </div>
         {{ else }}
             {{ if eq .Operation "Validate" }}
-            <div class="alert alert-success" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 12px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 10px; color: var(--success);">
+            <div class="alert alert-success" style="background: color-mix(in srgb, var(--success) 10%, transparent); border: 1px solid color-mix(in srgb, var(--success) 28%, transparent); padding: 12px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 10px;">
                 <i class="fa-solid fa-circle-check"></i>
                 <div>{{ .Result }}</div>
             </div>

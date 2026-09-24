@@ -46,13 +46,25 @@ This document outlines the core architecture, layout design, and implementation 
 - Non-2xx status codes (like the rate limiter's `429`) are caught globally in `app.js` using the `htmx:responseError` listener and shown as clean toast notifications.
 
 ### Visual Styling & Theme
-- **Theme**: Dual-theme support (light and dark modes) with a premium glowing aesthetic in dark mode.
-- **Theme Switching**: A toggle button in the top bar switches between light and dark modes. The preference is persisted in `localStorage` under the key `devutils_theme`. On first visit, the user's system preference (`prefers-color-scheme`) is respected, defaulting to dark if unavailable.
-- **CSS Variables**: All colors are defined as CSS custom properties on `:root` (dark defaults) and overridden via `[data-theme="light"]`. This ensures all components automatically adapt to the active theme.
-- **Glow Orbs**: The decorative animated background orbs are reduced to 10% opacity in light mode for a cleaner appearance.
-- **Typography**: 
-  - Sans-serif: `Plus Jakarta Sans` (sleek, geometric, modern look), loaded via **Bunny Fonts** (GDPR compliant).
-  - Monospace: `Comic Shanns` (Comic Sans-inspired monospace), served via `@font-face` from jsDelivr (MIT licensed, not available on Bunny Fonts).
+- **Design System**: **Warm Paper Workbench** — warm muted surfaces, flat paper-card components with hairline borders, a subtle SVG grain texture layered over soft ambient washes, and a single bold **vermilion** accent used sparingly for actions, active navigation, and highlights.
+- **Dual Theme**: Dark mode (warm charcoal-walnut) is the default; light mode (`[data-theme="light"]`) is a cream paper variant. A toggle button in the top bar switches themes. The preference is persisted in `localStorage` under the key `devutils_theme`. On first visit, the user's system preference (`prefers-color-scheme`) is respected, defaulting to dark if unavailable.
+- **CSS Variables**: All colors are defined as CSS custom properties on `:root` (dark defaults) and overridden via `[data-theme="light"]`. This ensures all components automatically adapt to the active theme. Derived tints use `color-mix(in srgb, var(--token) X%, transparent)` rather than hardcoded channel colors.
+- **Palette**:
+  | Token | Dark (walnut) | Light (paper) |
+  |---|---|---|
+  | `--bg-primary` | `#16120f` | `#f5efe3` |
+  | `--bg-secondary` | `#1d1813` | `#fcf8ef` |
+  | `--color-primary` (vermilion) | `#e4482a` | `#c53819` |
+  | `--color-accent` | `#ef5b34` | `#d1441f` |
+  | `--color-pink` (ochre) | `#e0a03a` | `#a86f16` |
+  | `--text-primary` | `#f2e9db` | `#2b2218` |
+  | `--text-muted` | `#a59685` | `#7d6f5c` |
+- **Background Texture**: The decorative background uses soft radial washes (warm tints of the accent family) plus a `paper-grain` overlay (SVG `feTurbulence` noise blended at low opacity). In light mode the grain switches to a gentle `multiply` blend for a cleaner paper feel.
+- **Typography**:
+  - Display/headings: **Fraunces** (warm editorial serif) — used for the brand wordmark, top-bar titles, and card headings. Loaded via **Bunny Fonts** (GDPR compliant).
+  - Sans-serif: **Plus Jakarta Sans** (UI/body text) — loaded via **Bunny Fonts**.
+  - Monospace: **Comic Shanns** (Comic Sans-inspired monospace) — used for code, results, and editors; served via `@font-face` from jsDelivr (MIT licensed, not available on Bunny Fonts).
+- **Glow & Lift**: Cards use soft drop shadows with restrained depth; the vermilion accent glows only on primary buttons, the active nav item, focus rings, and the brand logo.
 
 ### Mobile-First Responsive Design
 - **Mobile-First CSS**: Designed base CSS rules to fit mobile screens (vertical stacked layouts, full-width sidebars serving as top menus, scrollable nav menus, and compact card/grid spacing).

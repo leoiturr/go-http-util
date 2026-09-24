@@ -74,10 +74,10 @@
 {{ define "webhook_requests" }}
 <div class="requests-list" style="display: flex; flex-direction: column; gap: 10px;">
     {{ range .Requests }}
-    <div id="req-{{ .Timestamp.UnixNano }}" class="request-item" style="background: var(--card-bg); border-radius: 6px; padding: 10px; border-left: 4px solid {{ if eq .Method "GET" }}#4ade80{{ else if eq .Method "POST" }}#60a5fa{{ else if eq .Method "PUT" }}#fbbf24{{ else if eq .Method "DELETE" }}#f87171{{ else }}#a78bfa{{ end }};">
+    <div id="req-{{ .Timestamp.UnixNano }}" class="request-item" style="background: var(--card-bg); border-radius: 6px; padding: 10px; border-left: 4px solid {{ if eq .Method "GET" }}#7fc98a{{ else if eq .Method "POST" }}#e4482a{{ else if eq .Method "PUT" }}#e0a03a{{ else if eq .Method "DELETE" }}#db5f57{{ else }}#a98fc9{{ end }};">
         <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
             <div>
-                <strong style="color: {{ if eq .Method "GET" }}#4ade80{{ else if eq .Method "POST" }}#60a5fa{{ else if eq .Method "PUT" }}#fbbf24{{ else if eq .Method "DELETE" }}#f87171{{ else }}#a78bfa{{ end }};">{{ .Method }}</strong> 
+                <strong style="color: {{ if eq .Method "GET" }}#7fc98a{{ else if eq .Method "POST" }}#e4482a{{ else if eq .Method "PUT" }}#e0a03a{{ else if eq .Method "DELETE" }}#db5f57{{ else }}#a98fc9{{ end }};">{{ .Method }}</strong> 
                 <span>{{ .Path }}{{ if .QueryParams }}?{{ .QueryParams }}{{ end }}</span>
             </div>
             <div style="font-size: 0.85em; color: var(--text-muted);">
