@@ -1617,6 +1617,15 @@ input[type="range"]::-moz-range-thumb {
     accent-color: var(--color-primary);
 }
 
+.form-group .regex-flag.regex-flag-unsupported {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.form-group .regex-flag.regex-flag-unsupported input {
+    pointer-events: none;
+}
+
 .regex-flag-key {
     display: inline-flex;
     align-items: center;

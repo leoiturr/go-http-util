@@ -69,7 +69,8 @@ This document outlines the core architecture, layout design, and implementation 
 
 ### Utility Curation
 - New utilities should be focused, local-first where privacy matters, and small enough to complete in one workbench view.
-- The **Regex Playground** lives in the **Inspect & Format** group. It uses Go's linear-time RE2 engine, accepts pattern presets, supports `i`, `m`, `s`, and `U` flags, highlights matches in escaped result segments, and exposes capture groups as structured cards.
+- The **Regex Playground** lives in the **Inspect & Format** group. It accepts pattern presets, supports `i`, `m`, `s`, and `U` flags, highlights matches in escaped result segments, and exposes capture groups as structured cards. An Engine selector (styled like the flag tiles) switches between **Go RE2 (server)** — the linear-time default — and **JavaScript (browser)**, which tests locally with the tab's own engine for instant feedback and lookahead support.
+- In JavaScript mode the `U` flag tile is dimmed and disabled (RE2-only modifier), the pattern help text explains the trade-off, and execution runs in a sandboxed Web Worker with a 2-second timeout so catastrophic backtracking only freezes the worker, never the page. Timeouts and compile errors render through the same Regex Match Report error card. Both engines produce identical report markup and UTF-8 byte offsets; `(?P<name>` patterns port automatically to JS `(?<name>`.
 - Regex requests and responses are bounded to protect the workbench: patterns are limited to 4 KB, test text to 200 KB, and returned match details to the first 100 matches. Match positions are documented as UTF-8 byte offsets.
 - Regex pattern and test-text editors reuse nested rounded paper frames so code-like content remains visually separate from the settings card. On narrow screens, flag and capture grids collapse to one column.
 

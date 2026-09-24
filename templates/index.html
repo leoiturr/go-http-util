@@ -538,7 +538,7 @@ metadata:
                                 <p>Test regular expressions safely with Go's RE2 engine, inspect matches, and review capture groups.</p>
                             </div>
                             <div class="card-body">
-                                <form hx-post="/api/htmx/regex/test"
+                                <form id="regex-form" hx-post="/api/htmx/regex/test"
                                       hx-target="#regex-output"
                                       hx-indicator="#regex-loader"
                                       onsubmit="saveToHistory('Regex Test', document.getElementById('regex-pattern').value)">
@@ -555,32 +555,48 @@ metadata:
                                     </div>
 
                                     <div class="form-group">
+                                        <label>Engine</label>
+                                        <div class="regex-flag-grid" role="radiogroup" aria-label="Regex engine">
+                                            <label class="regex-flag">
+                                                <input type="radio" name="engine" value="re2" checked onchange="setRegexEngine('re2')">
+                                                <span class="regex-flag-key">Go</span>
+                                                <span>RE2 &middot; server</span>
+                                            </label>
+                                            <label class="regex-flag">
+                                                <input type="radio" name="engine" value="js" onchange="setRegexEngine('js')">
+                                                <span class="regex-flag-key">JS</span>
+                                                <span>JavaScript &middot; browser</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
                                         <label for="regex-pattern">Pattern</label>
                                         <div class="regex-input-frame">
                                             <input id="regex-pattern" name="pattern" class="font-mono" type="text" maxlength="4096" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" value="(?P&lt;local&gt;[\w.+-]+)@(?P&lt;domain&gt;[\w.-]+)">
                                         </div>
-                                        <small class="form-help">RE2 syntax is linear-time and resistant to catastrophic backtracking.</small>
+                                        <small class="form-help" id="regex-syntax-help">RE2 syntax is linear-time and resistant to catastrophic backtracking.</small>
                                     </div>
 
                                     <div class="form-group">
                                         <label>Flags</label>
                                         <div class="regex-flag-grid" role="group" aria-label="Regular expression flags">
-                                            <label class="regex-flag">
+                                            <label class="regex-flag" data-flag="i">
                                                 <input type="checkbox" name="flags" value="i">
                                                 <span class="regex-flag-key">i</span>
                                                 <span>Ignore case</span>
                                             </label>
-                                            <label class="regex-flag">
+                                            <label class="regex-flag" data-flag="m">
                                                 <input type="checkbox" name="flags" value="m">
                                                 <span class="regex-flag-key">m</span>
                                                 <span>Multiline</span>
                                             </label>
-                                            <label class="regex-flag">
+                                            <label class="regex-flag" data-flag="s">
                                                 <input type="checkbox" name="flags" value="s">
                                                 <span class="regex-flag-key">s</span>
                                                 <span>Dot matches newline</span>
                                             </label>
-                                            <label class="regex-flag">
+                                            <label class="regex-flag" data-flag="U">
                                                 <input type="checkbox" name="flags" value="U">
                                                 <span class="regex-flag-key">U</span>
                                                 <span>Ungreedy</span>

@@ -210,6 +210,286 @@ function clearRegex() {
     showToast('Regex Playground reset', 'success');
 }
 
+// Regex engine toggle: "re2" posts to the Go server via HTMX (default),
+// "js" runs the browser's JavaScript engine locally in a sandboxed worker.
+let regexEngineMode = 're2';
+const REGEX_JS_TIMEOUT_MS = 2000;
+let regexJSWorker = null;
+let regexJSWorkerUrl = null;
+let regexJSRunId = 0;
+
+function setRegexEngine(engine) {
+    regexEngineMode = engine === 'js' ? 'js' : 're2';
+
+    const ungreedy = document.querySelector('#module-regex .regex-flag[data-flag="U"]');
+    if (ungreedy) {
+        ungreedy.querySelector('input').disabled = regexEngineMode === 'js';
+        ungreedy.classList.toggle('regex-flag-unsupported', regexEngineMode === 'js');
+        ungreedy.title = regexEngineMode === 'js'
+            ? 'Ungreedy is a Go RE2 modifier and is unavailable in JavaScript.'
+            : '';
+    }
+
+    const help = document.getElementById('regex-syntax-help');
+    if (help) {
+        help.textContent = regexEngineMode === 'js'
+            ? 'JavaScript runs locally in this tab and supports lookaheads, but it backtracks: slow patterns are stopped after 2 seconds.'
+            : 'RE2 syntax is linear-time and resistant to catastrophic backtracking.';
+    }
+}
+
+function getRegexJSWorker() {
+    if (regexJSWorker) return regexJSWorker;
+    if (!regexJSWorkerUrl) {
+        regexJSWorkerUrl = URL.createObjectURL(new Blob([regexJsWorkerSource], { type: 'text/javascript' }));
+    }
+    regexJSWorker = new Worker(regexJSWorkerUrl);
+    return regexJSWorker;
+}
+
+function runRegexJavaScript(form) {
+    const output = document.getElementById('regex-output');
+    const loader = document.getElementById('regex-loader');
+    const flags = Array.from(form.elements.namedItem('flags'))
+        .filter(function (input) { return input.checked && input.value !== 'U'; })
+        .map(function (input) { return input.value; });
+
+    let worker;
+    try {
+        worker = getRegexJSWorker();
+    } catch (err) {
+        renderRegexReport(output, { Error: 'This browser could not start a Web Worker for the JavaScript engine. Switch the engine back to Go RE2.' });
+        return;
+    }
+
+    const runId = ++regexJSRunId;
+    loader.classList.add('htmx-request');
+
+    const timer = setTimeout(function () {
+        if (runId !== regexJSRunId) return;
+        worker.terminate();
+        regexJSWorker = null;
+        loader.classList.remove('htmx-request');
+        renderRegexReport(output, { Error: 'JavaScript regex execution timed out after 2 seconds. This pattern likely causes catastrophic backtracking. Simplify it or switch the engine to Go RE2.' });
+    }, REGEX_JS_TIMEOUT_MS);
+
+    worker.onmessage = function (evt) {
+        if (runId !== regexJSRunId) return;
+        clearTimeout(timer);
+        loader.classList.remove('htmx-request');
+        const data = evt.data || {};
+        renderRegexReport(output, data.error ? { Error: data.error } : { Result: data.result });
+    };
+
+    worker.onerror = function () {
+        if (runId !== regexJSRunId) return;
+        clearTimeout(timer);
+        loader.classList.remove('htmx-request');
+        renderRegexReport(output, { Error: 'The JavaScript engine could not evaluate this pattern.' });
+    };
+
+    worker.postMessage({
+        pattern: form.elements.namedItem('pattern').value,
+        text: form.elements.namedItem('test_text').value,
+        flags: flags,
+        matchLimit: 100
+    });
+}
+
+// Mirror of the "regex-result" Go template so both engines render the same report.
+function renderRegexReport(container, payload) {
+    let html = '<div class="card glass mt-4 animate-fade-in"><div class="card-header"><h4>Regex Match Report</h4>';
+    const result = payload.Result;
+    if (!result) {
+        html += '</div><div class="card-body"><div class="alert alert-error"><i class="fa-solid fa-circle-exclamation"></i><div>'
+            + escapeHTML(payload.Error) + '</div></div></div></div>';
+        container.innerHTML = html;
+        return;
+    }
+
+    html += '<div class="card-actions"><span class="badge badge-secondary">' + escapeHTML(result.engine) + '</span></div></div>';
+    html += '<div class="card-body">';
+    html += '<div class="regex-summary" aria-label="Regex result summary">'
+        + regexSummaryItem(result.matchCount, 'Matches')
+        + regexSummaryItem(result.captureCount, result.truncated ? 'Captures (shown)' : 'Captures')
+        + regexSummaryItem(result.groupCount, 'Groups')
+        + '</div>';
+
+    const flagKeys = (result.flags || []).map(function (flag) {
+        return '<span class="regex-flag-key">' + escapeHTML(flag) + '</span>';
+    }).join('');
+    html += '<div class="regex-flags-summary"><span class="form-group-label">Active Flags</span>'
+        + (flagKeys || '<span class="text-muted text-sm">None</span>') + '</div>';
+
+    if (result.truncated) {
+        html += '<div class="alert alert-warning mb-4"><i class="fa-solid fa-triangle-exclamation"></i><div>Showing the first '
+            + result.matchLimit + ' matches. Refine the pattern to inspect additional results.</div></div>';
+    }
+
+    const segments = (result.segments || []).map(function (segment) {
+        return segment.matched
+            ? '<mark class="regex-match-highlight" title="Match ' + segment.matchIndex + '">' + escapeHTML(segment.value) + '</mark>'
+            : escapeHTML(segment.value);
+    }).join('');
+    html += '<div class="form-group"><span class="form-group-label">Highlighted Test Text</span>'
+        + '<div class="regex-highlight-preview" aria-label="Test text with matched sections highlighted">'
+        + segments + '</div></div>';
+
+    html += '<hr class="divider"><div class="regex-match-list">';
+    const matches = result.matches || [];
+    if (matches.length) {
+        html += matches.map(renderRegexMatchCard).join('');
+    } else {
+        html += '<div class="regex-empty-state"><i class="fa-solid fa-circle-check"></i><div><h5>No matches found</h5>'
+            + '<p>The expression is valid, but none of its matches appear in the current test text.</p></div></div>';
+    }
+    html += '</div></div></div>';
+    container.innerHTML = html;
+}
+
+function regexSummaryItem(value, label) {
+    return '<div class="regex-summary-item"><span class="regex-summary-value">' + value
+        + '</span><span class="regex-summary-label">' + escapeHTML(label) + '</span></div>';
+}
+
+function renderRegexMatchCard(match, index) {
+    let html = '<article class="regex-match-card"><div class="regex-match-card-header"><div>'
+        + '<span class="regex-match-number">Match ' + match.index + '</span>'
+        + '<span class="regex-match-range">bytes ' + match.start + '–' + match.end + '</span>'
+        + '</div><button class="btn btn-sm btn-secondary" onclick="copyToClipboard(\'regex-match-' + index + '\')" title="Copy match ' + match.index + '">'
+        + '<i class="fa-regular fa-copy"></i> Copy</button></div>';
+    html += '<pre id="regex-match-' + index + '" class="regex-match-value">' + escapeHTML(match.value) + '</pre>';
+    if ((match.captures || []).length) {
+        html += '<div class="regex-capture-grid">' + match.captures.map(function (capture) {
+            const value = capture.matched ? (capture.value ? escapeHTML(capture.value) : '(empty)') : 'Not matched';
+            return '<div class="regex-capture-item"><span class="regex-capture-name">'
+                + escapeHTML(capture.name || ('Group ' + capture.index))
+                + '</span><code class="regex-capture-value">' + value + '</code></div>';
+        }).join('') + '</div>';
+    } else {
+        html += '<div class="regex-no-captures">No capture groups in this pattern.</div>';
+    }
+    return html + '</article>';
+}
+
+// Cancels the HTMX request when the local JavaScript engine is active and runs the test in the browser instead.
+document.addEventListener('htmx:before:request', function (evt) {
+    const form = evt.target && evt.target.closest ? evt.target.closest('#regex-form') : null;
+    if (form && regexEngineMode === 'js') {
+        evt.preventDefault();
+        runRegexJavaScript(form);
+    }
+});
+
+// Sandbox: the pattern only ever runs here, in a dedicated worker that the main thread
+// can terminate after REGEX_JS_TIMEOUT_MS. Server-side RE2 remains the safe default.
+const regexJsWorkerSource = `
+'use strict';
+
+function parseGroupNames(source) {
+    const names = {};
+    let count = 0;
+    let inClass = false;
+    for (let i = 0; i < source.length; i++) {
+        const ch = source.charAt(i);
+        if (ch === '\\\\') { i += 1; continue; }
+        if (inClass) { if (ch === ']') inClass = false; continue; }
+        if (ch === '[') { inClass = true; continue; }
+        if (ch !== '(') continue;
+        if (source.startsWith('(?<', i) && !source.startsWith('(?<=', i) && !source.startsWith('(?<!', i)) {
+            const close = source.indexOf('>', i + 3);
+            if (close !== -1) {
+                count += 1;
+                names[count] = source.slice(i + 3, close);
+                i = close;
+                continue;
+            }
+        }
+        if (source.charAt(i + 1) !== '?') count += 1;
+    }
+    return { names: names, count: count };
+}
+
+self.onmessage = function (evt) {
+    const pattern = evt.data.pattern || '';
+    const text = evt.data.text || '';
+    const requestedFlags = evt.data.flags || [];
+    const matchLimit = evt.data.matchLimit || 100;
+
+    if (!pattern) { postMessage({ error: 'regex pattern is required' }); return; }
+    if (pattern.length > 4096) { postMessage({ error: 'regex pattern exceeds the 4 KB limit' }); return; }
+    if (text.length > 204800) { postMessage({ error: 'test text exceeds the 200 KB limit' }); return; }
+
+    const flags = ['i', 'm', 's'].filter(function (flag) { return requestedFlags.indexOf(flag) !== -1; });
+    const jsPattern = pattern.split('(?P<').join('(?<');
+
+    let expression;
+    try {
+        expression = new RegExp(jsPattern, flags.join('') + 'g');
+    } catch (err) {
+        postMessage({ error: 'invalid regular expression: ' + err.message });
+        return;
+    }
+
+    const groups = parseGroupNames(jsPattern);
+    const encoder = new TextEncoder();
+    const collected = [];
+    let total = 0;
+    let groupCount = groups.count;
+    let match;
+    while ((match = expression.exec(text)) !== null) {
+        total += 1;
+        if (collected.length < matchLimit) {
+            const captures = [];
+            for (let g = 1; g < match.length; g++) {
+                const value = match[g];
+                captures.push({ index: g, name: groups.names[g] || '', value: value === undefined ? '' : value, matched: value !== undefined });
+            }
+            collected.push({ start: match.index, end: match.index + match[0].length, value: match[0], captures: captures });
+        }
+        if (match.length - 1 > groupCount) groupCount = match.length - 1;
+        if (match[0] === '') expression.lastIndex += 1;
+    }
+
+    const matches = collected.map(function (item, index) {
+        return {
+            index: index + 1,
+            value: item.value,
+            start: encoder.encode(text.slice(0, item.start)).length,
+            end: encoder.encode(text.slice(0, item.end)).length,
+            captures: item.captures
+        };
+    });
+
+    const segments = [];
+    let cursor = 0;
+    collected.forEach(function (item, index) {
+        if (item.start > cursor) segments.push({ value: text.slice(cursor, item.start), matched: false });
+        segments.push({ value: item.value, matched: true, matchIndex: index + 1 });
+        if (item.end > cursor) cursor = item.end;
+    });
+    if (cursor < text.length) segments.push({ value: text.slice(cursor), matched: false });
+
+    let captureCount = 0;
+    matches.forEach(function (item) {
+        item.captures.forEach(function (capture) { if (capture.matched) captureCount += 1; });
+    });
+
+    postMessage({ result: {
+        pattern: pattern,
+        flags: flags,
+        segments: segments,
+        matches: matches,
+        matchCount: total,
+        groupCount: groupCount,
+        captureCount: captureCount,
+        matchLimit: matchLimit,
+        truncated: total > matchLimit,
+        engine: 'JavaScript'
+    } });
+};
+`;
+
 // Clear helper for YAML Tools
 function clearYAML() {
     document.getElementById('yaml-input').value = '';
@@ -1625,6 +1905,12 @@ document.addEventListener('DOMContentLoaded', () => {
         regexPattern.addEventListener('input', function() {
             document.getElementById('regex-preset').value = 'custom';
         });
+    }
+
+    // Sync regex engine UI with any restored radio/checkbox state
+    const initialRegexEngine = document.querySelector('#regex-form input[name="engine"]:checked');
+    if (initialRegexEngine) {
+        setRegexEngine(initialRegexEngine.value);
     }
 
     // Initialize JWT input syntax highlighting
