@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "DevUtils Utility API",
-    "description": "High-performance, developer-focused utility APIs for encoding/decoding, generation, and parsing.",
+    "description": "High-performance, developer-focused utility APIs for encoding/decoding, generation, parsing, and safe RE2 pattern testing.",
     "version": "1.0.0"
   },
   "servers": [
@@ -636,6 +636,51 @@
         }
       }
     },
+    "/regex/test": {
+      "post": {
+        "summary": "Test a regular expression",
+        "description": "Compiles a Go RE2 expression, tests it against sample text, and returns highlighted segments, matches, and capture groups. Results are bounded to the first 100 matches.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegexTestRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/RegexTestRequest"
+              },
+              "encoding": {
+                "flags": {
+                  "style": "form",
+                  "explode": true
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "RE2 match report",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegexTestResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/429Error"
+          }
+        }
+      }
+    },
     "/jwt/decode": {
       "post": {
         "summary": "Decode JSON Web Token",
@@ -1114,6 +1159,150 @@
           },
           "issued_at": {
             "type": "string"
+          }
+        }
+      },
+      "RegexTestRequest": {
+        "type": "object",
+        "required": [
+          "pattern"
+        ],
+        "properties": {
+          "pattern": {
+            "type": "string",
+            "description": "Go RE2 regular expression, up to 4 KB"
+          },
+          "test_text": {
+            "type": "string",
+            "description": "Text to test, up to 200 KB"
+          },
+          "flags": {
+            "type": "array",
+            "description": "Optional RE2 flags. Supported values are i, m, s, and U.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "i",
+                "m",
+                "s",
+                "U"
+              ]
+            },
+            "default": []
+          }
+        }
+      },
+      "RegexCapture": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "start": {
+            "type": "integer",
+            "description": "Zero-based UTF-8 byte offset, or -1 when the group did not participate in the match"
+          },
+          "end": {
+            "type": "integer",
+            "description": "Exclusive UTF-8 byte offset, or -1 when the group did not participate in the match"
+          },
+          "matched": {
+            "type": "boolean"
+          }
+        }
+      },
+      "RegexTextSegment": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "matched": {
+            "type": "boolean"
+          },
+          "match_index": {
+            "type": "integer"
+          }
+        }
+      },
+      "RegexMatch": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "integer"
+          },
+          "value": {
+            "type": "string"
+          },
+          "start": {
+            "type": "integer",
+            "description": "Zero-based UTF-8 byte offset"
+          },
+          "end": {
+            "type": "integer",
+            "description": "Exclusive UTF-8 byte offset"
+          },
+          "captures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RegexCapture"
+            }
+          }
+        }
+      },
+      "RegexTestResult": {
+        "type": "object",
+        "properties": {
+          "pattern": {
+            "type": "string"
+          },
+          "flags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "segments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RegexTextSegment"
+            }
+          },
+          "matches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RegexMatch"
+            }
+          },
+          "match_count": {
+            "type": "integer",
+            "description": "Total number of matches found, even when details are truncated"
+          },
+          "group_count": {
+            "type": "integer",
+            "description": "Number of capture groups defined by the pattern"
+          },
+          "capture_count": {
+            "type": "integer",
+            "description": "Number of participating capture groups across the returned matches"
+          },
+          "match_limit": {
+            "type": "integer",
+            "description": "Maximum number of detailed matches returned per request"
+          },
+          "truncated": {
+            "type": "boolean",
+            "description": "True when match details were limited to the first 100 matches"
+          },
+          "engine": {
+            "type": "string",
+            "example": "Go RE2"
           }
         }
       },

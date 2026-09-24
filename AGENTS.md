@@ -21,6 +21,13 @@ Welcome! This document provides guidelines for AI agents contributing to the **D
     10;
   ```
 
+## Documentation & Curation Guidelines
+- **Keep Design Documentation Current**: Update `DESIGN.md` in the same change whenever architecture, layout, interaction, typography, theming, or reusable UI treatment changes. Do not defer design decisions to a later cleanup.
+- **Promote Durable Rules**: Update this file when a repeated implementation rule is discovered, such as documentation synchronization, responsive behavior, accessibility, or component geometry.
+- **Surface Geometry**: Cards and nested input/code surfaces must use deliberate padding, existing radius tokens, and overflow clipping. Avoid square inner corners or content touching an outer card edge.
+- **Suggest Complementary Utilities**: When asked for a new tool beside DevUtils, first suggest one focused, local-first developer utility. Check the existing navigation for overlap, choose the best-fit nav group, and explain its value before implementation.
+- **Do Not Install or Use Playwright**: Never install, add, or run Playwright in this repository. If browser-based visual review or a design opinion is needed, ask the user first.
+
 ## Git Commit Guidelines
 - **Oneline commits**: All commit messages must be a single line (max 72 chars).
 - **Conventional commits**: Use `type(scope): description` format.
@@ -59,6 +66,7 @@ Welcome! This document provides guidelines for AI agents contributing to the **D
    - HTMX 4.x event names use colon-separated format: `htmx:response:error`, `htmx:before:swap`, `htmx:after:swap`, `htmx:after:settle`, etc. Never use the legacy camelCase names from 1.x/2.x.
 5. **Route Separation**: Maintain a clear separation of routes between HTMX layout fragments (`/api/htmx/*`) and REST API endpoints (`/api/v1/*`).
 6. **API Documentation**: The interactive REST API specification is stored in `static/openapi.json` and rendered at `/docs` using custom-themed Swagger UI assets. Any updates to REST endpoints must be reflected in the schema file.
+7. **Safe Regex Execution**: The Regex Playground must use Go's linear-time RE2 engine. Preserve the documented pattern, test-text, and match-result limits; do not introduce a backtracking regex engine without an explicit security review.
 
 ## Theming & Styling Conventions
 - **Design System**: The UI follows a **Warm Paper Workbench** aesthetic (see `DESIGN.md`): warm muted surfaces, paper-grain texture over soft warm washes, and a single bold **vermilion** accent (`--color-primary`). Dark mode is the default; light mode (`[data-theme="light"]`) is a cream paper variant.
@@ -67,3 +75,5 @@ Welcome! This document provides guidelines for AI agents contributing to the **D
 - **Theme Toggle**: The toggle button is in the top bar (`.theme-toggle`). Theme preference is stored in `localStorage` under `devutils_theme` and initialized via `initTheme()` in `static/js/app.js`.
 - **Inline Styles**: Avoid inline color values. If inline styles are necessary, use CSS variables (e.g., `color: var(--text-muted)`) or `color-mix()` with tokens. The only exceptions are semantic per-item colors (like HTTP method badges in webhook requests) that are identical in both themes.
 - **New Components**: Always use existing CSS variable tokens. If a new color is needed, add it to both `:root` and `[data-theme="light"]` in `styles.css`.
+- **Icons**: Use only Font Awesome Free icons available from the loaded 6.5.2 stylesheet. Do not use Pro-only names such as `fa-brackets-curly`.
+- **Native Selects**: Option popup text must remain readable on the light OS menu. Use `--select-menu-text` and `--select-menu-bg`; do not inherit the dark theme's light foreground into `option` elements.

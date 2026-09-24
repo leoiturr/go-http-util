@@ -4,6 +4,7 @@ A lightweight, high-performance web application built with **Go** and the **Gin 
 - **Base64 Converter**: Encode and decode strings to/from Base64.
 - **GUID/UUID Generator**: Generate multiple unique identifiers (GUIDs) with custom options.
 - **QR Code Generator**: Generate QR codes from text/URLs as Base64-encoded images.
+- **Regex Playground**: Test RE2 patterns with flags, highlighted matches, capture groups, and common presets.
 
 ## Features
 
@@ -45,6 +46,9 @@ A lightweight, high-performance web application built with **Go** and the **Gin 
 
 ### QR Code Generator
 - **Generate**: `POST /api/qrcode/generate`
+
+### Regex Playground
+- **Test Pattern**: `POST /api/v1/regex/test`
 
 ## License
 

@@ -42,7 +42,7 @@ This document outlines the core architecture, layout design, and implementation 
 - Supports **Deep Linking** by reading the URL hash on initial page load.
 
 ### HTMX Integration & Error Handling
-- Dynamic actions (generating GUIDs, encoding/decoding Base64, creating QR codes) are triggered via `hx-post`.
+- Dynamic actions (generating GUIDs, encoding/decoding Base64, creating QR codes, and testing regular expressions) are triggered via `hx-post`.
 - Non-2xx status codes (like the rate limiter's `429`) are caught globally in `app.js` using the `htmx:responseError` listener and shown as clean toast notifications.
 
 ### Visual Styling & Theme
@@ -65,7 +65,16 @@ This document outlines the core architecture, layout design, and implementation 
   - Sans-serif: **Plus Jakarta Sans** (UI/body text) — loaded via **Bunny Fonts**.
   - Monospace: **Comic Shanns** (Comic Sans-inspired monospace) — used for code, results, and editors; served via `@font-face` from jsDelivr (MIT licensed, not available on Bunny Fonts).
 - **Glow & Lift**: Cards use soft drop shadows with restrained depth; the vermilion accent glows only on primary buttons, the active nav item, focus rings, and the brand logo.
+- **Inset Code Surfaces**: Long-form inputs such as the JWT editor use a nested paper frame. The outer frame carries the border, focus ring, rounded `--radius-md` corners, and a small padding gutter; the inner editor uses `--radius-sm` and clips overflow so long tokens cannot create square corners. JWT settings cards keep responsive inset padding and clip their child surfaces to `--radius-lg`.
+
+### Utility Curation
+- New utilities should be focused, local-first where privacy matters, and small enough to complete in one workbench view.
+- The **Regex Playground** lives in the **Inspect & Format** group. It uses Go's linear-time RE2 engine, accepts pattern presets, supports `i`, `m`, `s`, and `U` flags, highlights matches in escaped result segments, and exposes capture groups as structured cards.
+- Regex requests and responses are bounded to protect the workbench: patterns are limited to 4 KB, test text to 200 KB, and returned match details to the first 100 matches. Match positions are documented as UTF-8 byte offsets.
+- Regex pattern and test-text editors reuse nested rounded paper frames so code-like content remains visually separate from the settings card. On narrow screens, flag and capture grids collapse to one column.
 
 ### Mobile-First Responsive Design
 - **Mobile-First CSS**: Designed base CSS rules to fit mobile screens (vertical stacked layouts, full-width sidebars serving as top menus, scrollable nav menus, and compact card/grid spacing).
-- **Desktop Enhancements**: Uses `min-width: 1025px` media queries to expand the layout into side-by-side splits (sidebar docked to the left, full-height scrolls, dual-column grid splits, and increased spacing).
+- **Desktop Enhancements**: Uses `min-width: 1025px` media queries to expand the layout into side-by-side splits. The sidebar and main panel are inset from the viewport, separated by a 12px gutter, and each uses `--radius-lg` so their outer corners stay rounded. The sticky top bar bleeds through the main panel's 32px side padding (`margin: 0 -32px` with matching padding) so its background reaches the panel's rounded corners while content stays aligned with the cards below.
+- **Highlighted Test Text**: In the Regex Match Report, the `white-space: pre-wrap` highlight preview must contain only the result segments. Template markup inside it stays on one line, because any newline or indentation would render as literal text and shift the first line out of sync with the editor's test text.
+- **Native Select Menus**: Closed selects follow the active theme. Their option popups are OS-rendered and remain light, so option text uses `--select-menu-text` on `--select-menu-bg` rather than the theme's light foreground. This keeps every option readable.

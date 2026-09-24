@@ -117,6 +117,9 @@ func main() {
 		htmxGroup.POST("/url/decode", handlers.HTMXDecodeURL)
 		htmxGroup.POST("/url/parse", handlers.HTMXParseURL)
 
+		// Regex Playground API
+		htmxGroup.POST("/regex/test", handlers.HTMXTestRegex)
+
 		// JWT Debugger API
 		htmxGroup.POST("/jwt/decode", handlers.HTMXDecodeJWT)
 
@@ -164,6 +167,9 @@ func main() {
 		v1Group.POST("/url/encode", handlers.V1EncodeURL)
 		v1Group.POST("/url/decode", handlers.V1DecodeURL)
 		v1Group.POST("/url/parse", handlers.V1ParseURL)
+
+		// Regex Playground API
+		v1Group.POST("/regex/test", handlers.V1TestRegex)
 
 		// JWT Debugger API
 		v1Group.POST("/jwt/decode", handlers.V1DecodeJWT)

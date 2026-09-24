@@ -65,6 +65,7 @@ function switchTab(tabId, updateHistory = true) {
         'json': 'JSON Formatter & Validator',
         'yaml': 'YAML Formatter & JSON to YAML',
         'sql': 'SQL Formatter & Minifier',
+        'regex': 'Regex Playground',
         'url': 'URL Encoder / Decoder & Parser',
         'jwt': 'JWT Debugger',
         'epoch': 'Epoch Timestamp Converter',
@@ -154,6 +155,59 @@ function clearSQL() {
         `;
     }
     showToast('SQL inputs cleared', 'success');
+}
+
+// Regex Playground presets
+const regexPresets = {
+    email: {
+        pattern: '(?P<local>[\\w.+-]+)@(?P<domain>[\\w.-]+)',
+        text: 'Email ada@example.com\nInvalid: not-an-email'
+    },
+    url: {
+        pattern: 'https?://[^\\s]+',
+        text: 'Documentation: https://devutils.local/docs\nSupport: mailto:team@devutils.local'
+    },
+    ipv4: {
+        pattern: '((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)',
+        text: 'Gateway 192.168.1.1\nPublic 8.8.8.8\nInvalid 999.1.1.1'
+    },
+    date: {
+        pattern: '([0-9]{4})-([0-9]{2})-([0-9]{2})',
+        text: 'Release 2026-09-23\nReview 2026-10-01'
+    },
+    hex: {
+        pattern: '#[0-9A-Fa-f]{6}',
+        text: 'Primary #E4482A\nSecondary #ef5b34\nInvalid #12345'
+    }
+};
+
+function loadRegexPreset(presetName) {
+    const preset = regexPresets[presetName];
+    if (!preset) return;
+
+    document.getElementById('regex-pattern').value = preset.pattern;
+    document.getElementById('regex-test-text').value = preset.text;
+}
+
+function clearRegex() {
+    document.getElementById('regex-preset').value = 'email';
+    loadRegexPreset('email');
+    document.querySelectorAll('#module-regex input[name="flags"]').forEach(input => {
+        input.checked = false;
+    });
+
+    const outputDiv = document.getElementById('regex-output');
+    if (outputDiv) {
+        outputDiv.innerHTML = `
+            <div class="card glass card-placeholder">
+                <div class="placeholder-content">
+                    <i class="fa-solid fa-asterisk placeholder-icon"></i>
+                    <p>Choose a pattern, enter test text, and inspect highlighted matches and capture groups.</p>
+                </div>
+            </div>
+        `;
+    }
+    showToast('Regex Playground reset', 'success');
 }
 
 // Clear helper for YAML Tools
@@ -1290,11 +1344,22 @@ function toggleHistory() {
     }
 }
 
+// Read and validate the stored history log
+function loadHistory() {
+    try {
+        const parsed = JSON.parse(safeStorage.getItem('devutils_history') || '[]');
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+        console.warn('Ignoring invalid history data:', e);
+        return [];
+    }
+}
+
 // Operations History Log
 function saveToHistory(operation, details) {
-    if (!details || details.trim() === '') return;
+    if (typeof details !== 'string' || details.trim() === '') return;
 
-    const history = JSON.parse(safeStorage.getItem('devutils_history') || '[]');
+    const history = loadHistory();
     const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     
     const entry = {
@@ -1318,7 +1383,7 @@ function renderHistory() {
     const list = document.getElementById('history-list');
     if (!list) return;
 
-    const history = JSON.parse(safeStorage.getItem('devutils_history') || '[]');
+    const history = loadHistory();
 
     if (history.length === 0) {
         list.innerHTML = `
@@ -1330,15 +1395,24 @@ function renderHistory() {
         return;
     }
 
-    list.innerHTML = history.map(entry => `
-        <div class="history-item" onclick="loadHistoryItem('${entry.operation}', \`${entry.details.replace(/`/g, '\\`').replace(/\n/g, '\\n')}\`)">
-            <div class="history-meta">
-                <span class="history-type">${entry.operation}</span>
-                <span class="history-time">${entry.time}</span>
-            </div>
-            <div class="history-content">${escapeHTML(entry.details)}</div>
-        </div>
+    list.innerHTML = history.map((entry, index) => `
+        <button type="button" class="history-item" data-history-index="${index}">
+            <span class="history-meta">
+                <span class="history-type">${escapeHTML(entry.operation)}</span>
+                <span class="history-time">${escapeHTML(entry.time)}</span>
+            </span>
+            <span class="history-content">${escapeHTML(entry.details)}</span>
+        </button>
     `).join('');
+
+    list.querySelectorAll('.history-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const entry = history[Number(item.dataset.historyIndex)];
+            if (entry) {
+                loadHistoryItem(entry.operation, entry.details);
+            }
+        });
+    });
 }
 
 // Clear History Log
@@ -1350,7 +1424,7 @@ function clearHistoryLog() {
 
 // Utility to escape HTML strings
 function escapeHTML(str) {
-    return str
+    return String(str == null ? '' : str)
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
@@ -1412,6 +1486,11 @@ function loadHistoryItem(operation, details) {
         switchTab('url');
         document.getElementById('url-input').value = details;
         showToast('Restored payload to URL panel', 'success');
+    } else if (operation.includes('Regex')) {
+        switchTab('regex');
+        document.getElementById('regex-preset').value = 'custom';
+        document.getElementById('regex-pattern').value = details;
+        showToast('Restored pattern to Regex Playground', 'success');
     } else if (operation.includes('JWT')) {
         switchTab('jwt');
         document.getElementById('jwt-input').value = details;
@@ -1537,6 +1616,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         window.sqlEditor.on('change', function(cm) {
             cm.save();
+        });
+    }
+
+    // Mark the regex preset as custom when the pattern is edited directly
+    const regexPattern = document.getElementById('regex-pattern');
+    if (regexPattern) {
+        regexPattern.addEventListener('input', function() {
+            document.getElementById('regex-preset').value = 'custom';
         });
     }
 
