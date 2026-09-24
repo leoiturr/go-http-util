@@ -75,5 +75,5 @@ Welcome! This document provides guidelines for AI agents contributing to the **D
 - **Theme Toggle**: The toggle button is in the top bar (`.theme-toggle`). Theme preference is stored in `localStorage` under `devutils_theme` and initialized via `initTheme()` in `static/js/app.js`.
 - **Inline Styles**: Avoid inline color values. If inline styles are necessary, use CSS variables (e.g., `color: var(--text-muted)`) or `color-mix()` with tokens. The only exceptions are semantic per-item colors (like HTTP method badges in webhook requests) that are identical in both themes.
 - **New Components**: Always use existing CSS variable tokens. If a new color is needed, add it to both `:root` and `[data-theme="light"]` in `styles.css`.
-- **Icons**: Use only Font Awesome Free icons available from the loaded 6.5.2 stylesheet. Do not use Pro-only names such as `fa-brackets-curly`.
+- **Icons**: Use only Bootstrap Icons (v1.11.3, MIT-licensed) classes loaded from the `bi` font stylesheet (e.g., `bi bi-clipboard`). Do not reintroduce Font Awesome classes.
 - **Native Selects**: Option popup text must remain readable on the light OS menu. Use `--select-menu-text` and `--select-menu-bg`; do not inherit the dark theme's light foreground into `option` elements.

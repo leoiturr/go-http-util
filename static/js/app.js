@@ -148,7 +148,7 @@ function clearSQL() {
         outputDiv.innerHTML = `
             <div class="card glass card-placeholder">
                 <div class="placeholder-content">
-                    <i class="fa-solid fa-database placeholder-icon"></i>
+                    <i class="bi bi-database placeholder-icon"></i>
                     <p>Enter SQL query and select an operation to view output.</p>
                 </div>
             </div>
@@ -201,7 +201,7 @@ function clearRegex() {
         outputDiv.innerHTML = `
             <div class="card glass card-placeholder">
                 <div class="placeholder-content">
-                    <i class="fa-solid fa-asterisk placeholder-icon"></i>
+                    <i class="bi bi-asterisk placeholder-icon"></i>
                     <p>Choose a pattern, enter test text, and inspect highlighted matches and capture groups.</p>
                 </div>
             </div>
@@ -301,7 +301,7 @@ function renderRegexReport(container, payload) {
     let html = '<div class="card glass mt-4 animate-fade-in"><div class="card-header"><h4>Regex Match Report</h4>';
     const result = payload.Result;
     if (!result) {
-        html += '</div><div class="card-body"><div class="alert alert-error"><i class="fa-solid fa-circle-exclamation"></i><div>'
+        html += '</div><div class="card-body"><div class="alert alert-error"><i class="bi bi-exclamation-circle-fill"></i><div>'
             + escapeHTML(payload.Error) + '</div></div></div></div>';
         container.innerHTML = html;
         return;
@@ -322,7 +322,7 @@ function renderRegexReport(container, payload) {
         + (flagKeys || '<span class="text-muted text-sm">None</span>') + '</div>';
 
     if (result.truncated) {
-        html += '<div class="alert alert-warning mb-4"><i class="fa-solid fa-triangle-exclamation"></i><div>Showing the first '
+        html += '<div class="alert alert-warning mb-4"><i class="bi bi-exclamation-triangle-fill"></i><div>Showing the first '
             + result.matchLimit + ' matches. Refine the pattern to inspect additional results.</div></div>';
     }
 
@@ -340,7 +340,7 @@ function renderRegexReport(container, payload) {
     if (matches.length) {
         html += matches.map(renderRegexMatchCard).join('');
     } else {
-        html += '<div class="regex-empty-state"><i class="fa-solid fa-circle-check"></i><div><h5>No matches found</h5>'
+        html += '<div class="regex-empty-state"><i class="bi bi-check-circle-fill"></i><div><h5>No matches found</h5>'
             + '<p>The expression is valid, but none of its matches appear in the current test text.</p></div></div>';
     }
     html += '</div></div></div>';
@@ -357,7 +357,7 @@ function renderRegexMatchCard(match, index) {
         + '<span class="regex-match-number">Match ' + match.index + '</span>'
         + '<span class="regex-match-range">bytes ' + match.start + '–' + match.end + '</span>'
         + '</div><button class="btn btn-sm btn-secondary" onclick="copyToClipboard(\'regex-match-' + index + '\')" title="Copy match ' + match.index + '">'
-        + '<i class="fa-regular fa-copy"></i> Copy</button></div>';
+        + '<i class="bi bi-clipboard"></i> Copy</button></div>';
     html += '<pre id="regex-match-' + index + '" class="regex-match-value">' + escapeHTML(match.value) + '</pre>';
     if ((match.captures || []).length) {
         html += '<div class="regex-capture-grid">' + match.captures.map(function (capture) {
@@ -501,7 +501,7 @@ function clearYAML() {
         outputDiv.innerHTML = `
             <div class="card glass card-placeholder">
                 <div class="placeholder-content">
-                    <i class="fa-solid fa-file-lines placeholder-icon"></i>
+                    <i class="bi bi-file-earmark-text placeholder-icon"></i>
                     <p>Enter payload and select an operation to view output.</p>
                 </div>
             </div>
@@ -582,7 +582,7 @@ function clearCron() {
         outputDiv.innerHTML = `
             <div class="card glass card-placeholder">
                 <div class="placeholder-content">
-                    <i class="fa-solid fa-calendar-days placeholder-icon"></i>
+                    <i class="bi bi-calendar3 placeholder-icon"></i>
                     <p>Enter a cron expression and click "Parse & Preview" to see the schedule.</p>
                 </div>
             </div>
@@ -687,7 +687,7 @@ function runBase64(operation) {
             <div class="card glass mt-4 animate-fade-in">
                 <div class="card-body">
                     <div class="alert alert-error">
-                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <i class="bi bi-exclamation-circle-fill"></i>
                         <div>Input data is empty.</div>
                     </div>
                 </div>
@@ -733,7 +733,7 @@ function runBase64(operation) {
                 </div>
                 <div class="card-body">
                     <div class="alert alert-error">
-                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <i class="bi bi-exclamation-circle-fill"></i>
                         <div>${error}</div>
                     </div>
                 </div>
@@ -746,7 +746,7 @@ function runBase64(operation) {
                     <h4>Conversion Result (${operation === 'encode' ? 'Encode' : 'Decode'})</h4>
                     <div class="card-actions">
                         <button class="btn btn-sm btn-primary" onclick="copyToClipboard('base64-result-text')">
-                            <i class="fa-solid fa-copy"></i> Copy Output
+                            <i class="bi bi-clipboard"></i> Copy Output
                         </button>
                     </div>
                 </div>
@@ -797,7 +797,7 @@ function runJSON(operation) {
             <div class="card glass mt-4 animate-fade-in">
                 <div class="card-body">
                     <div class="alert alert-error">
-                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <i class="bi bi-exclamation-circle-fill"></i>
                         <div>JSON input is empty.</div>
                     </div>
                 </div>
@@ -832,7 +832,7 @@ function runJSON(operation) {
                 </div>
                 <div class="card-body">
                     <div class="alert alert-error">
-                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <i class="bi bi-exclamation-circle-fill"></i>
                         <div>Invalid JSON: ${escapeHTML(error)}</div>
                     </div>
                 </div>
@@ -852,7 +852,7 @@ function runJSON(operation) {
                 </div>
                 <div class="card-body">
                     <div class="alert alert-success" style="background: color-mix(in srgb, var(--success) 10%, transparent); border: 1px solid color-mix(in srgb, var(--success) 28%, transparent); padding: 12px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 10px;">
-                        <i class="fa-solid fa-circle-check"></i>
+                        <i class="bi bi-check-circle-fill"></i>
                         <div>${escapeHTML(msg)}</div>
                     </div>
                 </div>
@@ -875,7 +875,7 @@ function runJSON(operation) {
                     <h4>JSON Result (${operation.charAt(0).toUpperCase() + operation.slice(1)})</h4>
                     <div class="card-actions">
                         <button class="btn btn-sm btn-primary" onclick="copyToClipboard('json-result-text')">
-                            <i class="fa-solid fa-copy"></i> Copy Output
+                            <i class="bi bi-clipboard"></i> Copy Output
                         </button>
                     </div>
                 </div>
@@ -900,7 +900,7 @@ function runURL(operation) {
             <div class="card glass mt-4 animate-fade-in">
                 <div class="card-body">
                     <div class="alert alert-error">
-                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <i class="bi bi-exclamation-circle-fill"></i>
                         <div>URL input is empty.</div>
                     </div>
                 </div>
@@ -919,7 +919,7 @@ function runURL(operation) {
                     <h4>URL Result (Encode)</h4>
                     <div class="card-actions">
                         <button class="btn btn-sm btn-primary" onclick="copyToClipboard('url-result-text')">
-                            <i class="fa-solid fa-copy"></i> Copy Output
+                            <i class="bi bi-clipboard"></i> Copy Output
                         </button>
                     </div>
                 </div>
@@ -939,7 +939,7 @@ function runURL(operation) {
                         <h4>URL Result (Decode)</h4>
                         <div class="card-actions">
                             <button class="btn btn-sm btn-primary" onclick="copyToClipboard('url-result-text')">
-                                <i class="fa-solid fa-copy"></i> Copy Output
+                                <i class="bi bi-clipboard"></i> Copy Output
                             </button>
                         </div>
                     </div>
@@ -955,7 +955,7 @@ function runURL(operation) {
                 <div class="card glass mt-4 animate-fade-in">
                     <div class="card-body">
                         <div class="alert alert-error">
-                            <i class="fa-solid fa-circle-exclamation"></i>
+                            <i class="bi bi-exclamation-circle-fill"></i>
                             <div>Decoding failed: ${escapeHTML(e.message)}</div>
                         </div>
                     </div>
@@ -993,7 +993,7 @@ function runURL(operation) {
                     <div class="card glass mt-4 animate-fade-in">
                         <div class="card-body">
                             <div class="alert alert-error">
-                                <i class="fa-solid fa-circle-exclamation"></i>
+                                <i class="bi bi-exclamation-circle-fill"></i>
                                 <div>Failed to parse URL/Query string. Make sure it is a valid absolute URL or a key=value query string.</div>
                             </div>
                         </div>
@@ -1034,7 +1034,7 @@ function runURL(operation) {
                 <td><input type="text" class="table-input param-value" value="${escapeHTML(p.value)}" oninput="rebuildURL()"></td>
                 <td>
                     <button class="btn-copy-inline" onclick="copyTableValue(this)" title="Copy Value">
-                        <i class="fa-regular fa-copy"></i>
+                        <i class="bi bi-clipboard"></i>
                     </button>
                 </td>
             </tr>
@@ -1065,7 +1065,7 @@ function runURL(operation) {
                     <div class="reconstructed-wrapper">
                         <pre id="reconstructed-url" class="result-text"></pre>
                         <button class="btn btn-sm btn-secondary" onclick="copyToClipboard('reconstructed-url')">
-                            <i class="fa-solid fa-copy"></i> Copy
+                            <i class="bi bi-clipboard"></i> Copy
                         </button>
                     </div>
                 </div>
@@ -1103,7 +1103,7 @@ function runJWT() {
             <div class="card glass mt-4 animate-fade-in">
                 <div class="card-body">
                     <div class="alert alert-error">
-                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <i class="bi bi-exclamation-circle-fill"></i>
                         <div>JWT token input is empty.</div>
                     </div>
                 </div>
@@ -1120,7 +1120,7 @@ function runJWT() {
             <div class="card glass mt-4 animate-fade-in">
                 <div class="card-body">
                     <div class="alert alert-error">
-                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <i class="bi bi-exclamation-circle-fill"></i>
                         <div>Invalid JWT format. A valid token must have exactly three segments separated by dots (header.payload.signature).</div>
                     </div>
                 </div>
@@ -1168,7 +1168,7 @@ function runJWT() {
             <div class="card glass mt-4 animate-fade-in">
                 <div class="card-body">
                     <div class="alert alert-error">
-                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <i class="bi bi-exclamation-circle-fill"></i>
                         <div>Failed to decode token segments: ${escapeHTML(e.message)}</div>
                     </div>
                 </div>
@@ -1217,16 +1217,16 @@ function runJWT() {
     let statusBadgeHTML = '';
     if (hasExp) {
         if (isExpired) {
-            statusBadgeHTML = `<span class="badge badge-error"><i class="fa-solid fa-circle-xmark"></i> Token Expired (${escapeHTML(expInStr)})</span>`;
+            statusBadgeHTML = `<span class="badge badge-error"><i class="bi bi-x-circle-fill"></i> Token Expired (${escapeHTML(expInStr)})</span>`;
         } else {
-            statusBadgeHTML = `<span class="badge badge-success"><i class="fa-solid fa-circle-check"></i> Token Active (${escapeHTML(expInStr)})</span>`;
+            statusBadgeHTML = `<span class="badge badge-success"><i class="bi bi-check-circle-fill"></i> Token Active (${escapeHTML(expInStr)})</span>`;
         }
     } else {
-        statusBadgeHTML = `<span class="badge badge-warning"><i class="fa-solid fa-triangle-exclamation"></i> No Expiration Claim (exp)</span>`;
+        statusBadgeHTML = `<span class="badge badge-warning"><i class="bi bi-exclamation-triangle-fill"></i> No Expiration Claim (exp)</span>`;
     }
 
-    let iatBadgeHTML = issuedAtStr ? `<span class="badge badge-info"><i class="fa-solid fa-calendar-days"></i> Issued: ${escapeHTML(issuedAtStr)}</span>` : '';
-    let expBadgeHTML = expTimeStr ? `<span class="badge badge-secondary"><i class="fa-solid fa-clock"></i> Exp: ${escapeHTML(expTimeStr)}</span>` : '';
+    let iatBadgeHTML = issuedAtStr ? `<span class="badge badge-info"><i class="bi bi-calendar3"></i> Issued: ${escapeHTML(issuedAtStr)}</span>` : '';
+    let expBadgeHTML = expTimeStr ? `<span class="badge badge-secondary"><i class="bi bi-clock"></i> Exp: ${escapeHTML(expTimeStr)}</span>` : '';
 
     outputDiv.innerHTML = `
         <div class="card glass mt-4 animate-fade-in">
@@ -1245,7 +1245,7 @@ function runJWT() {
                         <div class="segment-header text-red">
                             <h5 style="font-size: 13px; font-weight: 700;">HEADER <span class="text-xs text-muted" style="font-size: 11px; color: var(--text-muted); font-weight: 400;">(ALGORITHM & TOKEN TYPE)</span></h5>
                             <button class="btn-copy-inline" onclick="copyToClipboard('jwt-header-text')" title="Copy Header">
-                                <i class="fa-regular fa-copy"></i>
+                                <i class="bi bi-clipboard"></i>
                             </button>
                         </div>
                         <div class="result-box result-box-red">
@@ -1257,7 +1257,7 @@ function runJWT() {
                         <div class="segment-header text-cyan">
                             <h5 style="font-size: 13px; font-weight: 700;">PAYLOAD <span class="text-xs text-muted" style="font-size: 11px; color: var(--text-muted); font-weight: 400;">(DATA / CLAIMS)</span></h5>
                             <button class="btn-copy-inline" onclick="copyToClipboard('jwt-payload-text')" title="Copy Payload">
-                                <i class="fa-regular fa-copy"></i>
+                                <i class="bi bi-clipboard"></i>
                             </button>
                         </div>
                         <div class="result-box result-box-cyan">
@@ -1269,7 +1269,7 @@ function runJWT() {
                         <div class="segment-header text-green">
                             <h5 style="font-size: 13px; font-weight: 700;">SIGNATURE <span class="text-xs text-muted" style="font-size: 11px; color: var(--text-muted); font-weight: 400;">(HMAC/RSA SHA-256)</span></h5>
                             <button class="btn-copy-inline" onclick="copyToClipboard('jwt-signature-text')" title="Copy Signature">
-                                <i class="fa-regular fa-copy"></i>
+                                <i class="bi bi-clipboard"></i>
                             </button>
                         </div>
                         <div class="result-box result-box-green">
@@ -1330,7 +1330,7 @@ function runEpoch() {
             <div class="card glass mt-4 animate-fade-in">
                 <div class="card-body">
                     <div class="alert alert-error">
-                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <i class="bi bi-exclamation-circle-fill"></i>
                         <div>Could not parse date/time value. Support Unix epoch integers (seconds or milliseconds) and standard ISO8601 date strings.</div>
                     </div>
                 </div>
@@ -1388,7 +1388,7 @@ function runEpoch() {
                         <div class="flex gap-2" style="display: flex; gap: 8px;">
                             <span id="epoch-sec-val" class="result-text-inline font-mono">${seconds}</span>
                             <button class="btn btn-sm btn-secondary" onclick="copyToClipboard('epoch-sec-val')">
-                                <i class="fa-solid fa-copy"></i>
+                                <i class="bi bi-clipboard"></i>
                             </button>
                         </div>
                     </div>
@@ -1398,7 +1398,7 @@ function runEpoch() {
                         <div class="flex gap-2" style="display: flex; gap: 8px;">
                             <span id="epoch-ms-val" class="result-text-inline font-mono">${millis}</span>
                             <button class="btn btn-sm btn-secondary" onclick="copyToClipboard('epoch-ms-val')">
-                                <i class="fa-solid fa-copy"></i>
+                                <i class="bi bi-clipboard"></i>
                             </button>
                         </div>
                     </div>
@@ -1411,7 +1411,7 @@ function runEpoch() {
                     <div class="flex gap-2" style="display: flex; gap: 8px;">
                         <span id="epoch-utc-val" class="result-text-inline font-mono">${escapeHTML(utcStr)}</span>
                         <button class="btn btn-sm btn-secondary" onclick="copyToClipboard('epoch-utc-val')">
-                            <i class="fa-solid fa-copy"></i>
+                            <i class="bi bi-clipboard"></i>
                         </button>
                     </div>
                 </div>
@@ -1421,7 +1421,7 @@ function runEpoch() {
                     <div class="flex gap-2" style="display: flex; gap: 8px;">
                         <span id="epoch-local-val" class="result-text-inline font-mono">${escapeHTML(localStr)}</span>
                         <button class="btn btn-sm btn-secondary" onclick="copyToClipboard('epoch-local-val')">
-                            <i class="fa-solid fa-copy"></i>
+                            <i class="bi bi-clipboard"></i>
                         </button>
                     </div>
                 </div>
@@ -1502,12 +1502,12 @@ function showToast(message, type = 'success') {
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     
-    let iconClass = 'fa-circle-check';
-    if (type === 'error') iconClass = 'fa-circle-xmark';
-    if (type === 'warning') iconClass = 'fa-circle-exclamation';
+    let iconClass = 'bi-check-circle-fill';
+    if (type === 'error') iconClass = 'bi-x-circle-fill';
+    if (type === 'warning') iconClass = 'bi-exclamation-circle-fill';
 
     toast.innerHTML = `
-        <i class="fa-solid ${iconClass}"></i>
+        <i class="bi ${iconClass}"></i>
         <span>${message}</span>
     `;
 
@@ -1668,7 +1668,7 @@ function renderHistory() {
     if (history.length === 0) {
         list.innerHTML = `
             <div class="placeholder-content mt-4" style="text-align: center; color: var(--text-dark);">
-                <i class="fa-solid fa-clock-rotate-left" style="font-size: 24px; opacity: 0.15; margin-bottom: 8px;"></i>
+                <i class="bi bi-clock-history" style="font-size: 24px; opacity: 0.15; margin-bottom: 8px;"></i>
                 <p style="font-size: 12px;">No recent operations recorded.</p>
             </div>
         `;

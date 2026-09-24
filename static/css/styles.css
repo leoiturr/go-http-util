@@ -547,28 +547,28 @@ body.dark-theme {
     transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
-.theme-toggle .fa-sun,
-.theme-toggle .fa-moon {
+.theme-toggle .bi-sun,
+.theme-toggle .bi-moon {
     position: absolute;
     transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
-.theme-toggle .fa-sun {
+.theme-toggle .bi-sun {
     opacity: 0;
     transform: rotate(-90deg) scale(0.5);
 }
 
-.theme-toggle .fa-moon {
+.theme-toggle .bi-moon {
     opacity: 1;
     transform: rotate(0deg) scale(1);
 }
 
-[data-theme="light"] .theme-toggle .fa-sun {
+[data-theme="light"] .theme-toggle .bi-sun {
     opacity: 1;
     transform: rotate(0deg) scale(1);
 }
 
-[data-theme="light"] .theme-toggle .fa-moon {
+[data-theme="light"] .theme-toggle .bi-moon {
     opacity: 0;
     transform: rotate(90deg) scale(0.5);
 }
