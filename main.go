@@ -139,6 +139,13 @@ func main() {
 		htmxGroup.POST("/sql/prettify", handlers.HTMXPrettifySQL)
 		htmxGroup.POST("/sql/minify", handlers.HTMXMinifySQL)
 
+		// HTML Entity Encoder / Decoder API
+		htmxGroup.POST("/html-entity/encode", handlers.HTMXEncodeHTMLEntity)
+		htmxGroup.POST("/html-entity/decode", handlers.HTMXDecodeHTMLEntity)
+
+		// Text Diff / Compare API
+		htmxGroup.POST("/diff/text", handlers.HTMXTextDiff)
+
 		// Webhook Tester API
 		htmxGroup.POST("/webhook/generate", handlers.HTMXGenerateWebhook)
 		htmxGroup.GET("/webhook/:id/requests", handlers.HTMXGetWebhookRequests)
@@ -189,6 +196,13 @@ func main() {
 		// SQL Tools API
 		v1Group.POST("/sql/prettify", handlers.V1PrettifySQL)
 		v1Group.POST("/sql/minify", handlers.V1MinifySQL)
+
+		// HTML Entity Encoder / Decoder API
+		v1Group.POST("/html-entity/encode", handlers.V1EncodeHTMLEntity)
+		v1Group.POST("/html-entity/decode", handlers.V1DecodeHTMLEntity)
+
+		// Text Diff / Compare API
+		v1Group.POST("/diff/text", handlers.V1TextDiff)
 	}
 
 	// Start Gin server on the configured port (Render uses the PORT environment variable)

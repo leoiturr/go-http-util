@@ -67,9 +67,11 @@ function switchTab(tabId, updateHistory = true) {
         'sql': 'SQL Formatter & Minifier',
         'regex': 'Regex Playground',
         'url': 'URL Encoder / Decoder & Parser',
+        'html-entity': 'HTML Entity Encoder / Decoder',
         'jwt': 'JWT Debugger',
         'epoch': 'Epoch Timestamp Converter',
         'cron': 'Cron Expression Parser',
+        'diff': 'Text Diff / Compare',
         'webhook': 'Webhook Tester',
         'docs': 'REST API Reference'
     };
@@ -1091,6 +1093,95 @@ function runURL(operation) {
             setTimeout(rebuildURL, 50);
         }
     }
+}
+
+function runHTMLEntity(operation) {
+    const input = document.getElementById('html-entity-input').value;
+    const outputDiv = document.getElementById('html-entity-output');
+    if (!outputDiv) return;
+
+    if (!input || input.trim() === '') {
+        outputDiv.innerHTML = `
+            <div class="card glass mt-4 animate-fade-in">
+                <div class="card-body">
+                    <div class="alert alert-error">
+                        <i class="bi bi-exclamation-circle-fill"></i>
+                        <div>Input data is empty.</div>
+                    </div>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    saveToHistory(`HTML Entity ${operation.charAt(0).toUpperCase() + operation.slice(1)}`, input);
+
+    let result = '';
+    if (operation === 'encode') {
+        const textarea = document.createElement('textarea');
+        textarea.innerHTML = input;
+        result = textarea.value
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    } else {
+        const textarea = document.createElement('textarea');
+        textarea.innerHTML = input;
+        result = textarea.value;
+    }
+
+    outputDiv.innerHTML = `
+        <div class="card glass mt-4 animate-fade-in">
+            <div class="card-header flex justify-between items-center">
+                <h4>HTML Entity Result (${operation.charAt(0).toUpperCase() + operation.slice(1)})</h4>
+                <div class="card-actions">
+                    <button class="btn btn-sm btn-primary" onclick="copyToClipboard('html-entity-result-text')">
+                        <i class="bi bi-clipboard"></i> Copy Output
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="result-box">
+                    <pre id="html-entity-result-text" class="result-text">${escapeHTML(result)}</pre>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function clearHTMLEntity() {
+    document.getElementById('html-entity-input').value = '';
+    const outputDiv = document.getElementById('html-entity-output');
+    if (outputDiv) {
+        outputDiv.innerHTML = `
+            <div class="card glass card-placeholder">
+                <div class="placeholder-content">
+                    <i class="bi bi-code-square placeholder-icon"></i>
+                    <p>Enter text and select an operation to view output.</p>
+                </div>
+            </div>
+        `;
+    }
+    showToast('HTML Entity inputs cleared', 'success');
+}
+
+function clearDiff() {
+    document.getElementById('diff-text-a').value = '';
+    document.getElementById('diff-text-b').value = '';
+    const outputDiv = document.getElementById('diff-output');
+    if (outputDiv) {
+        outputDiv.innerHTML = `
+            <div class="card glass card-placeholder">
+                <div class="placeholder-content">
+                    <i class="bi bi-file-diff placeholder-icon"></i>
+                    <p>Enter two text blocks and click "Compare Text" to view differences.</p>
+                </div>
+            </div>
+        `;
+    }
+    showToast('Text Diff inputs cleared', 'success');
 }
 
 function runJWT() {

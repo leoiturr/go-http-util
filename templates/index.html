@@ -72,6 +72,10 @@
                         <i class="bi bi-link-45deg"></i>
                         <span>URL Encoder</span>
                     </button>
+                    <button class="nav-item" onclick="switchTab('html-entity')">
+                        <i class="bi bi-code-square"></i>
+                        <span>HTML Entities</span>
+                    </button>
                     <button class="nav-item" onclick="switchTab('epoch')">
                         <i class="bi bi-clock"></i>
                         <span>Epoch Converter</span>
@@ -115,6 +119,10 @@
                     <button class="nav-item" onclick="switchTab('jwt')">
                         <i class="bi bi-shield-shaded"></i>
                         <span>JWT Debugger</span>
+                    </button>
+                    <button class="nav-item" onclick="switchTab('diff')">
+                        <i class="bi bi-file-diff"></i>
+                        <span>Text Diff</span>
                     </button>
                 </div>
 
@@ -821,6 +829,98 @@ Invalid: not-an-email</textarea>
                     </div>
                 </section>
 
+                <!-- HTML ENTITY ENCODER / DECODER MODULE -->
+                <section id="module-html-entity" class="tab-module">
+                    <div class="grid grid-cols-2">
+                        <div class="card glass">
+                            <div class="card-header">
+                                <h3>HTML Entity Settings</h3>
+                                <p>Encode or decode HTML entities for safe markup handling.</p>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="html-entity-input">HTML / Text Payload</label>
+                                    <textarea id="html-entity-input" name="text" placeholder="Type or paste text with HTML entities here..." rows="8">&lt;div class=&quot;example&quot;&gt;Hello &amp; Welcome!&lt;/div&gt;</textarea>
+                                </div>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-primary" onclick="runHTMLEntity('encode')">
+                                        <i class="bi bi-lock-fill"></i> Encode
+                                    </button>
+                                    <button type="button" class="btn btn-accent" onclick="runHTMLEntity('decode')">
+                                        <i class="bi bi-unlock-fill"></i> Decode
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="clearHTMLEntity()">
+                                        <i class="bi bi-trash3"></i> Clear
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="html-entity-output" class="output-wrapper">
+                            <div class="card glass card-placeholder">
+                                <div class="placeholder-content">
+                                    <i class="bi bi-code-square placeholder-icon"></i>
+                                    <p>Enter text and select an operation to view output.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TEXT DIFF / COMPARE MODULE -->
+                <section id="module-diff" class="tab-module">
+                    <div class="grid grid-cols-2">
+                        <div class="card glass">
+                            <div class="card-header">
+                                <h3>Text Diff Settings</h3>
+                                <p>Compare two text blocks and inspect line-by-line differences.</p>
+                            </div>
+                            <div class="card-body">
+                                <form id="diff-form" hx-post="/api/htmx/diff/text"
+                                      hx-target="#diff-output"
+                                      hx-indicator="#diff-loader"
+                                      onsubmit="saveToHistory('Text Diff', truncateString(document.getElementById('diff-text-a').value, 20) + ' vs ' + truncateString(document.getElementById('diff-text-b').value, 20))">
+                                    <div class="grid grid-cols-2 gap-4" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                        <div class="form-group" style="margin-bottom: 0;">
+                                            <label for="diff-text-a">Text A (Original)</label>
+                                            <textarea id="diff-text-a" name="text_a" placeholder="Original text..." rows="8" spellcheck="false">line 1
+line 2
+line 3
+line 4</textarea>
+                                        </div>
+                                        <div class="form-group" style="margin-bottom: 0;">
+                                            <label for="diff-text-b">Text B (Modified)</label>
+                                            <textarea id="diff-text-b" name="text_b" placeholder="Modified text..." rows="8" spellcheck="false">line 1
+line 2 modified
+line 3
+line 4
+line 5 added</textarea>
+                                        </div>
+                                    </div>
+                                    <div class="btn-group mt-4" style="margin-top: 16px;">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-file-diff"></i> Compare Text
+                                        </button>
+                                        <button type="button" class="btn btn-secondary" onclick="clearDiff()">
+                                            <i class="bi bi-trash3"></i> Clear
+                                        </button>
+                                        <div id="diff-loader" class="htmx-indicator loader"></div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div id="diff-output" class="output-wrapper">
+                            <div class="card glass card-placeholder">
+                                <div class="placeholder-content">
+                                    <i class="bi bi-file-diff placeholder-icon"></i>
+                                    <p>Enter two text blocks and click "Compare Text" to view differences.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- WEBHOOK TESTER MODULE -->
                 <section id="module-webhook" class="tab-module">
                     <div class="card glass">
@@ -1482,6 +1582,70 @@ Invalid: not-an-email</textarea>
                         <i class="bi bi-clipboard"></i>
                     </button>
                     <span id="cron-run-{{ $index }}" style="display: none;">{{ $run }}</span>
+                </div>
+                {{ end }}
+            </div>
+        </div>
+        {{ end }}
+    </div>
+</div>
+{{ end }}
+
+
+{{ define "html-entity-result" }}
+<div class="card glass mt-4 animate-fade-in">
+    <div class="card-header flex justify-between items-center">
+        <h4>HTML Entity Result ({{ .Operation }})</h4>
+        <div class="card-actions">
+            {{ if not .Error }}
+            <button class="btn btn-sm btn-primary" onclick="copyToClipboard('html-entity-result-text')">
+                <i class="bi bi-clipboard"></i> Copy Output
+            </button>
+            {{ end }}
+        </div>
+    </div>
+    <div class="card-body">
+        {{ if .Error }}
+        <div class="alert alert-error">
+            <i class="bi bi-exclamation-circle-fill"></i>
+            <div>{{ .Error }}</div>
+        </div>
+        {{ else }}
+        <div class="result-box">
+            <pre id="html-entity-result-text" class="result-text">{{ .Result }}</pre>
+        </div>
+        {{ end }}
+    </div>
+</div>
+{{ end }}
+
+
+{{ define "diff-result" }}
+<div class="card glass mt-4 animate-fade-in">
+    <div class="card-header flex justify-between items-center">
+        <h4>Text Diff Result</h4>
+        <div class="card-actions">
+            {{ if not .Error }}
+            <span class="badge badge-accent">+{{ .LinesAdded }} / -{{ .LinesRemoved }}</span>
+            {{ end }}
+        </div>
+    </div>
+    <div class="card-body">
+        {{ if .Error }}
+        <div class="alert alert-error">
+            <i class="bi bi-exclamation-circle-fill"></i>
+            <div>{{ .Error }}</div>
+        </div>
+        {{ else }}
+        <div class="diff-stats" style="display: flex; gap: 12px; margin-bottom: 12px;">
+            <span class="badge badge-success" style="background: color-mix(in srgb, var(--success) 15%, transparent); color: var(--success);">+{{ .LinesAdded }} added</span>
+            <span class="badge badge-error" style="background: color-mix(in srgb, var(--danger) 15%, transparent); color: var(--danger);">-{{ .LinesRemoved }} removed</span>
+        </div>
+        <div class="result-box">
+            <div class="diff-output" id="diff-result-text" style="font-family: var(--font-mono); font-size: 13px; line-height: 1.6;">
+                {{ range $line := .Diff.Lines }}
+                <div class="diff-line {{ $line.Type }}" style="padding: 2px 8px; white-space: pre-wrap; {{ if eq $line.Type "add" }}background: color-mix(in srgb, var(--success) 8%, transparent);{{ else if eq $line.Type "del" }}background: color-mix(in srgb, var(--danger) 8%, transparent);{{ end }}">
+                    {{ if eq $line.Type "add" }}+{{ else if eq $line.Type "del" }}-{{ else }} {{ end }}{{ $line.Content }}
                 </div>
                 {{ end }}
             </div>

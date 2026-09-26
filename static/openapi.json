@@ -759,6 +759,123 @@
         }
       }
     },
+    "/html-entity/encode": {
+      "post": {
+        "summary": "Encode HTML entities",
+        "description": "Converts special characters to their HTML entity equivalents (& to &amp;, < to &lt;, etc.).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TextPayload"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/TextPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful encoding",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTMLEntityResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/429Error"
+          }
+        }
+      }
+    },
+    "/html-entity/decode": {
+      "post": {
+        "summary": "Decode HTML entities",
+        "description": "Converts HTML entities back to their original characters.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TextPayload"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/TextPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful decoding",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTMLEntityResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/429Error"
+          }
+        }
+      }
+    },
+    "/diff/text": {
+      "post": {
+        "summary": "Compare two text blocks",
+        "description": "Computes a line-by-line diff between two text blocks, returning added, removed, and unchanged lines with statistics.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiffRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/DiffRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful comparison",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiffResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/429Error"
+          }
+        }
+      }
+    },
     "/cron/parse": {
       "post": {
         "summary": "Parse Cron Expression",
@@ -1352,6 +1469,80 @@
           "timezone": {
             "type": "string",
             "description": "IANA timezone name (e.g. UTC, America/New_York). Defaults to local time."
+          }
+        }
+      },
+      "HTMLEntityResult": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "string",
+            "description": "Encoded or decoded text output"
+          },
+          "original": {
+            "type": "string",
+            "description": "Source text provided"
+          },
+          "operation": {
+            "type": "string",
+            "enum": ["Encode", "Decode"]
+          }
+        }
+      },
+      "DiffRequest": {
+        "type": "object",
+        "required": ["text_a", "text_b"],
+        "properties": {
+          "text_a": {
+            "type": "string",
+            "description": "Original text block for comparison"
+          },
+          "text_b": {
+            "type": "string",
+            "description": "Modified text block for comparison"
+          }
+        }
+      },
+      "DiffLine": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["same", "add", "del"]
+          },
+          "content": {
+            "type": "string"
+          },
+          "line_a": {
+            "type": "integer",
+            "description": "Line number in text A"
+          },
+          "line_b": {
+            "type": "integer",
+            "description": "Line number in text B"
+          }
+        }
+      },
+      "DiffResult": {
+        "type": "object",
+        "properties": {
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiffLine"
+            }
+          },
+          "lines_added": {
+            "type": "integer"
+          },
+          "lines_removed": {
+            "type": "integer"
+          },
+          "original_a": {
+            "type": "string"
+          },
+          "original_b": {
+            "type": "string"
           }
         }
       },
