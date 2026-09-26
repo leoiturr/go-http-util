@@ -2035,6 +2035,16 @@ input[type="range"]::-moz-range-thumb {
     color: var(--text-muted);
 }
 
+.diff-char-add {
+    border-radius: 2px;
+    padding: 0 1px;
+}
+
+.diff-char-del {
+    border-radius: 2px;
+    padding: 0 1px;
+}
+
 .diff-output {
     max-height: 340px;
     overflow-y: auto;

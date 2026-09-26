@@ -97,6 +97,9 @@ func TestHTMXTestRegexRendersResult(t *testing.T) {
 		"add": func(a, b int) int {
 			return a + b
 		},
+		"replace": func(old, new, s string) string {
+			return strings.ReplaceAll(s, old, new)
+		},
 	})
 	router.LoadHTMLGlob("../templates/*")
 	router.POST("/api/htmx/regex/test", HTMXTestRegex)

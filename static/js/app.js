@@ -1167,6 +1167,117 @@ function clearHTMLEntity() {
     showToast('HTML Entity inputs cleared', 'success');
 }
 
+function escapeHTML(str) {
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+}
+
+function renderDiffLine(content) {
+    return escapeHTML(content).replace(/ /g, '·').replace(/\t/g, '→');
+}
+
+function computeDiff(textA, textB) {
+    const linesA = textA.split('\n');
+    const linesB = textB.split('\n');
+
+    const m = linesA.length;
+    const n = linesB.length;
+
+    // LCS DP table
+    const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+
+    for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+            if (linesA[i - 1] === linesB[j - 1]) {
+                dp[i][j] = dp[i - 1][j - 1] + 1;
+            } else {
+                dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+            }
+        }
+    }
+
+    // Backtrack
+    const diffLines = [];
+    let i = m, j = n;
+    while (i > 0 || j > 0) {
+        if (i > 0 && j > 0 && linesA[i - 1] === linesB[j - 1]) {
+            diffLines.unshift({ type: 'same', content: linesA[i - 1] });
+            i--; j--;
+        } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+            diffLines.unshift({ type: 'add', content: linesB[j - 1] });
+            j--;
+        } else {
+            diffLines.unshift({ type: 'del', content: linesA[i - 1] });
+            i--;
+        }
+    }
+
+    return diffLines;
+}
+
+function runTextDiff() {
+    const textA = document.getElementById('diff-text-a').value;
+    const textB = document.getElementById('diff-text-b').value;
+    const outputDiv = document.getElementById('diff-output');
+    if (!outputDiv) return;
+
+    if (textA.trim() === '' && textB.trim() === '') {
+        outputDiv.innerHTML = `
+            <div class="card glass animate-fade-in" style="flex: 1; display: flex; flex-direction: column;">
+                <div class="card-body">
+                    <div class="alert alert-error">
+                        <i class="bi bi-exclamation-circle-fill"></i>
+                        <div>Both text fields are empty.</div>
+                    </div>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    saveToHistory('Text Diff', truncateString(textA, 20) + ' vs ' + truncateString(textB, 20));
+
+    const diffLines = computeDiff(textA, textB);
+    let added = 0, removed = 0;
+    diffLines.forEach(l => {
+        if (l.type === 'add') added++;
+        else if (l.type === 'del') removed++;
+    });
+
+    const diffHTML = diffLines.map(line => {
+        const prefix = line.type === 'add' ? '+' : line.type === 'del' ? '-' : ' ';
+        const bgStyle = line.type === 'add'
+            ? 'background: color-mix(in srgb, var(--success) 8%, transparent);'
+            : line.type === 'del'
+            ? 'background: color-mix(in srgb, var(--danger) 8%, transparent);'
+            : '';
+        return `<div class="diff-line ${line.type}" style="padding: 1px 6px; white-space: pre-wrap; ${bgStyle}">${prefix}${renderDiffLine(line.content)}</div>`;
+    }).join('');
+
+    outputDiv.innerHTML = `
+        <div class="card glass animate-fade-in" style="flex: 1; display: flex; flex-direction: column;">
+            <div class="card-header flex justify-between items-center">
+                <h4>Text Diff Result</h4>
+                <div class="card-actions">
+                    <span class="badge badge-accent">+${added} / -${removed}</span>
+                </div>
+            </div>
+            <div class="card-body" style="flex: 1; display: flex; flex-direction: column;">
+                <div class="diff-stats" style="display: flex; gap: 12px; margin-bottom: 12px;">
+                    <span class="badge badge-success" style="background: color-mix(in srgb, var(--success) 15%, transparent); color: var(--success);">+${added} added</span>
+                    <span class="badge badge-error" style="background: color-mix(in srgb, var(--danger) 15%, transparent); color: var(--danger);">-${removed} removed</span>
+                </div>
+                <div class="result-box" style="flex: 1;">
+                    <div class="diff-output" id="diff-result-text" style="font-family: var(--font-mono); font-size: 12px; line-height: 1.4;">
+                        ${diffHTML}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 function clearDiff() {
     document.getElementById('diff-text-a').value = '';
     document.getElementById('diff-text-b').value = '';

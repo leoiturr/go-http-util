@@ -876,11 +876,7 @@ Invalid: not-an-email</textarea>
                                 <p>Compare two text blocks and inspect line-by-line differences.</p>
                             </div>
                             <div class="card-body" style="flex: 1; display: flex; flex-direction: column;">
-                                <form id="diff-form" hx-post="/api/htmx/diff/text"
-                                      hx-target="#diff-output"
-                                      hx-indicator="#diff-loader"
-                                      onsubmit="saveToHistory('Text Diff', truncateString(document.getElementById('diff-text-a').value, 20) + ' vs ' + truncateString(document.getElementById('diff-text-b').value, 20))"
-                                      style="flex: 1; display: flex; flex-direction: column;">
+                                <form onsubmit="runTextDiff(); return false;" style="flex: 1; display: flex; flex-direction: column;">
                                     <div class="grid grid-cols-2 gap-4" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; flex: 1;">
                                         <div class="form-group" style="margin-bottom: 0; display: flex; flex-direction: column;">
                                             <label for="diff-text-a">Text A (Original)</label>
@@ -905,7 +901,6 @@ line 5 added</textarea>
                                         <button type="button" class="btn btn-secondary" onclick="clearDiff()">
                                             <i class="bi bi-trash3"></i> Clear
                                         </button>
-                                        <div id="diff-loader" class="htmx-indicator loader"></div>
                                     </div>
                                 </form>
                             </div>
@@ -1621,37 +1616,4 @@ line 5 added</textarea>
 {{ end }}
 
 
-{{ define "diff-result" }}
-<div class="card glass animate-fade-in" style="flex: 1; display: flex; flex-direction: column;">
-    <div class="card-header flex justify-between items-center">
-        <h4>Text Diff Result</h4>
-        <div class="card-actions">
-            {{ if not .Error }}
-            <span class="badge badge-accent">+{{ .LinesAdded }} / -{{ .LinesRemoved }}</span>
-            {{ end }}
-        </div>
-    </div>
-    <div class="card-body" style="flex: 1; display: flex; flex-direction: column;">
-        {{ if .Error }}
-        <div class="alert alert-error">
-            <i class="bi bi-exclamation-circle-fill"></i>
-            <div>{{ .Error }}</div>
-        </div>
-        {{ else }}
-        <div class="diff-stats" style="display: flex; gap: 12px; margin-bottom: 12px;">
-            <span class="badge badge-success" style="background: color-mix(in srgb, var(--success) 15%, transparent); color: var(--success);">+{{ .LinesAdded }} added</span>
-            <span class="badge badge-error" style="background: color-mix(in srgb, var(--danger) 15%, transparent); color: var(--danger);">-{{ .LinesRemoved }} removed</span>
-        </div>
-        <div class="result-box" style="flex: 1;">
-            <div class="diff-output" id="diff-result-text" style="font-family: var(--font-mono); font-size: 12px; line-height: 1.4;">
-                {{ range $line := .Diff.Lines }}
-                <div class="diff-line {{ $line.Type }}" style="padding: 1px 6px; white-space: pre-wrap; {{ if eq $line.Type "add" }}background: color-mix(in srgb, var(--success) 8%, transparent);{{ else if eq $line.Type "del" }}background: color-mix(in srgb, var(--danger) 8%, transparent);{{ end }}">
-                    {{ if eq $line.Type "add" }}+{{ else if eq $line.Type "del" }}-{{ else }} {{ end }}{{ $line.Content }}
-                </div>
-                {{ end }}
-            </div>
-        </div>
-        {{ end }}
-    </div>
-</div>
-{{ end }}
+

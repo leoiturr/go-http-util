@@ -19,6 +19,14 @@ type DiffLine struct {
 	Content string `json:"content"`
 	LineA   int    `json:"line_a,omitempty"`
 	LineB   int    `json:"line_b,omitempty"`
+	// Segments contains character-level diff segments for modified lines
+	Segments []DiffSegment `json:"segments,omitempty"`
+}
+
+// DiffSegment represents a character-level diff segment
+type DiffSegment struct {
+	Type    string `json:"type"` // "same", "add", "del"
+	Content string `json:"content"`
 }
 
 // DiffResult contains the computed diff between two text blocks
@@ -26,6 +34,79 @@ type DiffResult struct {
 	Lines        []DiffLine `json:"lines"`
 	LinesAdded   int        `json:"lines_added"`
 	LinesRemoved int        `json:"lines_removed"`
+}
+
+// computeCharDiff compares two strings character by character and returns segments
+func computeCharDiff(a, b string) ([]DiffSegment, []DiffSegment) {
+	// Simple character-level LCS
+	runesA := []rune(a)
+	runesB := []rune(b)
+	m, n := len(runesA), len(runesB)
+
+	// LCS table
+	dp := make([][]int, m+1)
+	for i := range dp {
+		dp[i] = make([]int, n+1)
+	}
+
+	for i := 1; i <= m; i++ {
+		for j := 1; j <= n; j++ {
+			if runesA[i-1] == runesB[j-1] {
+				dp[i][j] = dp[i-1][j-1] + 1
+			} else if dp[i-1][j] >= dp[i][j-1] {
+				dp[i][j] = dp[i-1][j]
+			} else {
+				dp[i][j] = dp[i][j-1]
+			}
+		}
+	}
+
+	// Backtrack
+	var segsA, segsB []DiffSegment
+	i, j := m, n
+	for i > 0 || j > 0 {
+		if i > 0 && j > 0 && runesA[i-1] == runesB[j-1] {
+			segsA = append(segsA, DiffSegment{Type: "same", Content: string(runesA[i-1])})
+			segsB = append(segsB, DiffSegment{Type: "same", Content: string(runesB[j-1])})
+			i--
+			j--
+		} else if j > 0 && (i == 0 || dp[i][j-1] >= dp[i-1][j]) {
+			segsB = append(segsB, DiffSegment{Type: "add", Content: string(runesB[j-1])})
+			j--
+		} else if i > 0 {
+			segsA = append(segsA, DiffSegment{Type: "del", Content: string(runesA[i-1])})
+			i--
+		}
+	}
+
+	// Reverse
+	for left, right := 0, len(segsA)-1; left < right; left, right = left+1, right-1 {
+		segsA[left], segsA[right] = segsA[right], segsA[left]
+	}
+	for left, right := 0, len(segsB)-1; left < right; left, right = left+1, right-1 {
+		segsB[left], segsB[right] = segsB[right], segsB[left]
+	}
+
+	return segsA, segsB
+}
+
+// mergeSegments merges consecutive segments of the same type
+func mergeSegments(segs []DiffSegment) []DiffSegment {
+	if len(segs) == 0 {
+		return segs
+	}
+	var merged []DiffSegment
+	current := segs[0]
+	for i := 1; i < len(segs); i++ {
+		if segs[i].Type == current.Type {
+			current.Content += segs[i].Content
+		} else {
+			merged = append(merged, current)
+			current = segs[i]
+		}
+	}
+	merged = append(merged, current)
+	return merged
 }
 
 // ComputeDiff calculates a line-by-line diff using LCS
@@ -93,6 +174,15 @@ func ComputeDiff(textA, textB string) DiffResult {
 	// Reverse to correct order
 	for left, right := 0, len(diffLines)-1; left < right; left, right = left+1, right-1 {
 		diffLines[left], diffLines[right] = diffLines[right], diffLines[left]
+	}
+
+	// Compute character-level diffs for adjacent del+add pairs
+	for idx := 0; idx < len(diffLines)-1; idx++ {
+		if diffLines[idx].Type == "del" && diffLines[idx+1].Type == "add" {
+			segsA, segsB := computeCharDiff(diffLines[idx].Content, diffLines[idx+1].Content)
+			diffLines[idx].Segments = mergeSegments(segsA)
+			diffLines[idx+1].Segments = mergeSegments(segsB)
+		}
 	}
 
 	added, removed := 0, 0

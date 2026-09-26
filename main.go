@@ -49,6 +49,9 @@ func main() {
 		"add": func(a, b int) int {
 			return a + b
 		},
+		"replace": func(old, new, s string) string {
+			return strings.ReplaceAll(s, old, new)
+		},
 	})
 
 	// Load templates
