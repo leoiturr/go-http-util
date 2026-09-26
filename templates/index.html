@@ -870,27 +870,28 @@ Invalid: not-an-email</textarea>
                 <!-- TEXT DIFF / COMPARE MODULE -->
                 <section id="module-diff" class="tab-module">
                     <div class="grid grid-cols-2">
-                        <div class="card glass">
+                        <div class="card glass" style="display: flex; flex-direction: column;">
                             <div class="card-header">
                                 <h3>Text Diff Settings</h3>
                                 <p>Compare two text blocks and inspect line-by-line differences.</p>
                             </div>
-                            <div class="card-body">
+                            <div class="card-body" style="flex: 1; display: flex; flex-direction: column;">
                                 <form id="diff-form" hx-post="/api/htmx/diff/text"
                                       hx-target="#diff-output"
                                       hx-indicator="#diff-loader"
-                                      onsubmit="saveToHistory('Text Diff', truncateString(document.getElementById('diff-text-a').value, 20) + ' vs ' + truncateString(document.getElementById('diff-text-b').value, 20))">
-                                    <div class="grid grid-cols-2 gap-4" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                                        <div class="form-group" style="margin-bottom: 0;">
+                                      onsubmit="saveToHistory('Text Diff', truncateString(document.getElementById('diff-text-a').value, 20) + ' vs ' + truncateString(document.getElementById('diff-text-b').value, 20))"
+                                      style="flex: 1; display: flex; flex-direction: column;">
+                                    <div class="grid grid-cols-2 gap-4" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; flex: 1;">
+                                        <div class="form-group" style="margin-bottom: 0; display: flex; flex-direction: column;">
                                             <label for="diff-text-a">Text A (Original)</label>
-                                            <textarea id="diff-text-a" name="text_a" placeholder="Original text..." rows="8" spellcheck="false">line 1
+                                            <textarea id="diff-text-a" name="text_a" placeholder="Original text..." spellcheck="false" style="flex: 1; min-height: 240px; resize: none;">line 1
 line 2
 line 3
 line 4</textarea>
                                         </div>
-                                        <div class="form-group" style="margin-bottom: 0;">
+                                        <div class="form-group" style="margin-bottom: 0; display: flex; flex-direction: column;">
                                             <label for="diff-text-b">Text B (Modified)</label>
-                                            <textarea id="diff-text-b" name="text_b" placeholder="Modified text..." rows="8" spellcheck="false">line 1
+                                            <textarea id="diff-text-b" name="text_b" placeholder="Modified text..." spellcheck="false" style="flex: 1; min-height: 240px; resize: none;">line 1
 line 2 modified
 line 3
 line 4
@@ -910,8 +911,8 @@ line 5 added</textarea>
                             </div>
                         </div>
 
-                        <div id="diff-output" class="output-wrapper">
-                            <div class="card glass card-placeholder">
+                        <div id="diff-output" class="output-wrapper" style="display: flex; flex-direction: column;">
+                            <div class="card glass card-placeholder" style="flex: 1; display: flex; flex-direction: column;">
                                 <div class="placeholder-content">
                                     <i class="bi bi-file-diff placeholder-icon"></i>
                                     <p>Enter two text blocks and click "Compare Text" to view differences.</p>
@@ -1621,7 +1622,7 @@ line 5 added</textarea>
 
 
 {{ define "diff-result" }}
-<div class="card glass mt-4 animate-fade-in">
+<div class="card glass animate-fade-in" style="flex: 1; display: flex; flex-direction: column;">
     <div class="card-header flex justify-between items-center">
         <h4>Text Diff Result</h4>
         <div class="card-actions">
@@ -1630,7 +1631,7 @@ line 5 added</textarea>
             {{ end }}
         </div>
     </div>
-    <div class="card-body">
+    <div class="card-body" style="flex: 1; display: flex; flex-direction: column;">
         {{ if .Error }}
         <div class="alert alert-error">
             <i class="bi bi-exclamation-circle-fill"></i>
@@ -1641,10 +1642,10 @@ line 5 added</textarea>
             <span class="badge badge-success" style="background: color-mix(in srgb, var(--success) 15%, transparent); color: var(--success);">+{{ .LinesAdded }} added</span>
             <span class="badge badge-error" style="background: color-mix(in srgb, var(--danger) 15%, transparent); color: var(--danger);">-{{ .LinesRemoved }} removed</span>
         </div>
-        <div class="result-box">
-            <div class="diff-output" id="diff-result-text" style="font-family: var(--font-mono); font-size: 13px; line-height: 1.6;">
+        <div class="result-box" style="flex: 1;">
+            <div class="diff-output" id="diff-result-text" style="font-family: var(--font-mono); font-size: 12px; line-height: 1.4;">
                 {{ range $line := .Diff.Lines }}
-                <div class="diff-line {{ $line.Type }}" style="padding: 2px 8px; white-space: pre-wrap; {{ if eq $line.Type "add" }}background: color-mix(in srgb, var(--success) 8%, transparent);{{ else if eq $line.Type "del" }}background: color-mix(in srgb, var(--danger) 8%, transparent);{{ end }}">
+                <div class="diff-line {{ $line.Type }}" style="padding: 1px 6px; white-space: pre-wrap; {{ if eq $line.Type "add" }}background: color-mix(in srgb, var(--success) 8%, transparent);{{ else if eq $line.Type "del" }}background: color-mix(in srgb, var(--danger) 8%, transparent);{{ end }}">
                     {{ if eq $line.Type "add" }}+{{ else if eq $line.Type "del" }}-{{ else }} {{ end }}{{ $line.Content }}
                 </div>
                 {{ end }}

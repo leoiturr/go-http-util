@@ -2018,6 +2018,9 @@ input[type="range"]::-moz-range-thumb {
 /* Diff output styling */
 .diff-line {
     border-radius: var(--radius-sm);
+    padding: 1px 6px;
+    font-size: 12px;
+    line-height: 1.4;
 }
 
 .diff-line.add {
@@ -2030,6 +2033,11 @@ input[type="range"]::-moz-range-thumb {
 
 .diff-line.same {
     color: var(--text-muted);
+}
+
+.diff-output {
+    max-height: 340px;
+    overflow-y: auto;
 }
 
 .badge-error {

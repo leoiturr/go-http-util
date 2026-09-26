@@ -74,6 +74,10 @@ This document outlines the core architecture, layout design, and implementation 
 - Regex requests and responses are bounded to protect the workbench: patterns are limited to 4 KB, test text to 200 KB, and returned match details to the first 100 matches. Match positions are documented as UTF-8 byte offsets.
 - Regex pattern and test-text editors reuse nested rounded paper frames so code-like content remains visually separate from the settings card. On narrow screens, flag and capture grids collapse to one column.
 
+### Additional Utilities
+- **HTML Entity Encoder / Decoder** lives in the **Transform** group. It converts special characters to and from HTML entity equivalents (`<` to `&lt;`, `&` to `&amp;`, etc.) using Go's stdlib `html` package.
+- **Text Diff / Compare** lives in the **Inspect & Format** group. It computes a line-by-line diff between two text blocks using an LCS (Longest Common Subsequence) algorithm, returning color-coded results with added/removed line statistics.
+
 ### Mobile-First Responsive Design
 - **Mobile-First CSS**: Designed base CSS rules to fit mobile screens (vertical stacked layouts, full-width sidebars serving as top menus, scrollable nav menus, and compact card/grid spacing).
 - **Desktop Enhancements**: Uses `min-width: 1025px` media queries to expand the layout into side-by-side splits. The sidebar and main panel are inset from the viewport, separated by a 12px gutter, and each uses `--radius-lg` so their outer corners stay rounded. The sticky top bar bleeds through the main panel's 32px side padding (`margin: 0 -32px` with matching padding) so its background reaches the panel's rounded corners while content stays aligned with the cards below.
