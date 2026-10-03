@@ -50,6 +50,20 @@ A lightweight, high-performance web application built with **Go** and the **Gin 
 ### Regex Playground
 - **Test Pattern**: `POST /api/v1/regex/test`
 
+## Deployment
+
+Deployments are **git-push driven**: push to the `main` branch and the connected host rebuilds the container from `Dockerfile` and redeploys.
+
+- The app binds the port from the `PORT` environment variable and falls back to `8080`.
+- The container listens on port `8080` by default; set the platform's target port to `8080` (or inject `PORT`).
+- A health check endpoint is available at `/health`.
+
+## Webhook Tester
+
+- Generated webhook URLs capture incoming requests **in memory only**.
+- Captured requests are **reset on every deploy/restart** and expire after an idle TTL (default 24h, configurable via `WEBHOOK_TTL`).
+- Global retention caps (`WEBHOOK_MAX_SESSIONS`, `WEBHOOK_MAX_BODY_MB`) keep the store bounded. See `AGENTS.md` for the full retention rules.
+
 ## License
 
 This project is open-source and available under the [MIT License](LICENSE).
