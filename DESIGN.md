@@ -31,6 +31,14 @@ This document outlines the core architecture, layout design, and implementation 
   - `RATE_LIMIT_BURST` (Burst capacity, default `4.0`)
 - **HTTP Response**: Returns `429 Too Many Requests`.
 
+### Webhook Tester Store Lifecycle
+- **Storage**: In-memory only, keyed by generated webhook ID (`handlers/webhook.go`). No persistence or volumes — a deploy/restart clears all captured requests.
+- **Bounded Retention**: The store must never grow without limit on always-on hosts. Each session tracks `CreatedAt`/`LastSeen`, refreshed on inbound webhook requests and on UI polling.
+  - **Idle TTL**: sessions untouched for `WEBHOOK_TTL` (default `24h`) are evicted.
+  - **Global caps**: at most `WEBHOOK_MAX_SESSIONS` (default `500`) sessions and `WEBHOOK_MAX_BODY_MB` (default `10` MiB) of stored body bytes; over-cap evicts least-recently-seen first.
+  - **Sweeper**: a background goroutine in `main.go` runs eviction every 10 minutes.
+- **Expired UX**: polling an unknown/expired ID returns the `webhook_expired` fragment, which the client detects to stop its HTMX polling loop (rather than polling a dead session forever).
+
 ---
 
 ## 2. Frontend & UI Design
