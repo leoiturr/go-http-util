@@ -26,15 +26,50 @@ type WebhookRequest struct {
 	Delay       string
 }
 
-// WebhookStore holds the recent requests for each generated webhook ID
-type WebhookStore struct {
-	mu       sync.RWMutex
-	requests map[string][]WebhookRequest
+// webhookSession holds the recent requests (and liveness metadata) for a
+// single generated webhook ID.
+type webhookSession struct {
+	Requests  []WebhookRequest
+	CreatedAt time.Time
+	LastSeen  time.Time
 }
 
-var webhookStore = &WebhookStore{
-	requests: make(map[string][]WebhookRequest),
+// WebhookStore holds the recent requests for each generated webhook ID. The
+// store is intentionally bounded: sessions are pruned by idle time-to-live and
+// by global capacity caps so that an always-on deployment cannot grow memory
+// without limit.
+type WebhookStore struct {
+	mu           sync.RWMutex
+	requests     map[string]*webhookSession
+	ttl          time.Duration
+	maxSessions  int
+	maxBodyBytes int64
+	now          func() time.Time
 }
+
+const (
+	defaultWebhookTTL          = 24 * time.Hour
+	defaultMaxWebhookSessions  = 500
+	defaultMaxWebhookBodyBytes = 10 << 20 // 10 MiB of stored bodies across all sessions
+)
+
+// NewWebhookStore creates a bounded webhook store. The clock is injectable via
+// the returned store's now field for deterministic tests.
+func NewWebhookStore(ttl time.Duration, maxSessions int, maxBodyBytes int64) *WebhookStore {
+	return &WebhookStore{
+		requests:     make(map[string]*webhookSession),
+		ttl:          ttl,
+		maxSessions:  maxSessions,
+		maxBodyBytes: maxBodyBytes,
+		now:          time.Now,
+	}
+}
+
+var webhookStore = NewWebhookStore(
+	defaultWebhookTTL,
+	defaultMaxWebhookSessions,
+	defaultMaxWebhookBodyBytes,
+)
 
 const maxRequestsPerWebhook = 50
 
@@ -45,6 +80,124 @@ func generateWebhookID() string {
 	b := make([]byte, 8) // 16 characters
 	rand.Read(b)
 	return hex.EncodeToString(b)
+}
+
+// register creates an empty session for a freshly generated webhook ID.
+func (s *WebhookStore) register(id string) {
+	now := s.now()
+	s.mu.Lock()
+	s.requests[id] = &webhookSession{
+		Requests:  []WebhookRequest{},
+		CreatedAt: now,
+		LastSeen:  now,
+	}
+	s.mu.Unlock()
+}
+
+// record prepends a request to the session for id, creating the session on
+// first use and refreshing its LastSeen timestamp.
+func (s *WebhookStore) record(id string, req WebhookRequest) {
+	now := s.now()
+	s.mu.Lock()
+	sess, exists := s.requests[id]
+	if !exists {
+		sess = &webhookSession{
+			Requests:  []WebhookRequest{},
+			CreatedAt: now,
+		}
+	}
+	sess.LastSeen = now
+	sess.Requests = append([]WebhookRequest{req}, sess.Requests...)
+	if len(sess.Requests) > maxRequestsPerWebhook {
+		sess.Requests = sess.Requests[:maxRequestsPerWebhook]
+	}
+	s.requests[id] = sess
+	s.mu.Unlock()
+}
+
+// get returns a copy of the stored requests for id, refreshing LastSeen so
+// that an actively polled session does not expire. The second return value
+// reports whether the session still exists.
+func (s *WebhookStore) get(id string) ([]WebhookRequest, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	sess, exists := s.requests[id]
+	if !exists {
+		return nil, false
+	}
+	sess.LastSeen = s.now()
+	return append([]WebhookRequest(nil), sess.Requests...), true
+}
+
+// evict removes sessions that exceed the idle TTL, then trims the oldest
+// sessions until the session-count and stored-body caps are satisfied.
+func (s *WebhookStore) evict() {
+	now := s.now()
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	for id, sess := range s.requests {
+		if now.Sub(sess.LastSeen) > s.ttl {
+			delete(s.requests, id)
+		}
+	}
+
+	for len(s.requests) > s.maxSessions {
+		delete(s.requests, s.oldestIDLocked())
+	}
+
+	for s.totalBodyBytesLocked() > s.maxBodyBytes {
+		delete(s.requests, s.oldestIDLocked())
+	}
+}
+
+// oldestIDLocked returns the ID of the session least recently seen. Callers
+// must hold the write lock.
+func (s *WebhookStore) oldestIDLocked() string {
+	var oldestID string
+	var oldest time.Time
+	for id, sess := range s.requests {
+		if oldestID == "" || sess.LastSeen.Before(oldest) {
+			oldestID = id
+			oldest = sess.LastSeen
+		}
+	}
+	return oldestID
+}
+
+// totalBodyBytesLocked sums the stored request body sizes. Callers must hold
+// the write lock.
+func (s *WebhookStore) totalBodyBytesLocked() int64 {
+	var total int64
+	for _, sess := range s.requests {
+		for _, req := range sess.Requests {
+			total += int64(len(req.Body))
+		}
+	}
+	return total
+}
+
+// ConfigureWebhookStore overrides the global store's retention limits. Values
+// of zero or less leave the existing limit unchanged.
+func ConfigureWebhookStore(ttl time.Duration, maxSessions int, maxBodyBytes int64) {
+	webhookStore.mu.Lock()
+	if ttl > 0 {
+		webhookStore.ttl = ttl
+	}
+	if maxSessions > 0 {
+		webhookStore.maxSessions = maxSessions
+	}
+	if maxBodyBytes > 0 {
+		webhookStore.maxBodyBytes = maxBodyBytes
+	}
+	webhookStore.mu.Unlock()
+}
+
+// EvictWebhooks prunes expired or over-capacity webhook sessions. Intended to
+// be called periodically from a background goroutine so that the in-memory
+// store stays bounded on long-running (always-on) deployments.
+func EvictWebhooks() {
+	webhookStore.evict()
 }
 
 // HandleWebhookReceive handles any request hitting /w/:id
@@ -98,18 +251,7 @@ func HandleWebhookReceive(c *gin.Context) {
 		Delay:       delayDuration.String(),
 	}
 
-	webhookStore.mu.Lock()
-	reqs, exists := webhookStore.requests[id]
-	if !exists {
-		reqs = []WebhookRequest{}
-	}
-	// Prepend to list
-	reqs = append([]WebhookRequest{reqRecord}, reqs...)
-	if len(reqs) > maxRequestsPerWebhook {
-		reqs = reqs[:maxRequestsPerWebhook]
-	}
-	webhookStore.requests[id] = reqs
-	webhookStore.mu.Unlock()
+	webhookStore.record(id, reqRecord)
 
 	// Apply delay
 	if delayDuration > 0 {
@@ -124,9 +266,7 @@ func HandleWebhookReceive(c *gin.Context) {
 func HTMXGenerateWebhook(c *gin.Context) {
 	id := generateWebhookID()
 
-	webhookStore.mu.Lock()
-	webhookStore.requests[id] = []WebhookRequest{}
-	webhookStore.mu.Unlock()
+	webhookStore.register(id)
 
 	host := c.Request.Host
 	scheme := "http"
@@ -146,11 +286,14 @@ func HTMXGenerateWebhook(c *gin.Context) {
 func HTMXGetWebhookRequests(c *gin.Context) {
 	id := c.Param("id")
 
-	webhookStore.mu.RLock()
-	reqs, exists := webhookStore.requests[id]
-	webhookStore.mu.RUnlock()
+	reqs, exists := webhookStore.get(id)
 
-	if !exists || len(reqs) == 0 {
+	if !exists {
+		c.HTML(http.StatusOK, "webhook_expired", gin.H{})
+		return
+	}
+
+	if len(reqs) == 0 {
 		c.String(http.StatusOK, `<div class="text-gray-400 text-sm italic py-4">No requests yet... Waiting for incoming webhooks.</div>`)
 		return
 	}

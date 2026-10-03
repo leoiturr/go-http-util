@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 
 	"gin-example/handlers"
 	"gin-example/middleware"
@@ -95,6 +96,38 @@ func main() {
 	}
 
 	limiter := middleware.NewRateLimiter(rps, burst)
+
+	// Configure webhook store retention from environment variables with safe
+	// defaults. This keeps the in-memory webhook sessions bounded on always-on
+	// deployments (e.g. Northflank) where restarts never clear the store.
+	webhookTTL := 24 * time.Hour
+	if ttlEnv := os.Getenv("WEBHOOK_TTL"); ttlEnv != "" {
+		if d, err := time.ParseDuration(ttlEnv); err == nil && d > 0 {
+			webhookTTL = d
+		}
+	}
+	webhookMaxSessions := 0
+	if sessionsEnv := os.Getenv("WEBHOOK_MAX_SESSIONS"); sessionsEnv != "" {
+		if n, err := strconv.Atoi(sessionsEnv); err == nil && n > 0 {
+			webhookMaxSessions = n
+		}
+	}
+	var webhookMaxBodyBytes int64
+	if bodyEnv := os.Getenv("WEBHOOK_MAX_BODY_MB"); bodyEnv != "" {
+		if n, err := strconv.Atoi(bodyEnv); err == nil && n > 0 {
+			webhookMaxBodyBytes = int64(n) << 20
+		}
+	}
+	handlers.ConfigureWebhookStore(webhookTTL, webhookMaxSessions, webhookMaxBodyBytes)
+
+	// Background sweeper prunes expired or over-capacity webhook sessions.
+	go func() {
+		ticker := time.NewTicker(10 * time.Minute)
+		defer ticker.Stop()
+		for range ticker.C {
+			handlers.EvictWebhooks()
+		}
+	}()
 
 	// HTMX API Route Group with Rate Limiting
 	htmxGroup := r.Group("/api/htmx")

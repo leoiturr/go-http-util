@@ -65,6 +65,12 @@
                         });
                     } catch (e) {}
                 }
+
+                // Stop polling once the session has expired.
+                if (evt.detail.target.querySelector('.webhook-expired')) {
+                    evt.detail.target.removeAttribute('hx-trigger');
+                    evt.detail.target.removeAttribute('hx-get');
+                }
             }
         });
     }
@@ -100,5 +106,15 @@
         </details>
     </div>
     {{ end }}
+</div>
+{{ end }}
+
+{{ define "webhook_expired" }}
+<div class="webhook-expired alert alert-warning" style="display: flex; align-items: center; gap: 10px;">
+    <i class="bi bi-clock-history"></i>
+    <div>
+        <strong>This webhook session has expired.</strong>
+        <div style="font-size: 0.9em;">Generate a new webhook URL to continue receiving requests.</div>
+    </div>
 </div>
 {{ end }}
