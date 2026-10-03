@@ -1,0 +1,18 @@
+# Docker/Podman build context ignore. Keeps local binaries and repo metadata
+# out of the container image build context on Render, Northflank, Railway, etc.
+.git
+.gitignore
+.gitattributes
+.editorconfig
+.containerignore
+devforge
+devutils
+devutils_bin
+server
+*.exe
+*.test
+*.out
+test_qr.png
+AGENTS.md
+DESIGN.md
+README.md
