@@ -74,6 +74,7 @@ This document outlines the core architecture, layout design, and implementation 
   - Monospace: **Comic Shanns** (Comic Sans-inspired monospace) — used for code, results, and editors; served via `@font-face` from jsDelivr (MIT licensed, not available on Bunny Fonts).
 - **Glow & Lift**: Cards use soft drop shadows with restrained depth; the vermilion accent glows only on primary buttons, the active nav item, focus rings, and the brand logo.
 - **Inset Code Surfaces**: Long-form inputs such as the JWT editor use a nested paper frame. The outer frame carries the border, focus ring, rounded `--radius-md` corners, and a small padding gutter; the inner editor uses `--radius-sm` and clips overflow so long tokens cannot create square corners. JWT settings cards keep responsive inset padding and clip their child surfaces to `--radius-lg`.
+- **Sidebar Footer Deployment Links**: The desktop-only sidebar footer stacks the status dot, a row of live-instance links (the Northflank deployment and the `go-http-util` Render service), and the version credits line. Each link is an inline-flex Bootstrap Icon plus label in `--text-muted`, with no underline, a `--radius-sm` hit area, vermilion text plus a `color-mix` accent wash on hover, and a `--color-primary` `:focus-visible` outline. Both open in a new tab with `rel="noopener noreferrer"`; URLs are static template markup, not environment-driven.
 
 ### Utility Curation
 - New utilities should be focused, local-first where privacy matters, and small enough to complete in one workbench view.

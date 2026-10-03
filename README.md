@@ -57,6 +57,7 @@ Deployments are **git-push driven**: push to the `main` branch and the connected
 - The app binds the port from the `PORT` environment variable and falls back to `8080`.
 - The container listens on port `8080` by default; set the platform's target port to `8080` (or inject `PORT`).
 - A health check endpoint is available at `/health`.
+- Live instances are linked from the sidebar footer on desktop: the Northflank deployment at <https://p01--devutils--p5rzzdynfjt7.code.run/> and the companion `go-http-util` service at <https://go-http-util.onrender.com>.
 
 ## Webhook Tester
 
