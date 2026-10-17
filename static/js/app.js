@@ -106,9 +106,10 @@ function boot() {
     }
 
     // Upgrade any read-only result editors inside swapped-in fragments and
-    // restore the URL parser's reconstructed value.
+    // restore the URL parser's reconstructed value. HTMX 4 dispatches
+    // htmx:after:settle on the swapped element, so evt.target is it.
     document.addEventListener('htmx:after:settle', (evt) => {
-        const target = evt.detail && evt.detail.target ? evt.detail.target : document;
+        const target = evt.target instanceof Element ? evt.target : document;
         initResultEditors(target);
         if (target.querySelector && target.querySelector('#reconstructed-url')) {
             tools.rebuildURL();
