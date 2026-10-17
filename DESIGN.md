@@ -20,7 +20,7 @@ This document outlines the core architecture, layout design, and implementation 
   - `/api/v1/*`: Versioned JSON REST API endpoint group supporting standard REST clients.
 - **API Documentation & Specs**:
   - The OpenAPI 3.0.3 specification is defined statically in `static/openapi.json`.
-  - An interactive REST API docs site is hosted at `/docs` rendering Swagger UI customized to match the dashboard's dark-theme aesthetic.
+  - An interactive REST API docs site is hosted at `/docs` rendering **Scalar API Reference** (deepSpace theme) and following the workbench theme preference.
 
 ### API Rate Limiting
 - **Implementation**: Located in `middleware/ratelimit.go`. Utilizes a custom, in-memory **Token Bucket** algorithm.
@@ -48,16 +48,32 @@ This document outlines the core architecture, layout design, and implementation 
 - Navigation utilizes HTML5 History API (`history.pushState` and `history.replaceState`) along with URL hashes (e.g. `#guid`, `#qrcode`).
 - Supports the browser's **Back** and **Forward** buttons using the `popstate` event listener.
 - Supports **Deep Linking** by reading the URL hash on initial page load.
+- Tab switches are wrapped in the **View Transitions API** (`document.startViewTransition`) when supported.
+- Inactive `.tab-module` panels are marked **`inert`** so they leave the tab order and accessibility tree; the active nav item receives `aria-current="page"`.
+
+### Frontend Architecture (ES Modules)
+- `static/js/app.js` is the module entry (`<script type="module">`). It imports feature modules and boots the app; there is **no build step**.
+- Modules live under `static/js/`:
+  - `core/` — `storage`, `utils`, `ui` (toasts + clipboard), `theme`, `nav`, `delegate`, `history`, `editors`.
+  - `tools.js` — client-side Base64, JSON, URL, HTML entity, diff, JWT and epoch tools.
+  - `features/` — `regex` (engine toggle + Web Worker) and `webhook` (poll-state preservation).
+  - `components.js` — custom elements.
+- **Event delegation**: every interactive control declares `data-action="name"` (plus `data-*` arguments). One listener per event type on `document` dispatches through a registry, so server-rendered HTMX fragments work immediately after a swap without inline handlers or re-binding. This also allows a stricter CSP.
+- **Custom elements**:
+  - `<copy-button target|select|within|mode>` standardises every copy affordance, including HTMX fragments; it degrades into a native `<button>` and raises the global toast event.
+  - `<toast-stack>` hosts transient `<output>` notifications and listens for `devutils:toast`.
+- **`<template>` + `cloneNode`**: repeated client-rendered markup (placeholder/error/result cards, history items, regex report pieces) lives in `<template>` elements and is cloned. The regex report templates mirror the `regex-result` Go fragment so both engines render identical markup.
 
 ### HTMX Integration & Error Handling
 - Dynamic actions (generating GUIDs, encoding/decoding Base64, creating QR codes, and testing regular expressions) are triggered via `hx-post`.
-- Non-2xx status codes (like the rate limiter's `429`) are caught globally in `app.js` using the `htmx:responseError` listener and shown as clean toast notifications.
+- Non-2xx status codes (like the rate limiter's `429`) are caught globally in `app.js` using the `htmx:response:error` listener and shown as clean toast notifications.
+- Result-editor upgrades run on `htmx:after:settle`; the URL parser's reconstructed value is rebuilt there as well.
 
 ### Visual Styling & Theme
 - **Design System**: **Warm Paper Workbench** — warm muted surfaces, flat paper-card components with hairline borders, a subtle SVG grain texture layered over soft ambient washes, and a single bold **vermilion** accent used sparingly for actions, active navigation, and highlights.
-- **Dual Theme**: Dark mode (warm charcoal-walnut) is the default; light mode (`[data-theme="light"]`) is a cream paper variant. A toggle button in the top bar switches themes. The preference is persisted in `localStorage` under the key `devutils_theme`. On first visit, the user's system preference (`prefers-color-scheme`) is respected, defaulting to dark if unavailable.
-- **CSS Variables**: All colors are defined as CSS custom properties on `:root` (dark defaults) and overridden via `[data-theme="light"]`. This ensures all components automatically adapt to the active theme. Derived tints use `color-mix(in srgb, var(--token) X%, transparent)` rather than hardcoded channel colors.
-- **Palette**:
+- **Dual Theme**: Dark mode (warm charcoal-walnut) is the default; light mode (`[data-theme="light"]`) is a cream paper variant. A toggle button in the top bar switches themes. The preference is persisted in `localStorage` under the key `devutils_theme`. On first visit, the user's system preference (`prefers-color-scheme`) is respected, defaulting to dark if unavailable. `<meta name="color-scheme">` and the CSS `color-scheme` property keep native controls, pickers and scrollbars in step with the active theme.
+- **CSS Variables**: Colors are declared **once** with the CSS `light-dark(light, dark)` function on `:root`; `:root[data-theme="light"]` only switches `color-scheme: light`. One token block therefore drives both themes. Derived tints use `color-mix(in srgb, var(--token) X%, transparent)` rather than hardcoded channel colors.
+- **Palette** (declared as `light-dark(<light>, <dark>)`; the columns below show the resolved dark and light values):
   | Token | Dark (walnut) | Light (paper) |
   |---|---|---|
   | `--bg-primary` | `#16120f` | `#f5efe3` |
@@ -86,6 +102,22 @@ This document outlines the core architecture, layout design, and implementation 
 ### Additional Utilities
 - **HTML Entity Encoder / Decoder** lives in the **Transform** group. It converts special characters to and from HTML entity equivalents (`<` to `&lt;`, `&` to `&amp;`, etc.) using Go's stdlib `html` package.
 - **Text Diff / Compare** lives in the **Inspect & Format** group. It computes a line-by-line diff between two text blocks using an LCS (Longest Common Subsequence) algorithm, returning color-coded results with added/removed line statistics.
+
+### Modern Platform Features
+- **Popover API**: the history panel is a native `popover` opened via `popovertarget`; it slides in with `@starting-style` + `transition-behavior: allow-discrete` and gets light-dismiss and focus handling from the platform.
+- **`<output>`**: computed values (epoch seconds/millis/UTC/local, live clock, range readout) are `<output>` elements; toasts are `<output>` too (implicit polite live region).
+- **`<details>` / `<summary>`**: advanced tool options (cron, YAML) are native disclosures styled with `.advanced-options`, starting `open` to preserve the previous layout.
+- **Container queries**: cards are `container-type: inline-size`; the regex flag, capture and summary grids respond to the card's own width rather than the viewport.
+- **`prefers-reduced-motion`**: decorative animation (glow drift, logo pulse, tab slide, toasts, loaders) is disabled when the user asks for reduced motion.
+- **`content-visibility`, `scrollbar-gutter`, `overscroll-behavior`** keep long result surfaces cheap to render and free of layout shift.
+- **`Intl.RelativeTimeFormat`** formats epoch/JWT durations.
+- **View Transitions API** animates tab changes; **`inert`** removes hidden panels from keyboard/AT navigation.
+
+### CodeMirror 6 Editors
+- The JSON, YAML and SQL editors plus read-only result viewers use **CodeMirror 6** as ESM, resolved through an import map from esm.sh. Shared `@codemirror/{state,view,language}` and `@lezer/highlight` packages are marked `external` so every module uses a single instance.
+- CM6 is imported **dynamically**: if the CDN is unavailable, the rest of the workbench keeps working and the inputs remain plain textareas.
+- A custom "Warm Paper Workbench" theme and syntax highlighting are built entirely from `var(--token)` colors, so they follow both themes with no hardcoded colors.
+- Every editor mirrors document changes back into its hidden `<textarea>`, so HTMX `hx-include` and the client-side tools always read the current value.
 
 ### Mobile-First Responsive Design
 - **Mobile-First CSS**: Designed base CSS rules to fit mobile screens (vertical stacked layouts, full-width sidebars serving as top menus, scrollable nav menus, and compact card/grid spacing).
