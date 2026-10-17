@@ -114,7 +114,7 @@ This document outlines the core architecture, layout design, and implementation 
 - **View Transitions API** animates tab changes; **`inert`** removes hidden panels from keyboard/AT navigation.
 
 ### CodeMirror 6 Editors
-- The JSON, YAML and SQL editors plus read-only result viewers use **CodeMirror 6** as ESM, resolved through an import map from esm.sh. Shared `@codemirror/{state,view,language}` and `@lezer/highlight` packages are marked `external` so every module uses a single instance.
+- The JSON, YAML and SQL editors plus read-only result viewers use **CodeMirror 6** as ESM, resolved through an import map from esm.sh. Caret ranges (`@6`, `@1`) keep every package on one consistent build set so shared modules stay single instances; only the `codemirror` meta-package is pinned to a fixed 6.x release because esm.sh's `@6` range resolves to a phantom CodeMirror 5 build.
 - CM6 is imported **dynamically**: if the CDN is unavailable, the rest of the workbench keeps working and the inputs remain plain textareas.
 - A custom "Warm Paper Workbench" theme and syntax highlighting are built entirely from `var(--token)` colors, so they follow both themes with no hardcoded colors.
 - Every editor mirrors document changes back into its hidden `<textarea>`, so HTMX `hx-include` and the client-side tools always read the current value.

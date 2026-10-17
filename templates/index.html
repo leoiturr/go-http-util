@@ -35,12 +35,15 @@
     <link rel="stylesheet" href="/static/css/styles.css?v={{ .Version }}">
     <!-- CodeMirror 6 (ESM) resolved through the import map below.
          Caret ranges keep every @codemirror package on one consistent set from
-         esm.sh; mixing pinned versions breaks cross-package exports. -->
-    <link rel="modulepreload" href="https://esm.sh/codemirror@6">
+         esm.sh; mixing pinned versions breaks cross-package exports. The
+         codemirror meta-package is the sole exception: esm.sh resolves its
+         @6 range to a phantom 6.65.7 (CodeMirror 5 code, no EditorView), so
+         it must stay pinned to a real 6.x release. -->
+    <link rel="modulepreload" href="https://esm.sh/codemirror@6.0.2">
     <script type="importmap">
     {
         "imports": {
-            "codemirror": "https://esm.sh/codemirror@6",
+            "codemirror": "https://esm.sh/codemirror@6.0.2",
             "@codemirror/state": "https://esm.sh/@codemirror/state@6",
             "@codemirror/language": "https://esm.sh/@codemirror/language@6",
             "@lezer/highlight": "https://esm.sh/@lezer/highlight@1",
