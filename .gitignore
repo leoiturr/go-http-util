@@ -26,3 +26,6 @@ test_qr.png
 # OS files
 .DS_Store
 Thumbs.db
+
+# Local handoff notes
+TASKS.md
