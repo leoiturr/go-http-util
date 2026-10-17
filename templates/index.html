@@ -33,13 +33,24 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- Custom Vanilla CSS -->
     <link rel="stylesheet" href="/static/css/styles.css?v={{ .Version }}">
-    <!-- CodeMirror 5 Styles & Scripts -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/material-ocean.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/yaml/yaml.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/sql/sql.min.js"></script>
+    <!-- CodeMirror 6 (ESM) resolved through the import map below.
+         Shared packages are marked external so every module uses one
+         instance of @codemirror/state, view, language and @lezer/highlight. -->
+    <link rel="modulepreload" href="https://esm.sh/codemirror@6.0.1?external=@codemirror/state,@codemirror/view,@codemirror/language,@lezer/highlight">
+    <script type="importmap">
+    {
+        "imports": {
+            "@codemirror/state": "https://esm.sh/@codemirror/state@6.5.2",
+            "@codemirror/view": "https://esm.sh/@codemirror/view@6.36.2",
+            "@codemirror/language": "https://esm.sh/@codemirror/language@6.10.8?external=@codemirror/state,@codemirror/view,@lezer/highlight",
+            "@lezer/highlight": "https://esm.sh/@lezer/highlight@1.2.1",
+            "codemirror": "https://esm.sh/codemirror@6.0.1?external=@codemirror/state,@codemirror/view,@codemirror/language,@lezer/highlight",
+            "@codemirror/lang-json": "https://esm.sh/@codemirror/lang-json@6.0.1?external=@codemirror/state,@codemirror/view,@codemirror/language,@lezer/highlight",
+            "@codemirror/lang-yaml": "https://esm.sh/@codemirror/lang-yaml@6.1.1?external=@codemirror/state,@codemirror/view,@codemirror/language,@lezer/highlight",
+            "@codemirror/lang-sql": "https://esm.sh/@codemirror/lang-sql@6.8.0?external=@codemirror/state,@codemirror/view,@codemirror/language,@lezer/highlight"
+        }
+    }
+    </script>
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@4.0.0/dist/htmx.min.js" crossorigin="anonymous"></script>
 </head>
@@ -67,19 +78,19 @@
             <nav class="nav-menu">
                 <div class="nav-group">
                     <span class="nav-group-label">Transform</span>
-                    <button class="nav-item active" onclick="switchTab('base64')">
+                    <button class="nav-item active" data-action="tab" data-tab="base64">
                         <i class="bi bi-code-slash"></i>
                         <span>Base64 Encoder</span>
                     </button>
-                    <button class="nav-item" onclick="switchTab('url')">
+                    <button class="nav-item" data-action="tab" data-tab="url">
                         <i class="bi bi-link-45deg"></i>
                         <span>URL Encoder</span>
                     </button>
-                    <button class="nav-item" onclick="switchTab('html-entity')">
+                    <button class="nav-item" data-action="tab" data-tab="html-entity">
                         <i class="bi bi-code-square"></i>
                         <span>HTML Entities</span>
                     </button>
-                    <button class="nav-item" onclick="switchTab('epoch')">
+                    <button class="nav-item" data-action="tab" data-tab="epoch">
                         <i class="bi bi-clock"></i>
                         <span>Epoch Converter</span>
                     </button>
@@ -87,15 +98,15 @@
 
                 <div class="nav-group">
                     <span class="nav-group-label">Generate</span>
-                    <button class="nav-item" onclick="switchTab('guid')">
+                    <button class="nav-item" data-action="tab" data-tab="guid">
                         <i class="bi bi-fingerprint"></i>
                         <span>GUID Generator</span>
                     </button>
-                    <button class="nav-item" onclick="switchTab('qrcode')">
+                    <button class="nav-item" data-action="tab" data-tab="qrcode">
                         <i class="bi bi-qr-code"></i>
                         <span>QR Code Gen</span>
                     </button>
-                    <button class="nav-item" onclick="switchTab('cron')">
+                    <button class="nav-item" data-action="tab" data-tab="cron">
                         <i class="bi bi-calendar3"></i>
                         <span>Cron Parser</span>
                     </button>
@@ -103,27 +114,27 @@
 
                 <div class="nav-group">
                     <span class="nav-group-label">Inspect &amp; Format</span>
-                    <button class="nav-item" onclick="switchTab('json')">
+                    <button class="nav-item" data-action="tab" data-tab="json">
                         <i class="bi bi-file-earmark-code"></i>
                         <span>JSON Formatter</span>
                     </button>
-                    <button class="nav-item" onclick="switchTab('yaml')">
+                    <button class="nav-item" data-action="tab" data-tab="yaml">
                         <i class="bi bi-file-earmark-text"></i>
                         <span>YAML Tools</span>
                     </button>
-                    <button class="nav-item" onclick="switchTab('sql')">
+                    <button class="nav-item" data-action="tab" data-tab="sql">
                         <i class="bi bi-database"></i>
                         <span>SQL Formatter</span>
                     </button>
-                    <button class="nav-item" onclick="switchTab('regex')">
+                    <button class="nav-item" data-action="tab" data-tab="regex">
                         <i class="bi bi-asterisk"></i>
                         <span>Regex Playground</span>
                     </button>
-                    <button class="nav-item" onclick="switchTab('jwt')">
+                    <button class="nav-item" data-action="tab" data-tab="jwt">
                         <i class="bi bi-shield-shaded"></i>
                         <span>JWT Debugger</span>
                     </button>
-                    <button class="nav-item" onclick="switchTab('diff')">
+                    <button class="nav-item" data-action="tab" data-tab="diff">
                         <i class="bi bi-file-diff"></i>
                         <span>Text Diff</span>
                     </button>
@@ -131,11 +142,11 @@
 
                 <div class="nav-group">
                     <span class="nav-group-label">Develop</span>
-                    <button class="nav-item" onclick="switchTab('webhook')">
+                    <button class="nav-item" data-action="tab" data-tab="webhook">
                         <i class="bi bi-broadcast"></i>
                         <span>Webhook Tester</span>
                     </button>
-                    <button class="nav-item" onclick="switchTab('docs')">
+                    <button class="nav-item" data-action="tab" data-tab="docs">
                         <i class="bi bi-book"></i>
                         <span>API Reference</span>
                     </button>
@@ -168,11 +179,11 @@
             <header class="top-bar">
                 <h2 id="current-tab-title">Base64 Converter</h2>
                 <div class="user-actions">
-                    <button class="btn-icon theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">
+                    <button class="btn-icon theme-toggle" data-action="theme-toggle" title="Toggle light/dark mode">
                         <i class="bi bi-sun"></i>
                         <i class="bi bi-moon"></i>
                     </button>
-                    <button class="btn-icon" onclick="toggleHistory()" title="Toggle History Log">
+                    <button class="btn-icon" popovertarget="history-panel" title="Toggle History Log">
                         <i class="bi bi-clock-history"></i>
                     </button>
                 </div>
@@ -193,13 +204,13 @@
                                 <textarea id="base64-input" name="text" placeholder="Type or paste plain text/base64 here..." rows="6">Hello, DevUtils! This is a base64 encoding test.</textarea>
                             </div>
                             <div class="btn-group">
-                                <button type="button" class="btn btn-primary" onclick="runBase64('encode')">
+                                <button type="button" class="btn btn-primary" data-action="base64" data-op="encode">
                                     <i class="bi bi-lock-fill"></i> Encode
                                 </button>
-                                <button type="button" class="btn btn-accent" onclick="runBase64('decode')">
+                                <button type="button" class="btn btn-accent" data-action="base64" data-op="decode">
                                     <i class="bi bi-unlock-fill"></i> Decode
                                 </button>
-                                <button type="button" class="btn btn-secondary" onclick="clearBase64()">
+                                <button type="button" class="btn btn-secondary" data-action="clear-base64">
                                     <i class="bi bi-trash3"></i> Clear
                                 </button>
                             </div>
@@ -223,19 +234,19 @@
                                 <form hx-post="/api/htmx/guid/generate" 
                                       hx-target="#guid-output" 
                                       hx-indicator="#guid-loader"
-                                      onsubmit="saveToHistory('GUID Generation', document.getElementById('guid-type').value + ' x' + document.getElementById('guid-count').value)">
+                                      data-action="log" data-history-op="GUID Generation">
                                     
                                     <div class="form-group">
                                         <label for="guid-count">Quantity (10 - 100)</label>
                                         <div class="range-slider-container">
-                                            <input type="range" id="guid-count" name="count" min="10" max="100" value="10" oninput="updateRangeVal(this.value)">
-                                            <span class="range-value" id="range-val-display">10</span>
+                                            <input type="range" id="guid-count" name="count" min="10" max="100" value="10" data-action="guid-count">
+                                            <output class="range-value" id="range-val-display" for="guid-count">10</output>
                                         </div>
                                     </div>
 
                                     <div class="form-group">
                                         <label for="guid-type">Generation Algorithm</label>
-                                        <select id="guid-type" name="type" onchange="togglePrefixInput(this.value)">
+                                        <select id="guid-type" name="type" data-action="guid-type">
                                             <option value="v4">UUID v4 (Random / Unordered)</option>
                                             <option value="v7">UUID v7 (Time-ordered / Sequential)</option>
                                             <option value="prefixed">Prefixed (Custom Prefix + Random Suffix)</option>
@@ -243,7 +254,7 @@
                                         </select>
                                     </div>
 
-                                    <div class="form-group" id="prefix-group" style="display: none;">
+                                    <div class="form-group" id="prefix-group" hidden>
                                         <label for="guid-prefix">Custom Prefix</label>
                                         <input type="text" id="guid-prefix" name="prefix" placeholder="e.g. USER, PROD, order" maxlength="20">
                                         <small class="form-help" id="prefix-format-help">The generated format will be: {prefix}-{12 random hex characters}</small>
@@ -282,7 +293,7 @@
                                 <form hx-post="/api/htmx/qrcode/generate" 
                                       hx-target="#qrcode-output" 
                                       hx-indicator="#qrcode-loader"
-                                      onsubmit="saveToHistory('QR Code Gen', truncateString(document.getElementById('qrcode-text').value, 20))">
+                                      data-action="log" data-history-op="QR Code Gen" data-history-from="qrcode-text">
                                     
                                     <div class="form-group">
                                         <label for="qrcode-text">Text or URL Payload</label>
@@ -320,7 +331,7 @@
                                 <p>Prettify, minify, or validate raw JSON payload data.</p>
                             </div>
                             <div class="card-body">
-                                <form id="json-form" onsubmit="return false;">
+                                <form id="json-form">
                                     <div class="form-group">
                                         <label for="json-input">JSON Payload</label>
                                         <textarea id="json-input" name="text" placeholder='{"key": "value"}' rows="10">{
@@ -341,13 +352,13 @@
                                         </select>
                                     </div>
                                     <div class="btn-group">
-                                        <button type="button" class="btn btn-primary" onclick="runJSON('prettify')">
+                                        <button type="button" class="btn btn-primary" data-action="json" data-op="prettify">
                                             <i class="bi bi-justify"></i> Prettify
                                         </button>
-                                        <button type="button" class="btn btn-accent" onclick="runJSON('minify')">
+                                        <button type="button" class="btn btn-accent" data-action="json" data-op="minify">
                                             <i class="bi bi-arrows-angle-contract"></i> Minify
                                         </button>
-                                        <button type="button" class="btn btn-secondary" onclick="runJSON('validate')">
+                                        <button type="button" class="btn btn-secondary" data-action="json" data-op="validate">
                                             <i class="bi bi-check2-all"></i> Validate
                                         </button>
                                         <button type="button" class="btn btn-accent"
@@ -355,10 +366,10 @@
                                                 hx-target="#json-output" 
                                                 hx-include="#json-form"
                                                 hx-indicator="#json-loader"
-                                                onclick="saveToHistory('JSON to YAML', truncateString(document.getElementById('json-input').value, 20))">
+                                                data-action="log" data-history-op="JSON to YAML" data-history-from="json-input">
                                             <i class="bi bi-arrow-left-right"></i> Convert to YAML
                                         </button>
-                                        <button type="button" class="btn btn-secondary" onclick="clearJSON()">
+                                        <button type="button" class="btn btn-secondary" data-action="clear-json">
                                             <i class="bi bi-trash3"></i> Clear
                                         </button>
                                         <div id="json-loader" class="htmx-indicator loader"></div>
@@ -387,7 +398,7 @@
                                 <p>Format or minify SQL queries and statements.</p>
                             </div>
                             <div class="card-body">
-                                <form id="sql-form" onsubmit="return false;">
+                                <form id="sql-form">
                                     <div class="form-group">
                                         <label for="sql-input">SQL Query</label>
                                         <textarea id="sql-input" name="text" placeholder="SELECT * FROM users WHERE id=1;" rows="10">SELECT id, name, email FROM users WHERE status = 'active' ORDER BY created_at DESC LIMIT 10;</textarea>
@@ -398,7 +409,7 @@
                                                 hx-target="#sql-output" 
                                                 hx-include="#sql-form"
                                                 hx-indicator="#sql-loader"
-                                                onclick="saveToHistory('SQL Prettify', truncateString(document.getElementById('sql-input').value, 20))">
+                                                data-action="log" data-history-op="SQL Prettify" data-history-from="sql-input">
                                             <i class="bi bi-justify"></i> Prettify
                                         </button>
                                         <button type="button" class="btn btn-accent"
@@ -406,10 +417,10 @@
                                                 hx-target="#sql-output" 
                                                 hx-include="#sql-form"
                                                 hx-indicator="#sql-loader"
-                                                onclick="saveToHistory('SQL Minify', truncateString(document.getElementById('sql-input').value, 20))">
+                                                data-action="log" data-history-op="SQL Minify" data-history-from="sql-input">
                                             <i class="bi bi-arrows-angle-contract"></i> Minify
                                         </button>
-                                        <button type="button" class="btn btn-secondary" onclick="clearSQL()">
+                                        <button type="button" class="btn btn-secondary" data-action="clear-sql">
                                             <i class="bi bi-trash3"></i> Clear
                                         </button>
                                         <div id="sql-loader" class="htmx-indicator loader"></div>
@@ -438,7 +449,7 @@
                                 <p>Prettify, validate, or convert YAML payloads to formatted JSON.</p>
                             </div>
                             <div class="card-body">
-                                <form id="yaml-form" onsubmit="return false;">
+                                <form id="yaml-form">
                                     <div class="form-group">
                                         <label for="yaml-input">YAML Payload</label>
                                         <textarea id="yaml-input" name="text" placeholder='Paste YAML here to format, validate, or convert to JSON...' rows="10">project: DevUtils
@@ -447,30 +458,35 @@ metadata:
   version: 1.0.0
   environment: development</textarea>
                                     </div>
-                                    <div class="grid grid-cols-2 gap-4" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-                                        <div class="form-group" style="margin-bottom: 0;">
-                                            <label for="yaml-indent">Indentation</label>
-                                            <select id="yaml-indent" name="indent">
-                                                <option value="2">2 Spaces</option>
-                                                <option value="4">4 Spaces</option>
-                                            </select>
+                                    <details class="advanced-options" open>
+                                        <summary>Options</summary>
+                                        <div class="advanced-options-body">
+                                            <div class="grid grid-cols-2 gap-4" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                                <div class="form-group" style="margin-bottom: 0;">
+                                                    <label for="yaml-indent">Indentation</label>
+                                                    <select id="yaml-indent" name="indent">
+                                                        <option value="2">2 Spaces</option>
+                                                        <option value="4">4 Spaces</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group" style="margin-bottom: 0;">
+                                                    <label for="yaml-quotes">Quoting Style</label>
+                                                    <select id="yaml-quotes" name="quotes">
+                                                        <option value="default">Default Quotes</option>
+                                                        <option value="single">Single Quotes</option>
+                                                        <option value="double">Double Quotes</option>
+                                                    </select>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="form-group" style="margin-bottom: 0;">
-                                            <label for="yaml-quotes">Quoting Style</label>
-                                            <select id="yaml-quotes" name="quotes">
-                                                <option value="default">Default Quotes</option>
-                                                <option value="single">Single Quotes</option>
-                                                <option value="double">Double Quotes</option>
-                                            </select>
-                                        </div>
-                                    </div>
+                                    </details>
                                     <div class="btn-group">
                                         <button type="button" class="btn btn-accent"
                                                 hx-post="/api/htmx/yaml/yaml2json" 
                                                 hx-target="#yaml-output" 
                                                 hx-include="#yaml-form"
                                                 hx-indicator="#yaml-loader"
-                                                onclick="saveToHistory('YAML to JSON', truncateString(document.getElementById('yaml-input').value, 20))">
+                                                data-action="log" data-history-op="YAML to JSON" data-history-from="yaml-input">
                                             <i class="bi bi-arrow-left-right"></i> Convert to JSON
                                         </button>
                                         <button type="button" class="btn btn-primary"
@@ -478,7 +494,7 @@ metadata:
                                                 hx-target="#yaml-output" 
                                                 hx-include="#yaml-form"
                                                 hx-indicator="#yaml-loader"
-                                                onclick="saveToHistory('YAML Prettify', truncateString(document.getElementById('yaml-input').value, 20))">
+                                                data-action="log" data-history-op="YAML Prettify" data-history-from="yaml-input">
                                             <i class="bi bi-justify"></i> Prettify
                                         </button>
                                         <button type="button" class="btn btn-secondary"
@@ -486,10 +502,10 @@ metadata:
                                                 hx-target="#yaml-output" 
                                                 hx-include="#yaml-form"
                                                 hx-indicator="#yaml-loader"
-                                                onclick="saveToHistory('YAML Validate', truncateString(document.getElementById('yaml-input').value, 20))">
+                                                data-action="log" data-history-op="YAML Validate" data-history-from="yaml-input">
                                             <i class="bi bi-check2-all"></i> Validate
                                         </button>
-                                        <button type="button" class="btn btn-secondary" onclick="clearYAML()">
+                                        <button type="button" class="btn btn-secondary" data-action="clear-yaml">
                                             <i class="bi bi-trash3"></i> Clear
                                         </button>
                                         <div id="yaml-loader" class="htmx-indicator loader"></div>
@@ -523,16 +539,16 @@ metadata:
                                     <textarea id="url-input" name="text" placeholder="https://example.com/search?q=query&category=dev" rows="8">https://example.com/search?q=developer tools&category=web dev&status=active</textarea>
                                 </div>
                                 <div class="btn-group">
-                                    <button type="button" class="btn btn-primary" onclick="runURL('encode')">
+                                    <button type="button" class="btn btn-primary" data-action="url" data-op="encode">
                                         <i class="bi bi-lock-fill"></i> Encode
                                     </button>
-                                    <button type="button" class="btn btn-accent" onclick="runURL('decode')">
+                                    <button type="button" class="btn btn-accent" data-action="url" data-op="decode">
                                         <i class="bi bi-unlock-fill"></i> Decode
                                     </button>
-                                    <button type="button" class="btn btn-secondary" onclick="runURL('parse')">
+                                    <button type="button" class="btn btn-secondary" data-action="url" data-op="parse">
                                         <i class="bi bi-search"></i> Parse URL
                                     </button>
-                                    <button type="button" class="btn btn-secondary" onclick="clearURL()">
+                                    <button type="button" class="btn btn-secondary" data-action="clear-url">
                                         <i class="bi bi-trash3"></i> Clear
                                     </button>
                                 </div>
@@ -562,10 +578,10 @@ metadata:
                                 <form id="regex-form" hx-post="/api/htmx/regex/test"
                                       hx-target="#regex-output"
                                       hx-indicator="#regex-loader"
-                                      onsubmit="saveToHistory('Regex Test', document.getElementById('regex-pattern').value)">
+                                      data-action="log" data-history-op="Regex Test" data-history-from="regex-pattern">
                                     <div class="form-group">
                                         <label for="regex-preset">Common Pattern</label>
-                                        <select id="regex-preset" onchange="loadRegexPreset(this.value)">
+                                        <select id="regex-preset" data-action="regex-preset">
                                             <option value="email" selected>Email address</option>
                                             <option value="url">URL</option>
                                             <option value="ipv4">IPv4 address</option>
@@ -579,12 +595,12 @@ metadata:
                                         <label>Engine</label>
                                         <div class="regex-flag-grid" role="radiogroup" aria-label="Regex engine">
                                             <label class="regex-flag">
-                                                <input type="radio" name="engine" value="re2" checked onchange="setRegexEngine('re2')">
+                                                <input type="radio" name="engine" value="re2" checked data-action="regex-engine">
                                                 <span class="regex-flag-key">Go</span>
                                                 <span>RE2 &middot; server</span>
                                             </label>
                                             <label class="regex-flag">
-                                                <input type="radio" name="engine" value="js" onchange="setRegexEngine('js')">
+                                                <input type="radio" name="engine" value="js" data-action="regex-engine">
                                                 <span class="regex-flag-key">JS</span>
                                                 <span>JavaScript &middot; browser</span>
                                             </label>
@@ -637,7 +653,7 @@ Invalid: not-an-email</textarea>
                                         <button type="submit" class="btn btn-primary">
                                             <i class="bi bi-play-fill"></i> Test Pattern
                                         </button>
-                                        <button type="button" class="btn btn-secondary" onclick="clearRegex()">
+                                        <button type="button" class="btn btn-secondary" data-action="clear-regex">
                                             <i class="bi bi-trash3"></i> Clear
                                         </button>
                                         <div id="regex-loader" class="htmx-indicator loader"></div>
@@ -676,10 +692,10 @@ Invalid: not-an-email</textarea>
                                     </div>
                                 </div>
                                 <div class="btn-group">
-                                    <button type="button" class="btn btn-primary" onclick="runJWT()">
+                                    <button type="button" class="btn btn-primary" data-action="jwt">
                                         <i class="bi bi-key-fill"></i> Decode Token
                                     </button>
-                                    <button type="button" class="btn btn-secondary" onclick="clearJWT()">
+                                    <button type="button" class="btn btn-secondary" data-action="clear-jwt">
                                         <i class="bi bi-trash3"></i> Clear
                                     </button>
                                 </div>
@@ -710,35 +726,33 @@ Invalid: not-an-email</textarea>
                                 <div class="live-clock-panel mb-4">
                                     <div>
                                         <span class="label text-xs" style="color: var(--text-muted);">Current Unix Timestamp</span>
-                                        <div id="live-epoch-value" class="text-xl font-mono text-accent" style="font-size: 20px; font-weight: 700; color: var(--color-accent);">Loading...</div>
+                                        <output id="live-epoch-value" class="text-xl font-mono text-accent" style="font-size: 20px; font-weight: 700; color: var(--color-accent);">Loading...</output>
                                     </div>
                                     <div class="flex gap-2">
-                                        <button class="btn btn-sm btn-secondary" onclick="copyLiveEpoch()" title="Copy live timestamp">
-                                            <i class="bi bi-clipboard"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-accent" onclick="useCurrentEpoch()" title="Insert into converter">
+                                        <copy-button class="btn btn-sm btn-secondary" target="live-epoch-value" title="Copy live timestamp"></copy-button>
+                                        <button class="btn btn-sm btn-accent" data-action="epoch-use-current" title="Insert into converter">
                                             <i class="bi bi-arrow-down-circle-fill"></i> Use
                                         </button>
                                     </div>
                                 </div>
 
-                                <form onsubmit="event.preventDefault(); runEpoch();">
+                                <form data-action="epoch">
                                     <div class="form-group">
                                         <label for="epoch-input">Timestamp / Datetime string</label>
-                                        <input type="text" id="epoch-input" name="value" placeholder="e.g. 1781845200, 2026-06-19 12:00:00" oninput="syncDateTimePickerFromText(this)">
+                                        <input type="text" id="epoch-input" name="value" placeholder="e.g. 1781845200, 2026-06-19 12:00:00" data-action="epoch-from-text">
                                         <small class="form-help" style="display: block; margin-top: 4px; color: var(--text-muted); font-size: 11px;">Supports Unix seconds/milliseconds, and common datetime formats.</small>
                                     </div>
 
                                     <div class="form-group">
                                         <label for="epoch-datetime">Or pick date & time</label>
-                                        <input type="datetime-local" id="epoch-datetime" name="datetime" onchange="syncTextInputFromDateTime()">
+                                        <input type="datetime-local" id="epoch-datetime" name="datetime" data-action="epoch-from-datetime">
                                     </div>
 
                                     <div class="btn-group mt-4">
                                         <button type="submit" class="btn btn-primary">
                                             <i class="bi bi-clock"></i> Convert Time
                                         </button>
-                                        <button type="button" class="btn btn-secondary" onclick="clearEpoch()">
+                                        <button type="button" class="btn btn-secondary" data-action="clear-epoch">
                                             <i class="bi bi-trash3"></i> Clear
                                         </button>
                                     </div>
@@ -769,33 +783,38 @@ Invalid: not-an-email</textarea>
                                 <form hx-post="/api/htmx/cron/parse" 
                                       hx-target="#cron-output" 
                                       hx-indicator="#cron-loader"
-                                      onsubmit="saveToHistory('Cron Parse', document.getElementById('cron-expression').value)">
+                                      data-action="log" data-history-op="Cron Parse" data-history-from="cron-expression">
                                     <div class="form-group">
                                         <label for="cron-expression">Cron Expression</label>
                                         <input type="text" id="cron-expression" name="expression" placeholder="* * * * *  or  0 0 * * *  or  @daily" required>
                                         <small class="form-help">Standard 5-field (min hour dom month dow), 6-field with seconds, or aliases (@yearly, @monthly, @weekly, @daily, @hourly)</small>
                                     </div>
 
-                                    <div class="grid grid-cols-2 gap-4" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-                                        <div class="form-group" style="margin-bottom: 0;">
-                                            <label for="cron-count">Next Runs to Show (1-50)</label>
-                                            <input type="number" id="cron-count" name="count" value="10" min="1" max="50" style="width: 100%;">
+                                    <details class="advanced-options" open>
+                                        <summary>Options</summary>
+                                        <div class="advanced-options-body">
+                                            <div class="grid grid-cols-2 gap-4" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                                <div class="form-group" style="margin-bottom: 0;">
+                                                    <label for="cron-count">Next Runs to Show (1-50)</label>
+                                                    <input type="number" id="cron-count" name="count" value="10" min="1" max="50" style="width: 100%;">
+                                                </div>
+                                                <div class="form-group" style="margin-bottom: 0;">
+                                                    <label for="cron-timezone">Timezone</label>
+                                                    <select id="cron-timezone" name="timezone" style="width: 100%;">
+                                                        <option value="Local" selected>Local (Browser)</option>
+                                                        <option value="UTC">UTC</option>
+                                                        <option value="America/New_York">America/New_York (EST/EDT)</option>
+                                                        <option value="America/Los_Angeles">America/Los_Angeles (PST/PDT)</option>
+                                                        <option value="Europe/London">Europe/London (GMT/BST)</option>
+                                                        <option value="Europe/Paris">Europe/Paris (CET/CEST)</option>
+                                                        <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
+                                                        <option value="Asia/Shanghai">Asia/Shanghai (CST)</option>
+                                                        <option value="Australia/Sydney">Australia/Sydney (AEST/AEDT)</option>
+                                                    </select>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="form-group" style="margin-bottom: 0;">
-                                            <label for="cron-timezone">Timezone</label>
-                                            <select id="cron-timezone" name="timezone" style="width: 100%;">
-                                                <option value="Local" selected>Local (Browser)</option>
-                                                <option value="UTC">UTC</option>
-                                                <option value="America/New_York">America/New_York (EST/EDT)</option>
-                                                <option value="America/Los_Angeles">America/Los_Angeles (PST/PDT)</option>
-                                                <option value="Europe/London">Europe/London (GMT/BST)</option>
-                                                <option value="Europe/Paris">Europe/Paris (CET/CEST)</option>
-                                                <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
-                                                <option value="Asia/Shanghai">Asia/Shanghai (CST)</option>
-                                                <option value="Australia/Sydney">Australia/Sydney (AEST/AEDT)</option>
-                                            </select>
-                                        </div>
-                                    </div>
+                                    </details>
 
                                     <div class="btn-group">
                                         <button type="submit" class="btn btn-primary">
@@ -856,13 +875,13 @@ Invalid: not-an-email</textarea>
                                     <textarea id="html-entity-input" name="text" placeholder="Type or paste text with HTML entities here..." rows="8">&lt;div class=&quot;example&quot;&gt;Hello &amp; Welcome!&lt;/div&gt;</textarea>
                                 </div>
                                 <div class="btn-group">
-                                    <button type="button" class="btn btn-primary" onclick="runHTMLEntity('encode')">
+                                    <button type="button" class="btn btn-primary" data-action="html-entity" data-op="encode">
                                         <i class="bi bi-lock-fill"></i> Encode
                                     </button>
-                                    <button type="button" class="btn btn-accent" onclick="runHTMLEntity('decode')">
+                                    <button type="button" class="btn btn-accent" data-action="html-entity" data-op="decode">
                                         <i class="bi bi-unlock-fill"></i> Decode
                                     </button>
-                                    <button type="button" class="btn btn-secondary" onclick="clearHTMLEntity()">
+                                    <button type="button" class="btn btn-secondary" data-action="clear-html-entity">
                                         <i class="bi bi-trash3"></i> Clear
                                     </button>
                                 </div>
@@ -889,7 +908,7 @@ Invalid: not-an-email</textarea>
                                 <p>Compare two text blocks and inspect line-by-line differences.</p>
                             </div>
                             <div class="card-body" style="flex: 1; display: flex; flex-direction: column;">
-                                <form onsubmit="runTextDiff(); return false;" style="flex: 1; display: flex; flex-direction: column;">
+                                <form data-action="diff" style="flex: 1; display: flex; flex-direction: column;">
                                     <div class="grid grid-cols-2 gap-4" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; flex: 1;">
                                         <div class="form-group" style="margin-bottom: 0; display: flex; flex-direction: column;">
                                             <label for="diff-text-a">Text A (Original)</label>
@@ -911,7 +930,7 @@ line 5 added</textarea>
                                         <button type="submit" class="btn btn-primary">
                                             <i class="bi bi-file-diff"></i> Compare Text
                                         </button>
-                                        <button type="button" class="btn btn-secondary" onclick="clearDiff()">
+                                        <button type="button" class="btn btn-secondary" data-action="clear-diff">
                                             <i class="bi bi-trash3"></i> Clear
                                         </button>
                                     </div>
@@ -963,14 +982,14 @@ line 5 added</textarea>
         </main>
 
         <!-- Slide-out History Log panel -->
-        <aside class="history-panel" id="history-panel">
+        <aside class="history-panel" id="history-panel" popover>
             <div class="panel-header">
                 <h3><i class="bi bi-clock-history"></i> Operation History</h3>
-                <button class="btn-close" onclick="toggleHistory()">&times;</button>
+                <button class="btn-close" popovertarget="history-panel">&times;</button>
             </div>
             <div class="panel-body">
                 <div class="history-actions">
-                    <button class="btn btn-sm btn-secondary" onclick="clearHistoryLog()">
+                    <button class="btn btn-sm btn-secondary" data-action="history-clear">
                         <i class="bi bi-trash3"></i> Clear All History
                     </button>
                 </div>
@@ -982,10 +1001,106 @@ line 5 added</textarea>
     </div>
 
     <!-- Custom Toast Notification System -->
-    <div id="toast-container" class="toast-container"></div>
+    <toast-stack class="toast-container" role="region" aria-label="Notifications"></toast-stack>
+
+    <!-- Markup templates cloned with cloneNode by the frontend modules -->
+    <template id="tpl-placeholder">
+        <div class="card glass card-placeholder">
+            <div class="placeholder-content">
+                <i class="bi placeholder-icon" aria-hidden="true"></i>
+                <p></p>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-error-card">
+        <div class="card glass mt-4 animate-fade-in">
+            <div class="card-body">
+                <div class="alert alert-error">
+                    <i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i>
+                    <div class="error-message"></div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-result-card">
+        <div class="card glass mt-4 animate-fade-in">
+            <div class="card-header flex justify-between items-center">
+                <h4 class="result-title"></h4>
+                <div class="card-actions"></div>
+            </div>
+            <div class="card-body"></div>
+        </div>
+    </template>
+
+    <template id="tpl-history-empty">
+        <div class="placeholder-content mt-4" style="text-align: center; color: var(--text-dark);">
+            <i class="bi bi-clock-history" style="font-size: 24px; opacity: 0.15; margin-bottom: 8px;"></i>
+            <p style="font-size: 12px;">No recent operations recorded.</p>
+        </div>
+    </template>
+
+    <template id="tpl-history-item">
+        <button type="button" class="history-item" data-action="history-item">
+            <span class="history-meta">
+                <span class="history-type"></span>
+                <span class="history-time"></span>
+            </span>
+            <span class="history-content"></span>
+        </button>
+    </template>
+
+    <template id="tpl-regex-report">
+        <div class="card glass mt-4 animate-fade-in">
+            <div class="card-header">
+                <h4>Regex Match Report</h4>
+                <div class="card-actions"></div>
+            </div>
+            <div class="card-body"></div>
+        </div>
+    </template>
+
+    <template id="tpl-regex-summary-item">
+        <div class="regex-summary-item">
+            <span class="regex-summary-value"></span>
+            <span class="regex-summary-label"></span>
+        </div>
+    </template>
+
+    <template id="tpl-regex-match-card">
+        <article class="regex-match-card">
+            <div class="regex-match-card-header">
+                <div>
+                    <span class="regex-match-number"></span>
+                    <span class="regex-match-range"></span>
+                </div>
+                <copy-button class="btn btn-sm btn-secondary">Copy</copy-button>
+            </div>
+            <pre class="regex-match-value"></pre>
+            <div class="regex-captures"></div>
+        </article>
+    </template>
+
+    <template id="tpl-regex-capture-item">
+        <div class="regex-capture-item">
+            <span class="regex-capture-name"></span>
+            <code class="regex-capture-value"></code>
+        </div>
+    </template>
+
+    <template id="tpl-regex-empty">
+        <div class="regex-empty-state">
+            <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+            <div>
+                <h5>No matches found</h5>
+                <p>The expression is valid, but none of its matches appear in the current test text.</p>
+            </div>
+        </div>
+    </template>
 
     <!-- JS Scripts -->
-    <script src="/static/js/app.js?v={{ .Version }}"></script>
+    <script type="module" src="/static/js/app.js?v={{ .Version }}"></script>
 </body>
 </html>
 {{ end }}
@@ -997,9 +1112,9 @@ line 5 added</textarea>
         <h4>Conversion Result ({{ .Operation }})</h4>
         <div class="card-actions">
             {{ if not .Error }}
-            <button class="btn btn-sm btn-primary" onclick="copyToClipboard('base64-result-text')">
+            <copy-button class="btn btn-sm btn-primary" target="base64-result-text">
                 <i class="bi bi-clipboard"></i> Copy Output
-            </button>
+            </copy-button>
             {{ end }}
         </div>
     </div>
@@ -1028,9 +1143,7 @@ line 5 added</textarea>
         </div>
         <div class="card-actions">
             {{ if not .Error }}
-            <button class="btn btn-sm btn-primary" onclick="copyAllGUIDs()">
-                <i class="bi bi-clipboard"></i> Copy All
-            </button>
+            <copy-button class="btn btn-sm btn-primary" select=".guid-val">Copy All</copy-button>
             {{ end }}
         </div>
     </div>
@@ -1046,9 +1159,9 @@ line 5 added</textarea>
             <div class="guid-item">
                 <span class="guid-index">{{ add $index 1 }}</span>
                 <span class="guid-val" id="guid-{{ $index }}">{{ $guid }}</span>
-                <button class="btn-copy-inline" onclick="copyToClipboard('guid-{{ $index }}')" title="Copy to clipboard">
+                <copy-button class="btn-copy-inline" target="guid-{{ $index }}" title="Copy to clipboard">
                     <i class="bi bi-clipboard"></i>
-                </button>
+                </copy-button>
             </div>
             {{ end }}
         </div>
@@ -1066,9 +1179,9 @@ line 5 added</textarea>
         </div>
         <div class="card-actions">
             {{ if not .Error }}
-            <button class="btn btn-sm btn-primary" onclick="copyToClipboard('qrcode-raw-base64')">
+            <copy-button class="btn btn-sm btn-primary" target="qrcode-raw-base64">
                 <i class="bi bi-clipboard"></i> Copy Base64
-            </button>
+            </copy-button>
             {{ end }}
         </div>
     </div>
@@ -1080,7 +1193,7 @@ line 5 added</textarea>
         </div>
         {{ else }}
         <div class="qrcode-image-container" style="background: white; padding: 16px; border-radius: var(--radius-md); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); display: inline-block;">
-            <img src="{{ .ImageURL }}" alt="Generated QR Code" style="display: block; width: 200px; height: 200px;" />
+            <img src="{{ .ImageURL }}" alt="Generated QR Code" loading="lazy" decoding="async" style="display: block; width: 200px; height: 200px;" />
         </div>
         <div style="display: none;">
             <textarea id="qrcode-raw-base64">{{ .RawBase64 }}</textarea>
@@ -1098,9 +1211,9 @@ line 5 added</textarea>
         <h4>JSON Result ({{ .Operation }})</h4>
         <div class="card-actions">
             {{ if and (not .Error) (ne .Operation "Validate") }}
-            <button class="btn btn-sm btn-primary" onclick="copyToClipboard('{{ if .ResultID }}{{ .ResultID }}{{ else }}json-result-text{{ end }}')">
+            <copy-button class="btn btn-sm btn-primary" target="{{ if .ResultID }}{{ .ResultID }}{{ else }}json-result-text{{ end }}">
                 <i class="bi bi-clipboard"></i> Copy Output
-            </button>
+            </copy-button>
             {{ end }}
         </div>
     </div>
@@ -1133,9 +1246,9 @@ line 5 added</textarea>
         <h4>YAML Result ({{ .Operation }})</h4>
         <div class="card-actions">
             {{ if and (not .Error) (ne .Operation "Validate") }}
-            <button class="btn btn-sm btn-primary" onclick="copyToClipboard('{{ if .ResultID }}{{ .ResultID }}{{ else }}yaml-result-text{{ end }}')">
+            <copy-button class="btn btn-sm btn-primary" target="{{ if .ResultID }}{{ .ResultID }}{{ else }}yaml-result-text{{ end }}">
                 <i class="bi bi-clipboard"></i> Copy Output
-            </button>
+            </copy-button>
             {{ end }}
         </div>
     </div>
@@ -1168,9 +1281,9 @@ line 5 added</textarea>
         <h4>URL Result ({{ .Operation }})</h4>
         <div class="card-actions">
             {{ if and (not .Error) (ne .Operation "Parse") (ne .Operation "ParseQueryString") }}
-            <button class="btn btn-sm btn-primary" onclick="copyToClipboard('url-result-text')">
+            <copy-button class="btn btn-sm btn-primary" target="url-result-text">
                 <i class="bi bi-clipboard"></i> Copy Output
-            </button>
+            </copy-button>
             {{ end }}
         </div>
     </div>
@@ -1216,12 +1329,10 @@ line 5 added</textarea>
                             <tbody>
                                 {{ range $index, $param := .Params }}
                                 <tr>
-                                    <td><input type="text" class="table-input param-key" value="{{ $param.Key }}" oninput="rebuildURL()"></td>
-                                    <td><input type="text" class="table-input param-value" value="{{ $param.Value }}" oninput="rebuildURL()"></td>
+                                    <td><input type="text" class="table-input param-key" value="{{ $param.Key }}" data-action="url-rebuild"></td>
+                                    <td><input type="text" class="table-input param-value" value="{{ $param.Value }}" data-action="url-rebuild"></td>
                                     <td>
-                                        <button class="btn-copy-inline" onclick="copyTableValue(this)" title="Copy Value">
-                                            <i class="bi bi-clipboard"></i>
-                                        </button>
+                                        <copy-button class="btn-copy-inline" within=".param-value" title="Copy Value"></copy-button>
                                     </td>
                                 </tr>
                                 {{ end }}
@@ -1233,15 +1344,11 @@ line 5 added</textarea>
                         <label style="display: block; margin-bottom: 6px;">Reconstructed URL / Query String</label>
                         <div class="reconstructed-wrapper">
                             <pre id="reconstructed-url" class="result-text"></pre>
-                            <button class="btn btn-sm btn-secondary" onclick="copyToClipboard('reconstructed-url')">
+                            <copy-button class="btn btn-sm btn-secondary" target="reconstructed-url">
                                 <i class="bi bi-clipboard"></i> Copy
-                            </button>
+                            </copy-button>
                         </div>
                     </div>
-                    <script>
-                        // Initialize reconstruction with a slight delay
-                        setTimeout(rebuildURL, 50);
-                    </script>
                     {{ end }}
                 </div>
             {{ else }}
@@ -1318,9 +1425,9 @@ line 5 added</textarea>
                         <span class="regex-match-number">Match {{ $match.Index }}</span>
                         <span class="regex-match-range">bytes {{ $match.Start }}–{{ $match.End }}</span>
                     </div>
-                    <button class="btn btn-sm btn-secondary" onclick="copyToClipboard('regex-match-{{ $index }}')" title="Copy match {{ $match.Index }}">
+                    <copy-button class="btn btn-sm btn-secondary" target="regex-match-{{ $index }}" title="Copy match {{ $match.Index }}">
                         <i class="bi bi-clipboard"></i> Copy
-                    </button>
+                    </copy-button>
                 </div>
                 <pre id="regex-match-{{ $index }}" class="regex-match-value">{{ $match.Value }}</pre>
                 {{ if $match.Captures }}
@@ -1400,9 +1507,9 @@ line 5 added</textarea>
             <div class="jwt-segment">
                 <div class="segment-header text-red">
                     <h5 style="font-size: 13px; font-weight: 700;">HEADER <span class="text-xs text-muted" style="font-size: 11px; color: var(--text-muted); font-weight: 400;">(ALGORITHM & TOKEN TYPE)</span></h5>
-                    <button class="btn-copy-inline" onclick="copyToClipboard('jwt-header-text')" title="Copy Header">
+                    <copy-button class="btn-copy-inline" target="jwt-header-text" title="Copy Header">
                         <i class="bi bi-clipboard"></i>
-                    </button>
+                    </copy-button>
                 </div>
                 <div class="result-box result-box-red">
                     <pre id="jwt-header-text" class="result-text">{{ .Header }}</pre>
@@ -1412,9 +1519,9 @@ line 5 added</textarea>
             <div class="jwt-segment mt-4">
                 <div class="segment-header text-cyan">
                     <h5 style="font-size: 13px; font-weight: 700;">PAYLOAD <span class="text-xs text-muted" style="font-size: 11px; color: var(--text-muted); font-weight: 400;">(DATA / CLAIMS)</span></h5>
-                    <button class="btn-copy-inline" onclick="copyToClipboard('jwt-payload-text')" title="Copy Payload">
+                    <copy-button class="btn-copy-inline" target="jwt-payload-text" title="Copy Payload">
                         <i class="bi bi-clipboard"></i>
-                    </button>
+                    </copy-button>
                 </div>
                 <div class="result-box result-box-cyan">
                     <pre id="jwt-payload-text" class="result-text">{{ .Payload }}</pre>
@@ -1424,9 +1531,9 @@ line 5 added</textarea>
             <div class="jwt-segment mt-4">
                 <div class="segment-header text-green">
                     <h5 style="font-size: 13px; font-weight: 700;">SIGNATURE <span class="text-xs text-muted" style="font-size: 11px; color: var(--text-muted); font-weight: 400;">(HMAC/RSA SHA-256)</span></h5>
-                    <button class="btn-copy-inline" onclick="copyToClipboard('jwt-signature-text')" title="Copy Signature">
+                    <copy-button class="btn-copy-inline" target="jwt-signature-text" title="Copy Signature">
                         <i class="bi bi-clipboard"></i>
-                    </button>
+                    </copy-button>
                 </div>
                 <div class="result-box result-box-green">
                     <pre id="jwt-signature-text" class="result-text" style="word-break: break-all; white-space: pre-wrap;">{{ .Signature }}</pre>
@@ -1455,20 +1562,20 @@ line 5 added</textarea>
             <div class="form-group">
                 <label>Epoch Seconds (10-digit)</label>
                 <div class="flex gap-2" style="display: flex; gap: 8px;">
-                    <span id="epoch-sec-val" class="result-text-inline font-mono">{{ .Seconds }}</span>
-                    <button class="btn btn-sm btn-secondary" onclick="copyToClipboard('epoch-sec-val')">
+                    <output id="epoch-sec-val" class="result-text-inline font-mono">{{ .Seconds }}</output>
+                    <copy-button class="btn btn-sm btn-secondary" target="epoch-sec-val">
                         <i class="bi bi-clipboard"></i>
-                    </button>
+                    </copy-button>
                 </div>
             </div>
 
             <div class="form-group">
                 <label>Epoch Milliseconds (13-digit)</label>
                 <div class="flex gap-2" style="display: flex; gap: 8px;">
-                    <span id="epoch-ms-val" class="result-text-inline font-mono">{{ .Millis }}</span>
-                    <button class="btn btn-sm btn-secondary" onclick="copyToClipboard('epoch-ms-val')">
+                    <output id="epoch-ms-val" class="result-text-inline font-mono">{{ .Millis }}</output>
+                    <copy-button class="btn btn-sm btn-secondary" target="epoch-ms-val">
                         <i class="bi bi-clipboard"></i>
-                    </button>
+                    </copy-button>
                 </div>
             </div>
         </div>
@@ -1478,20 +1585,20 @@ line 5 added</textarea>
         <div class="form-group">
             <label>GMT / UTC Time</label>
             <div class="flex gap-2" style="display: flex; gap: 8px;">
-                <span id="epoch-utc-val" class="result-text-inline font-mono">{{ .UTC }}</span>
-                <button class="btn btn-sm btn-secondary" onclick="copyToClipboard('epoch-utc-val')">
+                <output id="epoch-utc-val" class="result-text-inline font-mono">{{ .UTC }}</output>
+                <copy-button class="btn btn-sm btn-secondary" target="epoch-utc-val">
                     <i class="bi bi-clipboard"></i>
-                </button>
+                </copy-button>
             </div>
         </div>
 
         <div class="form-group mt-3" style="margin-top: 12px;">
             <label>Local Time (Your system timezone)</label>
             <div class="flex gap-2" style="display: flex; gap: 8px;">
-                <span id="epoch-local-val" class="result-text-inline font-mono">{{ .Local }}</span>
-                <button class="btn btn-sm btn-secondary" onclick="copyToClipboard('epoch-local-val')">
+                <output id="epoch-local-val" class="result-text-inline font-mono">{{ .Local }}</output>
+                <copy-button class="btn btn-sm btn-secondary" target="epoch-local-val">
                     <i class="bi bi-clipboard"></i>
-                </button>
+                </copy-button>
             </div>
         </div>
 
@@ -1513,9 +1620,9 @@ line 5 added</textarea>
         <h4>SQL Result ({{ .Operation }})</h4>
         <div class="card-actions">
             {{ if not .Error }}
-            <button class="btn btn-sm btn-primary" onclick="copyToClipboard('{{ if .ResultID }}{{ .ResultID }}{{ else }}sql-result-text{{ end }}')">
+            <copy-button class="btn btn-sm btn-primary" target="{{ if .ResultID }}{{ .ResultID }}{{ else }}sql-result-text{{ end }}">
                 <i class="bi bi-clipboard"></i> Copy Output
-            </button>
+            </copy-button>
             {{ end }}
         </div>
     </div>
@@ -1541,9 +1648,7 @@ line 5 added</textarea>
         <h4>Cron Expression Analysis</h4>
         <div class="card-actions">
             {{ if .IsValid }}
-            <button class="btn btn-sm btn-primary" onclick="copyAllCronRuns()">
-                <i class="bi bi-clipboard"></i> Copy All Runs
-            </button>
+            <copy-button class="btn btn-sm btn-primary" select=".cron-run-item .run-time">Copy All Runs</copy-button>
             {{ end }}
         </div>
     </div>
@@ -1587,9 +1692,9 @@ line 5 added</textarea>
                 <div class="cron-run-item" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius-sm);">
                     <span class="run-index badge badge-secondary" style="min-width: 28px; text-align: center;">{{ add $index 1 }}</span>
                     <span class="run-time font-mono" style="flex: 1; word-break: break-all;">{{ $run }}</span>
-                    <button class="btn-copy-inline" onclick="copyToClipboard('cron-run-{{ $index }}')" title="Copy this time">
+                    <copy-button class="btn-copy-inline" target="cron-run-{{ $index }}" title="Copy this time">
                         <i class="bi bi-clipboard"></i>
-                    </button>
+                    </copy-button>
                     <span id="cron-run-{{ $index }}" style="display: none;">{{ $run }}</span>
                 </div>
                 {{ end }}
@@ -1607,9 +1712,9 @@ line 5 added</textarea>
         <h4>HTML Entity Result ({{ .Operation }})</h4>
         <div class="card-actions">
             {{ if not .Error }}
-            <button class="btn btn-sm btn-primary" onclick="copyToClipboard('html-entity-result-text')">
+            <copy-button class="btn btn-sm btn-primary" target="html-entity-result-text">
                 <i class="bi bi-clipboard"></i> Copy Output
-            </button>
+            </copy-button>
             {{ end }}
         </div>
     </div>

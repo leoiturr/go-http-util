@@ -2004,6 +2004,27 @@ input[type="range"]::-moz-range-thumb {
     .btn {
         flex: 1 1 auto;
     }
+    .cm-editor {
+        min-height: 180px;
+    }
+    .cm-editor .cm-scroller {
+        max-height: 300px;
+    }
+}
+
+/* <copy-button> is a transparent host; the inner native button is the box. */
+copy-button {
+    display: contents;
+}
+
+/* CodeMirror 6 sizing on top of the JS-provided warm theme. */
+.cm-editor {
+    min-height: 250px;
+    max-width: 100%;
+}
+
+.cm-editor .cm-scroller {
+    max-height: 400px;
 }
 
 @media (max-width: 480px) {
