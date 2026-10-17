@@ -118,6 +118,7 @@ This document outlines the core architecture, layout design, and implementation 
 - CM6 is imported **dynamically**: if the CDN is unavailable, the rest of the workbench keeps working and the inputs remain plain textareas.
 - A custom "Warm Paper Workbench" theme and syntax highlighting are built entirely from `var(--token)` colors, so they follow both themes with no hardcoded colors.
 - Every editor mirrors document changes back into its hidden `<textarea>`, so HTMX `hx-include` and the client-side tools always read the current value.
+- Result viewers share the input editor's height (min `250px`, via `.result-box textarea.result-text` and `.result-box .cm-editor`) so paired input/result panes line up in both the rich-editor and plain-textarea fallback states.
 
 ### Mobile-First Responsive Design
 - **Mobile-First CSS**: Designed base CSS rules to fit mobile screens (vertical stacked layouts, full-width sidebars serving as top menus, scrollable nav menus, and compact card/grid spacing).

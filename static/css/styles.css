@@ -966,6 +966,20 @@ input[type="range"]::-moz-range-thumb {
     align-items: center;
 }
 
+/* Result editors match the input editor's size so the two panes line up.
+   Covers both the CodeMirror host (min-height below) and the plain
+   <textarea> fallback used when the rich editor cannot load. */
+.result-box textarea.result-text {
+    display: block;
+    width: 100%;
+    min-height: 250px;
+    resize: vertical;
+}
+
+.result-box .cm-editor {
+    min-height: 250px;
+}
+
 /* Alert Styling */
 .alert {
     display: flex;
