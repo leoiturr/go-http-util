@@ -8,29 +8,38 @@
     font-display: swap;
 }
 
+/*
+ * Theme tokens are declared once with light-dark(first, second):
+ * the first value is used when the used color-scheme is "light", the
+ * second when it is "dark". `color-scheme` is switched by the
+ * data-theme attribute, so a single token block drives both themes
+ * and native controls follow along automatically.
+ */
 :root {
-    --bg-primary: #16120f;
-    --bg-secondary: #1d1813;
-    --sidebar-bg: rgba(24, 19, 15, 0.88);
-    --card-bg: rgba(38, 31, 25, 0.82);
-    --card-border: rgba(243, 231, 214, 0.09);
-    --card-border-hover: rgba(243, 231, 214, 0.18);
+    color-scheme: dark;
 
-    --text-primary: #f2e9db;
-    --text-muted: #a59685;
-    --text-dark: #6d6152;
+    --bg-primary: light-dark(#f5efe3, #16120f);
+    --bg-secondary: light-dark(#fcf8ef, #1d1813);
+    --sidebar-bg: light-dark(rgba(250, 245, 236, 0.92), rgba(24, 19, 15, 0.88));
+    --card-bg: light-dark(rgba(255, 252, 246, 0.9), rgba(38, 31, 25, 0.82));
+    --card-border: light-dark(rgba(96, 76, 52, 0.16), rgba(243, 231, 214, 0.09));
+    --card-border-hover: light-dark(rgba(96, 76, 52, 0.3), rgba(243, 231, 214, 0.18));
 
-    /* Warm Vermilion accent family */
-    --color-primary: #e4482a;   /* vermilion - the one bold accent */
-    --color-primary-glow: rgba(228, 72, 42, 0.32);
-    --color-accent: #ef5b34;    /* brighter vermilion */
-    --color-accent-glow: rgba(239, 91, 52, 0.32);
-    --color-pink: #e0a03a;      /* ochre gold (warm complement) */
-    --color-pink-glow: rgba(224, 160, 58, 0.32);
+    --text-primary: light-dark(#2b2218, #f2e9db);
+    --text-muted: light-dark(#7d6f5c, #a59685);
+    --text-dark: light-dark(#b8a88e, #6d6152);
 
-    --success: #93cf9a;
-    --danger: #e0716b;
-    --warning: #e2a44e;
+    /* Warm Vermilion accent family (deeper in light mode for contrast on paper) */
+    --color-primary: light-dark(#c53819, #e4482a);   /* vermilion - the one bold accent */
+    --color-primary-glow: light-dark(rgba(197, 56, 25, 0.18), rgba(228, 72, 42, 0.32));
+    --color-accent: light-dark(#d1441f, #ef5b34);    /* brighter vermilion */
+    --color-accent-glow: light-dark(rgba(209, 68, 31, 0.18), rgba(239, 91, 52, 0.32));
+    --color-pink: light-dark(#a86f16, #e0a03a);      /* ochre gold (warm complement) */
+    --color-pink-glow: light-dark(rgba(168, 111, 22, 0.18), rgba(224, 160, 58, 0.32));
+
+    --success: light-dark(#3d8a54, #93cf9a);
+    --danger: light-dark(#c0392b, #e0716b);
+    --warning: light-dark(#b8791f, #e2a44e);
 
     --radius-lg: 16px;
     --radius-md: 10px;
@@ -52,30 +61,15 @@
     --paper-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
 }
 
-/* Light Theme Overrides */
-[data-theme="light"] {
-    --bg-primary: #f5efe3;
-    --bg-secondary: #fcf8ef;
-    --sidebar-bg: rgba(250, 245, 236, 0.92);
-    --card-bg: rgba(255, 252, 246, 0.9);
-    --card-border: rgba(96, 76, 52, 0.16);
-    --card-border-hover: rgba(96, 76, 52, 0.3);
+/* The single token block above resolves through light-dark(); flipping
+ * color-scheme is all the light theme needs. */
+:root[data-theme="light"] {
+    color-scheme: light;
+}
 
-    --text-primary: #2b2218;
-    --text-muted: #7d6f5c;
-    --text-dark: #b8a88e;
-
-    /* Deeper vermilion for contrast on paper */
-    --color-primary: #c53819;
-    --color-primary-glow: rgba(197, 56, 25, 0.18);
-    --color-accent: #d1441f;
-    --color-accent-glow: rgba(209, 68, 31, 0.18);
-    --color-pink: #a86f16;
-    --color-pink-glow: rgba(168, 111, 22, 0.18);
-
-    --success: #3d8a54;
-    --danger: #c0392b;
-    --warning: #b8791f;
+::selection {
+    background: color-mix(in srgb, var(--color-primary) 28%, transparent);
+    color: var(--text-primary);
 }
 
 /* Reset & Base Styles */
@@ -616,6 +610,20 @@ body.dark-theme {
     border: 1px solid var(--card-border);
     padding: 16px;
     transition: var(--transition-normal);
+    /* Cards are query containers so inner grids can respond to the
+     * card's own width instead of the viewport. */
+    container-type: inline-size;
+}
+
+@container (max-width: 560px) {
+    .regex-flag-grid,
+    .regex-capture-grid,
+    .regex-summary {
+        grid-template-columns: 1fr;
+    }
+    .regex-match-card-header {
+        align-items: flex-start;
+    }
 }
 
 @media (min-width: 1025px) {
@@ -1283,13 +1291,16 @@ input[type="range"]::-moz-range-thumb {
     border-left-color: var(--warning);
 }
 
-/* History panel sliding */
+/* History panel - native popover sliding in from the inline-end edge */
 .history-panel {
+    /* Reset UA popover defaults, then own the layout. */
     position: fixed;
-    top: 0;
-    right: -350px;
-    width: 350px;
-    height: 100vh;
+    inset: 0 0 0 auto;
+    margin: 0;
+    border: none;
+    width: min(350px, 100vw);
+    height: 100dvh;
+    max-height: 100dvh;
     background: var(--sidebar-bg);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
@@ -1297,12 +1308,33 @@ input[type="range"]::-moz-range-thumb {
     z-index: 100;
     display: flex;
     flex-direction: column;
-    transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+    overscroll-behavior: contain;
     box-shadow: -10px 0 40px -12px rgba(0, 0, 0, 0.6);
+    translate: 100% 0;
+    opacity: 0;
+    transition:
+        translate 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+        display 0.3s allow-discrete,
+        overlay 0.3s allow-discrete;
 }
 
-.history-panel.open {
-    right: 0;
+.history-panel:popover-open {
+    translate: 0 0;
+    opacity: 1;
+}
+
+/* Discrete enter/exit animation for the top-layer popover. */
+@starting-style {
+    .history-panel:popover-open {
+        translate: 100% 0;
+        opacity: 0;
+    }
+}
+
+.history-panel::backdrop {
+    background: color-mix(in srgb, var(--bg-primary) 24%, transparent);
 }
 
 .panel-header {
@@ -1867,16 +1899,6 @@ input[type="range"]::-moz-range-thumb {
     line-height: 1.5;
 }
 
-@media (max-width: 560px) {
-    .regex-flag-grid,
-    .regex-capture-grid {
-        grid-template-columns: 1fr;
-    }
-    .regex-match-card-header {
-        align-items: flex-start;
-    }
-}
-
 /* URL table parser */
 .table-container {
     width: 100%;
@@ -1971,67 +1993,11 @@ input[type="range"]::-moz-range-thumb {
     font-size: 13px;
 }
 
-/* CodeMirror Styles overrides for the warm workbench theme */
-.CodeMirror,
-.CodeMirror * {
-    font-family: var(--font-mono) !important;
-}
+/* CodeMirror 6 appearance is defined as an EditorView.theme() built from
+ * the CSS custom properties in static/js/core/editors.js, so the editor
+ * always follows the active theme. Only responsive layout lives here. */
 
-.CodeMirror {
-    width: 100%;
-    height: auto;
-    min-height: 250px;
-    max-height: 400px;
-    background: color-mix(in srgb, var(--text-primary) 5%, transparent) !important;
-    border: 1px solid var(--card-border) !important;
-    border-radius: var(--radius-md);
-    color: var(--text-primary) !important;
-    font-size: 13px !important;
-    line-height: 1.6 !important;
-}
-
-.CodeMirror-focused {
-    border-color: color-mix(in srgb, var(--color-primary) 65%, transparent) !important;
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 18%, transparent) !important;
-}
-
-.CodeMirror-gutters {
-    background: color-mix(in srgb, var(--text-primary) 4%, transparent) !important;
-    border-right: 1px solid var(--card-border) !important;
-}
-
-.CodeMirror-linenumber {
-    color: var(--text-muted) !important;
-    padding-left: 8px !important;
-    padding-right: 8px !important;
-}
-
-.CodeMirror-scroll {
-    max-height: 400px;
-}
-
-.CodeMirror-cursor {
-    border-left: 2px solid var(--color-primary) !important;
-}
-
-.CodeMirror-selected {
-    background: color-mix(in srgb, var(--color-primary) 22%, transparent) !important;
-}
-
-/* Adjustments for mobile responsiveness (under 768px) */
 @media (max-width: 768px) {
-    .CodeMirror {
-        min-height: 180px;
-        max-height: 300px;
-        font-size: 12px !important;
-    }
-    .CodeMirror-scroll {
-        max-height: 300px;
-    }
-    .CodeMirror-linenumber {
-        padding-left: 4px !important;
-        padding-right: 4px !important;
-    }
     .btn-group {
         gap: 8px;
     }
@@ -2093,4 +2059,142 @@ input[type="range"]::-moz-range-thumb {
     border-radius: var(--radius-sm);
     font-size: 12px;
     font-weight: 600;
+}
+
+/* ------------------------------------------------------------------ */
+/* Modern platform refinements                                         */
+/* ------------------------------------------------------------------ */
+
+/* Readable headlines and paragraphs without manual line breaks. */
+h1, h2, h3, h4, h5,
+.top-bar h2,
+.card-header h3,
+.card-header h4 {
+    text-wrap: balance;
+}
+
+p,
+.card-header p,
+.placeholder-content p {
+    text-wrap: pretty;
+}
+
+/* Native validation feedback. */
+input:user-invalid,
+textarea:user-invalid,
+select:user-invalid {
+    border-color: color-mix(in srgb, var(--danger) 70%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 16%, transparent);
+}
+
+input:user-valid,
+textarea:user-valid,
+select:user-valid {
+    border-color: color-mix(in srgb, var(--success) 55%, transparent);
+}
+
+/* Avoid layout shift when a scrollbar appears in long result surfaces. */
+.result-box,
+.scrollable-body,
+.diff-output,
+.regex-match-list {
+    scrollbar-gutter: stable;
+    overscroll-behavior: contain;
+}
+
+/* Skip rendering work for very long lists until they are near the viewport. */
+.regex-match-list,
+.cron-runs-list {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 400px;
+}
+
+/* Native <details> disclosure used for advanced tool options. */
+.advanced-options {
+    margin-bottom: 20px;
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--text-primary) 3%, transparent);
+    overflow: hidden;
+}
+
+.advanced-options > summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    cursor: pointer;
+    list-style: none;
+    transition: var(--transition-fast);
+}
+
+.advanced-options > summary::-webkit-details-marker {
+    display: none;
+}
+
+.advanced-options > summary::after {
+    content: "\F282"; /* Bootstrap Icons chevron-down */
+    font-family: "bootstrap-icons";
+    margin-inline-start: auto;
+    font-size: 14px;
+    transition: transform var(--transition-fast);
+}
+
+.advanced-options[open] > summary {
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--card-border);
+}
+
+.advanced-options[open] > summary::after {
+    transform: rotate(180deg);
+}
+
+.advanced-options > summary:hover {
+    color: var(--text-primary);
+    background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+}
+
+.advanced-options > summary:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: -2px;
+}
+
+.advanced-options .advanced-options-body {
+    padding: 16px;
+}
+
+/* <output> elements read as inline results, not as form inputs. */
+output.result-text-inline,
+output.range-value {
+    display: inline-flex;
+}
+
+/* Respect the user's motion preference across every decorative animation. */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .glow-orb,
+    .brand-logo i,
+    .pulse-dot,
+    .loader,
+    .spinner {
+        animation: none !important;
+    }
+
+    .tab-module.active,
+    .animate-fade-in {
+        animation: none !important;
+    }
 }
