@@ -289,7 +289,7 @@
                         <div class="card glass">
                             <div class="card-header">
                                 <h3>QR Code Settings</h3>
-                                <p>Generate standard high-contrast QR codes from any web link, plain text, or configuration payload.</p>
+                                <p>Generate a QR code from a link, plain text, or a ready-made payload, then tune its error correction, colors, quiet zone, and export format.</p>
                             </div>
                             <div class="card-body">
                                 <form hx-post="/api/htmx/qrcode/generate" 
@@ -298,9 +298,159 @@
                                       data-action="log" data-history-op="QR Code Gen" data-history-from="qrcode-text">
                                     
                                     <div class="form-group">
+                                        <label for="qrcode-preset">Content Type</label>
+                                        <select id="qrcode-preset" name="preset" data-action="qrcode-preset">
+                                            <option value="text" selected>Plain Text</option>
+                                            <option value="url">Website URL</option>
+                                            <option value="wifi">WiFi Network</option>
+                                            <option value="vcard">Contact Card (vCard)</option>
+                                            <option value="mecard">Contact Card (MECARD)</option>
+                                            <option value="mailto">Email Address</option>
+                                            <option value="tel">Phone Number</option>
+                                            <option value="sms">SMS Message</option>
+                                            <option value="geo">Map Location</option>
+                                        </select>
+                                        <small class="form-help">The server assembles the payload for the selected type, so the exported code and the REST response always agree.</small>
+                                    </div>
+
+                                    <div class="form-group" id="qrcode-preset-fields" hidden>
+                                        <div class="qrcode-field-grid" id="qrcode-fields-url" hidden>
+                                            <div>
+                                                <label for="qrcode-url">Website URL</label>
+                                                <input type="text" id="qrcode-url" name="url" placeholder="example.com" autocomplete="off" spellcheck="false">
+                                            </div>
+                                        </div>
+
+                                        <div class="qrcode-field-grid" id="qrcode-fields-wifi" hidden>
+                                            <div>
+                                                <label for="qrcode-ssid">Network Name (SSID)</label>
+                                                <input type="text" id="qrcode-ssid" name="ssid" placeholder="Office WiFi" autocomplete="off">
+                                            </div>
+                                            <div>
+                                                <label for="qrcode-password">Password</label>
+                                                <input type="text" id="qrcode-password" name="password" placeholder="Leave blank for open network" autocomplete="off">
+                                            </div>
+                                            <div>
+                                                <label for="qrcode-security">Security</label>
+                                                <select id="qrcode-security" name="security">
+                                                    <option value="" selected>Auto</option>
+                                                    <option value="WPA">WPA / WPA2 / WPA3</option>
+                                                    <option value="WEP">WEP</option>
+                                                    <option value="nopass">Open (no password)</option>
+                                                </select>
+                                            </div>
+                                            <label class="checkbox-row">
+                                                <input type="checkbox" name="hidden" value="true">
+                                                <span>Hidden network</span>
+                                            </label>
+                                        </div>
+
+                                        <div class="qrcode-field-grid" id="qrcode-fields-contact" hidden>
+                                            <div>
+                                                <label for="qrcode-name">Full Name</label>
+                                                <input type="text" id="qrcode-name" name="name" placeholder="Ada Lovelace" autocomplete="off">
+                                            </div>
+                                            <div>
+                                                <label for="qrcode-phone">Phone</label>
+                                                <input type="text" id="qrcode-phone" name="phone" placeholder="+1 555 123 4567" autocomplete="off">
+                                            </div>
+                                            <div>
+                                                <label for="qrcode-email">Email</label>
+                                                <input type="text" id="qrcode-email" name="email" placeholder="ada@example.com" autocomplete="off" spellcheck="false">
+                                            </div>
+                                            <div>
+                                                <label for="qrcode-org">Organization</label>
+                                                <input type="text" id="qrcode-org" name="org" placeholder="Analytical Engines" autocomplete="off">
+                                            </div>
+                                            <div>
+                                                <label for="qrcode-address">Street Address</label>
+                                                <input type="text" id="qrcode-address" name="address" autocomplete="off">
+                                            </div>
+                                            <div>
+                                                <label for="qrcode-city">City</label>
+                                                <input type="text" id="qrcode-city" name="city" autocomplete="off">
+                                            </div>
+                                            <div class="qrcode-field-span">
+                                                <label for="qrcode-note">Note</label>
+                                                <textarea id="qrcode-note" name="note" rows="2" placeholder="Optional note carried in the payload"></textarea>
+                                            </div>
+                                        </div>
+
+                                        <div class="qrcode-field-grid" id="qrcode-fields-message" hidden>
+                                            <div>
+                                                <label for="qrcode-message">Message</label>
+                                                <textarea id="qrcode-message" name="message" rows="2" placeholder="Optional SMS body"></textarea>
+                                            </div>
+                                        </div>
+
+                                        <div class="qrcode-field-grid" id="qrcode-fields-geo" hidden>
+                                            <div>
+                                                <label for="qrcode-latitude">Latitude</label>
+                                                <input type="text" id="qrcode-latitude" name="latitude" placeholder="37.7749" autocomplete="off" spellcheck="false">
+                                            </div>
+                                            <div>
+                                                <label for="qrcode-longitude">Longitude</label>
+                                                <input type="text" id="qrcode-longitude" name="longitude" placeholder="-122.4194" autocomplete="off" spellcheck="false">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
                                         <label for="qrcode-text">Text or URL Payload</label>
                                         <textarea id="qrcode-text" name="text" placeholder="https://example.com or any text data..." rows="5" required></textarea>
+                                        <small class="form-help" id="qrcode-text-help">Any text, link, or configuration payload is encoded verbatim.</small>
                                     </div>
+
+                                    <details class="advanced-options" open>
+                                        <summary>Appearance &amp; Export</summary>
+                                        <div class="advanced-options-body">
+                                            <div class="form-group">
+                                                <label for="qrcode-ecc">Error Correction Level</label>
+                                                <select id="qrcode-ecc" name="ecc">
+                                                    <option value="l">L &middot; 7% &middot; smallest code</option>
+                                                    <option value="m" selected>M &middot; 15% &middot; balanced</option>
+                                                    <option value="q">Q &middot; 25% &middot; logo friendly</option>
+                                                    <option value="h">H &middot; 30% &middot; most resilient</option>
+                                                </select>
+                                                <small class="form-help">Higher levels survive more damage but need more modules, producing a denser code.</small>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>Colors</label>
+                                                <div class="qrcode-color-row">
+                                                    <div class="qrcode-color-field">
+                                                        <label for="qrcode-fg">Modules</label>
+                                                        <input type="color" id="qrcode-fg" name="fg" value="#000000" data-action="qrcode-color">
+                                                    </div>
+                                                    <div class="qrcode-color-field">
+                                                        <label for="qrcode-bg">Background</label>
+                                                        <input type="color" id="qrcode-bg" name="bg" value="#ffffff" data-action="qrcode-color">
+                                                    </div>
+                                                    <button type="button" class="btn btn-sm btn-secondary qrcode-color-reset" data-action="qrcode-reset-colors">
+                                                        <i class="bi bi-arrow-counterclockwise"></i> Theme colors
+                                                    </button>
+                                                </div>
+                                                <small class="form-help" id="qrcode-contrast-help">Keep the two colors far apart in brightness or scanners may struggle to read the code.</small>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="qrcode-size">Image Size (128 - 1024px)</label>
+                                                <div class="range-slider-container">
+                                                    <input type="range" id="qrcode-size" name="size" min="128" max="1024" step="4" value="300" data-action="qrcode-range" data-target="qrcode-size-value">
+                                                    <output class="range-value" id="qrcode-size-value" for="qrcode-size">300px</output>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="qrcode-margin">Quiet Zone (0 - 8 modules)</label>
+                                                <div class="range-slider-container">
+                                                    <input type="range" id="qrcode-margin" name="margin" min="0" max="8" step="1" value="4" data-action="qrcode-range" data-target="qrcode-margin-value">
+                                                    <output class="range-value" id="qrcode-margin-value" for="qrcode-margin">4</output>
+                                                </div>
+                                                <small class="form-help">The spec asks for four modules of clear margin. Below two, many cameras will fail to lock on.</small>
+                                            </div>
+                                        </div>
+                                    </details>
 
                                     <div class="btn-group">
                                         <button type="submit" class="btn btn-primary">
@@ -316,7 +466,7 @@
                             <div class="card glass card-placeholder">
                                 <div class="placeholder-content">
                                     <i class="bi bi-qr-code placeholder-icon"></i>
-                                    <p>Enter text or a URL and click "Generate QR Code" to display output here.</p>
+                                    <p>Choose a content type and click "Generate QR Code" to display output here.</p>
                                 </div>
                             </div>
                         </div>
@@ -1181,6 +1331,12 @@ line 5 added</textarea>
         </div>
         <div class="card-actions">
             {{ if not .Error }}
+            <a class="btn btn-sm btn-secondary" href="{{ .ImageURL }}" download="qrcode.png">
+                <i class="bi bi-filetype-png"></i> PNG
+            </a>
+            <a class="btn btn-sm btn-secondary" href="{{ .SVGURL }}" download="qrcode.svg">
+                <i class="bi bi-filetype-svg"></i> SVG
+            </a>
             <copy-button class="btn btn-sm btn-primary" target="qrcode-raw-base64">
                 <i class="bi bi-clipboard"></i> Copy Base64
             </copy-button>
@@ -1194,13 +1350,51 @@ line 5 added</textarea>
             <div>{{ .Error }}</div>
         </div>
         {{ else }}
-        <div class="qrcode-image-container" style="background: white; padding: 16px; border-radius: var(--radius-md); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); display: inline-block;">
-            <img src="{{ .ImageURL }}" alt="Generated QR Code" loading="lazy" decoding="async" style="display: block; width: 200px; height: 200px;" />
+        {{ if .Warning }}
+        <div class="alert alert-warning qrcode-warning" role="status">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <div>{{ .Warning }}</div>
+        </div>
+        {{ end }}
+        <div class="qrcode-image-container" style="background: {{ .BG }}; padding: 16px; border-radius: var(--radius-md); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); display: inline-block;">
+            <img src="{{ .ImageURL }}" alt="Generated QR Code" width="{{ .Size }}" height="{{ .Size }}" loading="lazy" decoding="async" style="display: block; width: 200px; height: 200px;" />
         </div>
         <div style="display: none;">
             <textarea id="qrcode-raw-base64">{{ .RawBase64 }}</textarea>
         </div>
-        <p class="text-sm text-muted" style="text-align: center; max-width: 85%; word-break: break-all; color: var(--text-muted); font-size: 13px;">Payload: <code>{{ .Text }}</code></p>
+        <dl class="qrcode-meta">
+            <div class="qrcode-meta-item">
+                <dt>Error correction</dt>
+                <dd>{{ .ECC | upper }}</dd>
+            </div>
+            <div class="qrcode-meta-item">
+                <dt>Symbol version</dt>
+                <dd>{{ .Version }} <small>({{ .Modules }}&times;{{ .Modules }} modules)</small></dd>
+            </div>
+            <div class="qrcode-meta-item">
+                <dt>Image size</dt>
+                <dd>{{ .Size }}&times;{{ .Size }} px</dd>
+            </div>
+            <div class="qrcode-meta-item">
+                <dt>Quiet zone</dt>
+                <dd>{{ .Margin }} modules</dd>
+            </div>
+            <div class="qrcode-meta-item">
+                <dt>Payload size</dt>
+                <dd>{{ .ByteLen }} bytes</dd>
+            </div>
+            <div class="qrcode-meta-item">
+                <dt>Contrast</dt>
+                <dd>{{ printf "%.1f" .Contrast }}:1</dd>
+            </div>
+        </dl>
+        <div class="qrcode-payload">
+            <span class="qrcode-payload-label">Encoded payload</span>
+            <code id="qrcode-payload">{{ .Payload }}</code>
+            <copy-button class="btn-copy-inline" target="qrcode-payload" title="Copy payload">
+                <i class="bi bi-clipboard"></i>
+            </copy-button>
+        </div>
         {{ end }}
     </div>
 </div>

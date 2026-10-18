@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"html/template"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -93,14 +92,7 @@ func TestRegexTestLogicRejectsInvalidPattern(t *testing.T) {
 func TestHTMXTestRegexRendersResult(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
-	router.SetFuncMap(template.FuncMap{
-		"add": func(a, b int) int {
-			return a + b
-		},
-		"replace": func(old, new, s string) string {
-			return strings.ReplaceAll(s, old, new)
-		},
-	})
+	router.SetFuncMap(TemplateFuncs)
 	router.LoadHTMLGlob("../templates/*")
 	router.POST("/api/htmx/regex/test", HTMXTestRegex)
 

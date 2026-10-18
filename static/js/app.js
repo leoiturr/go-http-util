@@ -13,6 +13,13 @@ import { showToast } from './core/ui.js';
 import { truncateString } from './core/utils.js';
 import { initRegex, loadRegexPreset, setRegexEngine, clearRegex } from './features/regex.js';
 import { initWebhook } from './features/webhook.js';
+import {
+    initQRCode,
+    setQRCodePreset,
+    updateQRCodeRange,
+    refreshQRCodeContrast,
+    resetQRCodeColors
+} from './features/qrcode.js';
 import * as tools from './tools.js';
 
 // HTMX-driven history buttons/forms declare data-history-op (+ optional
@@ -31,6 +38,15 @@ function logHistory(el, evt) {
     let details = '';
     if (op === 'GUID Generation') {
         details = `${document.getElementById('guid-type').value} x${document.getElementById('guid-count').value}`;
+    } else if (op === 'QR Code Gen') {
+        // The preset and style options matter more than the raw payload here,
+        // which can be a long data blob.
+        const preset = document.getElementById('qrcode-preset');
+        const ecc = document.getElementById('qrcode-ecc');
+        const size = document.getElementById('qrcode-size');
+        if (preset && ecc && size) {
+            details = `${preset.value} · ECC ${ecc.value.toUpperCase()} · ${size.value}px`;
+        }
     } else {
         const from = el.dataset.historyFrom ? document.getElementById(el.dataset.historyFrom) : null;
         details = from ? from.value : '';
@@ -79,7 +95,13 @@ registerActions({
 
     // GUID
     'guid-count': (el) => tools.updateRangeVal(el.value),
-    'guid-type': (el) => tools.togglePrefixInput(el.value)
+    'guid-type': (el) => tools.togglePrefixInput(el.value),
+
+    // QR Code
+    'qrcode-preset': (el) => setQRCodePreset(el.value),
+    'qrcode-range': (el) => updateQRCodeRange(el),
+    'qrcode-color': () => refreshQRCodeContrast(),
+    'qrcode-reset-colors': () => resetQRCodeColors()
 });
 
 function boot() {
@@ -89,6 +111,7 @@ function boot() {
     initHistoryPanel();
     initRegex();
     initWebhook();
+    initQRCode();
 
     // Editable CodeMirror editors.
     mountEditor('json', 'json-input', 'application/json');

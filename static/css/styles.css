@@ -1011,6 +1011,15 @@ input[type="range"]::-moz-range-thumb {
     border-color: color-mix(in srgb, var(--danger) 28%, transparent);
 }
 
+.alert-warning {
+    background: color-mix(in srgb, var(--warning) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--warning) 28%, transparent);
+    color: var(--warning);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
 /* Loader Animation */
 .loader {
     width: 24px;
@@ -2207,6 +2216,174 @@ select:user-valid {
 output.result-text-inline,
 output.range-value {
     display: inline-flex;
+}
+
+/* QR CODE GENERATOR */
+/* Preset sub-fields collapse to one column inside a narrow card. */
+.qrcode-field-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 16px;
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--text-primary) 3%, transparent);
+}
+
+@container (min-width: 420px) {
+    .qrcode-field-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .qrcode-field-span {
+        grid-column: 1 / -1;
+    }
+}
+
+.qrcode-field-grid label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 0 !important;
+    font-size: 13px !important;
+    color: var(--text-primary) !important;
+    cursor: pointer;
+}
+
+.checkbox-row input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--color-primary);
+    cursor: pointer;
+}
+
+.qrcode-color-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.qrcode-color-field label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+/* The swatch is the control; keep the native box small but fully clickable. */
+input[type="color"] {
+    width: 100%;
+    min-width: 64px;
+    height: 40px;
+    padding: 4px;
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--text-primary) 5%, transparent);
+    cursor: pointer;
+}
+
+input[type="color"]:hover {
+    border-color: var(--card-border-hover);
+}
+
+input[type="color"]:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.qrcode-color-reset {
+    margin-bottom: 2px;
+}
+
+/* Result metadata: a bordered definition grid rather than a loose list. */
+.qrcode-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1px;
+    width: 100%;
+    max-width: 520px;
+    margin: 0;
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-md);
+    background: var(--card-border);
+    overflow: hidden;
+}
+
+.qrcode-meta-item {
+    padding: 10px 14px;
+    background: var(--card-bg);
+}
+
+.qrcode-meta dt {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.qrcode-meta dd {
+    margin: 4px 0 0;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.qrcode-meta dd small {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-muted);
+}
+
+.qrcode-payload {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 520px;
+    padding: 10px 14px;
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--text-primary) 3%, transparent);
+}
+
+.qrcode-payload-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.qrcode-payload code {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-primary);
+    overflow-wrap: anywhere;
+}
+
+.qrcode-warning {
+    max-width: 520px;
+    text-align: left;
+}
+
+.qrcode-warning i {
+    flex-shrink: 0;
+    line-height: 1.4;
 }
 
 /* Respect the user's motion preference across every decorative animation. */

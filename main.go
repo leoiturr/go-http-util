@@ -1,7 +1,6 @@
 package main
 
 import (
-	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -46,14 +45,7 @@ func main() {
 	r.SetTrustedProxies(nil)
 
 	// Register custom template functions before loading HTML templates
-	r.SetFuncMap(template.FuncMap{
-		"add": func(a, b int) int {
-			return a + b
-		},
-		"replace": func(old, new, s string) string {
-			return strings.ReplaceAll(s, old, new)
-		},
-	})
+	r.SetFuncMap(handlers.TemplateFuncs)
 
 	// Load templates
 	r.LoadHTMLGlob("templates/*")

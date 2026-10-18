@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"fmt"
-	"html/template"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -102,9 +101,7 @@ func TestHTMXGetWebhookRequestsRendersExpiredNotice(t *testing.T) {
 	resetWebhookStoreForTest(time.Now())
 
 	router := gin.New()
-	router.SetFuncMap(template.FuncMap{
-		"add": func(a, b int) int { return a + b },
-	})
+	router.SetFuncMap(TemplateFuncs)
 	router.LoadHTMLGlob("../templates/*")
 	router.GET("/api/htmx/webhook/:id/requests", HTMXGetWebhookRequests)
 
@@ -126,9 +123,7 @@ func TestHTMXGetWebhookRequestsRendersEmptyState(t *testing.T) {
 	webhookStore.register("abc")
 
 	router := gin.New()
-	router.SetFuncMap(template.FuncMap{
-		"add": func(a, b int) int { return a + b },
-	})
+	router.SetFuncMap(TemplateFuncs)
 	router.LoadHTMLGlob("../templates/*")
 	router.GET("/api/htmx/webhook/:id/requests", HTMXGetWebhookRequests)
 
@@ -157,9 +152,7 @@ func TestHTMXGetWebhookRequestsRendersRequests(t *testing.T) {
 	})
 
 	router := gin.New()
-	router.SetFuncMap(template.FuncMap{
-		"add": func(a, b int) int { return a + b },
-	})
+	router.SetFuncMap(TemplateFuncs)
 	router.LoadHTMLGlob("../templates/*")
 	router.GET("/api/htmx/webhook/:id/requests", HTMXGetWebhookRequests)
 

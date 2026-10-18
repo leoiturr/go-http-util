@@ -132,18 +132,18 @@
     "/qrcode/generate": {
       "post": {
         "summary": "Generate QR Code",
-        "description": "Creates a PNG QR code representing the text or URL provided, returning base64-encoded visual formats.",
+        "description": "Creates a QR code as base64-encoded PNG and SVG. Only `text` is required; every other field is optional and falls back to a default, so sending just `text` reproduces the plain black-on-white code at the default size. A `preset` builds the encoded payload server-side (WiFi, vCard, MECARD, mailto, tel, SMS, geo), which is why the response echoes a resolved `payload` alongside the raw `text`.",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TextPayload"
+                "$ref": "#/components/schemas/QRCodeRequest"
               }
             },
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/TextPayload"
+                "$ref": "#/components/schemas/QRCodeRequest"
               }
             }
           }
@@ -1030,6 +1030,116 @@
           }
         }
       },
+      "QRCodeRequest": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Raw payload to encode. Used directly when preset is 'text', and as the fallback value for the presets that accept a single primary field."
+          },
+          "preset": {
+            "type": "string",
+            "enum": ["text", "url", "wifi", "vcard", "mecard", "mailto", "tel", "sms", "geo"],
+            "default": "text",
+            "description": "Content type assembled into the final payload by the server."
+          },
+          "ecc": {
+            "type": "string",
+            "enum": ["l", "m", "q", "h"],
+            "default": "m",
+            "description": "Error correction level. L = 7%, M = 15%, Q = 25%, H = 30% recovery. Higher levels resist more damage but need more modules, producing a denser code."
+          },
+          "fg": {
+            "type": "string",
+            "default": "#000000",
+            "description": "Module (dark pixel) color as #rrggbb or #rgb. Alpha forms are rejected. Invalid values fall back to the default."
+          },
+          "bg": {
+            "type": "string",
+            "default": "#ffffff",
+            "description": "Background color as #rrggbb or #rgb. Invalid values fall back to the default."
+          },
+          "margin": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 8,
+            "default": 4,
+            "description": "Quiet zone width in modules. Zero is legal but warned about, since most scanners need clear margin."
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 128,
+            "maximum": 1024,
+            "default": 300,
+            "description": "Requested image edge length in pixels. The renderer snaps to a whole module boundary, so the reported `size` may differ slightly."
+          },
+          "ssid": {
+            "type": "string",
+            "description": "WiFi network name. Required when preset is 'wifi'."
+          },
+          "password": {
+            "type": "string",
+            "description": "WiFi password. Leave blank for an open network."
+          },
+          "security": {
+            "type": "string",
+            "enum": ["", "WPA", "WEP", "nopass"],
+            "description": "WiFi authentication type. Defaults to WPA when a password is present, otherwise nopass."
+          },
+          "hidden": {
+            "type": "string",
+            "enum": ["true"],
+            "description": "Set to 'true' to mark the WiFi network as hidden."
+          },
+          "name": {
+            "type": "string",
+            "description": "Contact name for the vcard and mecard presets."
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number for the tel, sms, vcard, and mecard presets."
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address for the mailto, vcard, and mecard presets."
+          },
+          "org": {
+            "type": "string",
+            "description": "Organization, emitted in the vCard ORG field."
+          },
+          "note": {
+            "type": "string",
+            "description": "Free-text note. Becomes the mailto body, the MECARD NOTE field, or the vCard NOTE field."
+          },
+          "address": {
+            "type": "string",
+            "description": "Street address, emitted in the vCard ADR field."
+          },
+          "city": {
+            "type": "string",
+            "description": "City, emitted in the vCard ADR field."
+          },
+          "url": {
+            "type": "string",
+            "description": "URL used by the url and vcard presets. A bare hostname gains an https:// prefix."
+          },
+          "message": {
+            "type": "string",
+            "description": "SMS body for the sms preset."
+          },
+          "latitude": {
+            "type": "string",
+            "description": "Decimal latitude for the geo preset. Must parse as a number."
+          },
+          "longitude": {
+            "type": "string",
+            "description": "Decimal longitude for the geo preset. Must parse as a number."
+          }
+        }
+      },
       "QRCodeResult": {
         "type": "object",
         "properties": {
@@ -1037,13 +1147,62 @@
             "type": "string",
             "description": "Standard inline image Data URL (data:image/png;base64,...)"
           },
+          "svg_url": {
+            "type": "string",
+            "description": "Inline vector Data URL (data:image/svg+xml;base64,...). Scales losslessly for print."
+          },
           "text": {
             "type": "string",
-            "description": "Input payload encoded within the QR code graphic grid"
+            "description": "Input payload as submitted, echoed back unchanged"
+          },
+          "payload": {
+            "type": "string",
+            "description": "The string actually encoded in the QR grid, after any preset expansion"
           },
           "raw_base64": {
             "type": "string",
             "description": "Base64 payload representation minus HTTP url decoration"
+          },
+          "ecc": {
+            "type": "string",
+            "enum": ["l", "m", "q", "h"],
+            "description": "Error correction level applied to the render"
+          },
+          "foreground": {
+            "type": "string",
+            "description": "Resolved module color as #rrggbb, after fallback"
+          },
+          "background": {
+            "type": "string",
+            "description": "Resolved background color as #rrggbb, after fallback"
+          },
+          "margin": {
+            "type": "integer",
+            "description": "Applied quiet zone width in modules"
+          },
+          "size": {
+            "type": "integer",
+            "description": "Rendered image edge length in pixels, snapped to a whole module boundary"
+          },
+          "version": {
+            "type": "integer",
+            "description": "QR symbol version (1-40). Higher means denser."
+          },
+          "modules": {
+            "type": "integer",
+            "description": "Module count per side, including the quiet zone (4*version + 17 + 2*margin)"
+          },
+          "byte_length": {
+            "type": "integer",
+            "description": "UTF-8 byte length of the encoded payload"
+          },
+          "contrast_ratio": {
+            "type": "number",
+            "description": "WCAG contrast ratio between foreground and background, from 1 to 21. Scanners generally need at least 3."
+          },
+          "warning": {
+            "type": "string",
+            "description": "Advisory message about scanning risk (low contrast, zero quiet zone, very dense symbol). Empty when there is nothing to flag; the code is still returned."
           }
         }
       },
