@@ -403,6 +403,11 @@ func TestQRCodePayloadPresets(t *testing.T) {
 			want: "https://example.com",
 		},
 		{
+			name: "url uses its dedicated field without generic text",
+			req:  QRCodeRequest{URL: "google.com", Preset: "url"},
+			want: "https://google.com",
+		},
+		{
 			name: "url keeps existing scheme",
 			req:  QRCodeRequest{Text: "http://example.com", Preset: "url"},
 			want: "http://example.com",

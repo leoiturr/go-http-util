@@ -6,8 +6,8 @@
 // That keeps the swatches following the active theme without ever asking the
 // author to invent a second per-theme color block.
 
-// Which preset shows which group of sub-fields. Anything not listed renders no
-// sub-fields and falls back to the free-text payload box.
+// Which preset shows which group of sub-fields. Plain text uses the generic
+// payload box instead; unknown presets render no sub-fields.
 const PRESET_FIELD_GROUPS = {
     url: ['qrcode-fields-url'],
     wifi: ['qrcode-fields-wifi'],
@@ -19,20 +19,7 @@ const PRESET_FIELD_GROUPS = {
     geo: ['qrcode-fields-geo']
 };
 
-// Placeholder + help copy per preset, so the main textarea always explains
-// what it currently encodes.
-const PRESET_TEXT_HELP = {
-    text: 'Any text, link, or configuration payload is encoded verbatim.',
-    url: 'Leave blank to use the address above, or type a path to encode.',
-    wifi: 'Leave blank to encode the network details from the fields above.',
-    vcard: 'Leave blank to encode the contact details from the fields above.',
-    mecard: 'Leave blank to encode the contact details from the fields above.',
-    mailto: 'Leave blank to encode the address from the fields above.',
-    tel: 'Leave blank to encode the number from the fields above.',
-    sms: 'Leave blank to encode the number from the fields above.',
-    geo: 'Leave blank to encode the coordinates from the fields above.'
-};
-
+const TEXT_PRESET_HELP = 'Any text, link, or configuration payload is encoded verbatim.';
 const DEFAULT_TEXT_PLACEHOLDER = 'https://example.com or any text data...';
 
 function $(id) {
@@ -134,18 +121,18 @@ export function setQRCodePreset(value) {
     }
 
     const textarea = $('qrcode-text');
+    const textField = $('qrcode-text-field');
     const help = $('qrcode-text-help');
-    // The free-text box is only the primary input for the plain-text preset.
-    // For every other preset the server builds the payload from the fields.
-    if (textarea) textarea.required = value === 'text' || value === 'url';
-    if (textarea && value !== 'text' && value !== 'url') {
-        textarea.placeholder = 'Optional — overrides the fields above';
-    } else if (textarea) {
+    // Structured presets replace the legacy free-text field. Disable it while
+    // hidden so stale text cannot be submitted as a fallback payload.
+    const isTextPreset = value === 'text';
+    if (textField) textField.hidden = !isTextPreset;
+    if (textarea) {
+        textarea.required = isTextPreset;
+        textarea.disabled = !isTextPreset;
         textarea.placeholder = DEFAULT_TEXT_PLACEHOLDER;
     }
-    if (help) {
-        help.textContent = PRESET_TEXT_HELP[value] || PRESET_TEXT_HELP.text;
-    }
+    if (help) help.textContent = TEXT_PRESET_HELP;
 }
 
 export function updateQRCodeRange(input) {

@@ -45,7 +45,7 @@
     --radius-md: 10px;
     --radius-sm: 6px;
 
-    /* Native select menus stay light even in dark mode. */
+    /* Native option menus keep these fixed light colors in dark mode. */
     --select-menu-bg: #fcf8ef;
     --select-menu-text: #2b2218;
 
@@ -79,6 +79,11 @@
     box-sizing: border-box;
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+}
+
+/* Component display rules (e.g. .qrcode-field-grid) would otherwise override the UA hidden style. */
+[hidden] {
+    display: none !important;
 }
 
 body.dark-theme {
@@ -692,7 +697,7 @@ body.dark-theme {
 
 textarea, input[type="text"], input[type="datetime-local"], input[type="number"], select {
     width: 100%;
-    background: color-mix(in srgb, var(--text-primary) 5%, transparent);
+    background-color: color-mix(in srgb, var(--text-primary) 5%, transparent);
     border: 1px solid var(--card-border);
     border-radius: var(--radius-md);
     color: var(--text-primary);
@@ -706,7 +711,7 @@ textarea, input[type="text"], input[type="datetime-local"], input[type="number"]
 textarea:focus, input[type="text"]:focus, input[type="datetime-local"]:focus, input[type="number"]:focus, select:focus {
     border-color: color-mix(in srgb, var(--color-primary) 70%, transparent);
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 18%, transparent);
-    background: color-mix(in srgb, var(--text-primary) 7%, transparent);
+    background-color: color-mix(in srgb, var(--text-primary) 7%, transparent);
 }
 
 textarea {
@@ -721,9 +726,9 @@ select {
     background-position: right 14px center;
     padding-right: 36px;
     cursor: pointer;
-    color-scheme: light;
 }
 
+/* No color-scheme here: light-dark() tokens resolve against the element's own color-scheme, so a light override would turn the closed text dark-on-dark. */
 select option,
 select optgroup {
     background-color: var(--select-menu-bg);
