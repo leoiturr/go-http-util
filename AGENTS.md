@@ -22,6 +22,7 @@ Welcome! This document provides guidelines for AI agents contributing to the **D
   ```
 
 ## Documentation & Curation Guidelines
+- **English Only**: Always communicate in English — chat responses, commit messages, documentation, and code comments. Never reply in another language regardless of the language the user writes in.
 - **Keep Design Documentation Current**: Update `DESIGN.md` in the same change whenever architecture, layout, interaction, typography, theming, or reusable UI treatment changes. Do not defer design decisions to a later cleanup.
 - **Promote Durable Rules**: Update this file when a repeated implementation rule is discovered, such as documentation synchronization, responsive behavior, accessibility, or component geometry.
 - **Surface Geometry**: Cards and nested input/code surfaces must use deliberate padding, existing radius tokens, and overflow clipping. Avoid square inner corners or content touching an outer card edge.
