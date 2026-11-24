@@ -113,6 +113,10 @@ This document outlines the core architecture, layout design, and implementation 
 - The result card offers PNG and SVG download plus base64 copy, and reports symbol version, module count, rendered pixel size, quiet zone, payload byte length, and contrast ratio. Exact data density is deliberately not shown: the library's codeword table is unexported, so a percentage would be invented rather than measured.
 - The color swatches default to the live values of `--color-primary` and `--card-bg`, re-read through a `MutationObserver` whenever `data-theme` changes. Module and background colors are **user data**, not theme decoration, so they are exempt from the no-hardcoded-colors rule and are stored as plain `#rrggbb` values.
 
+### WhatsApp Link
+- The WhatsApp Link tool lives in the **Generate** group. It validates an international phone number and creates both a `wa.me` click-to-chat URL and a `whatsapp://` deep link, with an optional URL-encoded pre-filled message.
+- The app does not store the recipient; opening the link starts a chat without requiring the number to be saved as a contact.
+
 ### Modern Platform Features
 - **Popover API**: the history panel is a native `popover` opened via `popovertarget`; it slides in with `@starting-style` + `transition-behavior: allow-discrete` and gets light-dismiss and focus handling from the platform.
 - **`<output>`**: computed values (epoch seconds/millis/UTC/local, live clock, range readout) are `<output>` elements; toasts are `<output>` too (implicit polite live region).

@@ -2311,7 +2311,7 @@ input[type="color"]:focus-visible {
 }
 
 /* Result metadata: a bordered definition grid rather than a loose list. */
-.qrcode-meta {
+.result-meta {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 1px;
@@ -2324,12 +2324,12 @@ input[type="color"]:focus-visible {
     overflow: hidden;
 }
 
-.qrcode-meta-item {
+.result-meta-item {
     padding: 10px 14px;
     background: var(--card-bg);
 }
 
-.qrcode-meta dt {
+.result-meta dt {
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 1px;
@@ -2337,7 +2337,7 @@ input[type="color"]:focus-visible {
     color: var(--text-muted);
 }
 
-.qrcode-meta dd {
+.result-meta dd {
     margin: 4px 0 0;
     font-family: var(--font-mono);
     font-size: 14px;
@@ -2345,7 +2345,7 @@ input[type="color"]:focus-visible {
     color: var(--text-primary);
 }
 
-.qrcode-meta dd small {
+.result-meta dd small {
     font-size: 11px;
     font-weight: 400;
     color: var(--text-muted);

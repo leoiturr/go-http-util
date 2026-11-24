@@ -135,6 +135,9 @@ func main() {
 		// QR Code Generator API
 		htmxGroup.POST("/qrcode/generate", handlers.HTMXGenerateQRCode)
 
+		// WhatsApp Link Generator API
+		htmxGroup.POST("/whatsapp/link", handlers.HTMXGenerateWhatsAppLink)
+
 		// JSON Prettifier / Minifier / Validator API
 		htmxGroup.POST("/json/prettify", handlers.HTMXPrettifyJSON)
 		htmxGroup.POST("/json/minify", handlers.HTMXMinifyJSON)
@@ -192,6 +195,9 @@ func main() {
 
 		// QR Code Generator API
 		v1Group.POST("/qrcode/generate", handlers.V1GenerateQRCode)
+
+		// WhatsApp Link Generator API
+		v1Group.POST("/whatsapp/link", handlers.V1GenerateWhatsAppLink)
 
 		// JSON Prettifier / Minifier / Validator API
 		v1Group.POST("/json/prettify", handlers.V1PrettifyJSON)

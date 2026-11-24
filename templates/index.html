@@ -108,6 +108,10 @@
                         <i class="bi bi-qr-code"></i>
                         <span>QR Code Gen</span>
                     </button>
+                    <button class="nav-item" data-action="tab" data-tab="whatsapp">
+                        <i class="bi bi-whatsapp"></i>
+                        <span>WhatsApp Link</span>
+                    </button>
                     <button class="nav-item" data-action="tab" data-tab="cron">
                         <i class="bi bi-calendar3"></i>
                         <span>Cron Parser</span>
@@ -471,6 +475,49 @@
                             </div>
                         </div>
 
+                    </div>
+                </section>
+
+                <!-- WHATSAPP LINK MODULE -->
+                <section id="module-whatsapp" class="tab-module">
+                    <div class="grid grid-cols-2">
+                        <div class="card glass">
+                            <div class="card-header">
+                                <h3>WhatsApp Link</h3>
+                                <p>Create a click-to-chat link that opens a WhatsApp conversation without saving the recipient as a contact.</p>
+                            </div>
+                            <div class="card-body">
+                                <form hx-post="/api/htmx/whatsapp/link"
+                                      hx-target="#whatsapp-result"
+                                      hx-swap="innerHTML"
+                                      hx-indicator="#whatsapp-loader">
+                                    <div class="form-group">
+                                        <label for="whatsapp-phone">Phone Number</label>
+                                        <input type="tel" id="whatsapp-phone" name="phone" placeholder="+1 415 555 0132" autocomplete="tel" required>
+                                        <small class="form-help">Include the country code. No contact needed — the link opens the chat directly.</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="whatsapp-message">Message (optional)</label>
+                                        <textarea id="whatsapp-message" name="message" rows="4" placeholder="Write a message to pre-fill in the chat..."></textarea>
+                                    </div>
+                                    <div class="btn-group">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-whatsapp"></i> Generate Link
+                                        </button>
+                                        <div id="whatsapp-loader" class="htmx-indicator loader"></div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div id="whatsapp-result" class="output-wrapper">
+                            <div class="card glass card-placeholder">
+                                <div class="placeholder-content">
+                                    <i class="bi bi-whatsapp placeholder-icon"></i>
+                                    <p>Enter an international phone number to create a WhatsApp click-to-chat link.</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -1362,28 +1409,28 @@ line 5 added</textarea>
         <div style="display: none;">
             <textarea id="qrcode-raw-base64">{{ .RawBase64 }}</textarea>
         </div>
-        <dl class="qrcode-meta">
-            <div class="qrcode-meta-item">
+        <dl class="result-meta">
+            <div class="result-meta-item">
                 <dt>Error correction</dt>
                 <dd>{{ .ECC | upper }}</dd>
             </div>
-            <div class="qrcode-meta-item">
+            <div class="result-meta-item">
                 <dt>Symbol version</dt>
                 <dd>{{ .Version }} <small>({{ .Modules }}&times;{{ .Modules }} modules)</small></dd>
             </div>
-            <div class="qrcode-meta-item">
+            <div class="result-meta-item">
                 <dt>Image size</dt>
                 <dd>{{ .Size }}&times;{{ .Size }} px</dd>
             </div>
-            <div class="qrcode-meta-item">
+            <div class="result-meta-item">
                 <dt>Quiet zone</dt>
                 <dd>{{ .Margin }} modules</dd>
             </div>
-            <div class="qrcode-meta-item">
+            <div class="result-meta-item">
                 <dt>Payload size</dt>
                 <dd>{{ .ByteLen }} bytes</dd>
             </div>
-            <div class="qrcode-meta-item">
+            <div class="result-meta-item">
                 <dt>Contrast</dt>
                 <dd>{{ printf "%.1f" .Contrast }}:1</dd>
             </div>
@@ -1395,6 +1442,64 @@ line 5 added</textarea>
                 <i class="bi bi-clipboard"></i>
             </copy-button>
         </div>
+        {{ end }}
+    </div>
+</div>
+{{ end }}
+
+
+{{ define "whatsapp-result" }}
+<div class="card glass animate-fade-in full-height-card">
+    <div class="card-header flex justify-between items-center">
+        <div>
+            <h4>WhatsApp Link Result</h4>
+        </div>
+        <div class="card-actions">
+            {{ if not .Error }}
+            <copy-button class="btn btn-sm btn-primary" target="whatsapp-link">
+                <i class="bi bi-clipboard"></i> Copy Link
+            </copy-button>
+            {{ end }}
+        </div>
+    </div>
+    <div class="card-body">
+        {{ if .Error }}
+        <div class="alert alert-error">
+            <i class="bi bi-exclamation-circle-fill"></i>
+            <div>{{ .Error }}</div>
+        </div>
+        {{ else }}
+        <div class="form-group">
+            <label for="whatsapp-link">Click-to-chat link</label>
+            <div class="result-box">
+                <textarea id="whatsapp-link" class="result-text" readonly rows="3">{{ .Link }}</textarea>
+            </div>
+        </div>
+        <div class="btn-group">
+            <a class="btn btn-primary" href="{{ .Link }}" target="_blank" rel="noopener noreferrer">
+                <i class="bi bi-box-arrow-up-right"></i> Open WhatsApp
+            </a>
+        </div>
+        <dl class="result-meta">
+            <div class="result-meta-item">
+                <dt>Recipient</dt>
+                <dd>{{ .FormattedPhone }}</dd>
+            </div>
+            <div class="result-meta-item">
+                <dt>wa.me number</dt>
+                <dd>{{ .Phone }}</dd>
+            </div>
+        </dl>
+        {{ if .HasMessage }}
+        <div class="form-group">
+            <label for="whatsapp-message-preview">Message preview</label>
+            <div class="result-box">
+                <textarea id="whatsapp-message-preview" class="result-text" readonly rows="4">{{ .Message }}</textarea>
+            </div>
+        </div>
+        {{ else }}
+        <p class="text-muted">No message is pre-filled.</p>
+        {{ end }}
         {{ end }}
     </div>
 </div>
@@ -1928,6 +2033,5 @@ line 5 added</textarea>
     </div>
 </div>
 {{ end }}
-
 
 

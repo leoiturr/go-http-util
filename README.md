@@ -7,6 +7,7 @@ A lightweight, high-performance developer toolbox built with **Go** and the **Gi
 - **Base64 Converter**: Encode and decode strings to/from Base64.
 - **GUID/UUID Generator**: Generate multiple unique identifiers (GUIDs) with custom options.
 - **QR Code Generator**: Generate QR codes from text, URLs, or ready-made payloads (WiFi, vCard, MECARD, mailto, tel, SMS, geo). Customize error correction, module/background colors, quiet zone, and image size, then export as PNG or SVG.
+- **WhatsApp Link**: Create a wa.me click-to-chat link with an optional pre-filled message, without saving the recipient as a contact.
 - **JSON Formatter**: Prettify, minify, and validate JSON in CodeMirror 6 editors.
 - **YAML Tools**: Convert JSON ⇄ YAML, prettify, and validate.
 - **SQL Formatter**: Prettify and minify SQL with syntax highlighting.
@@ -66,6 +67,7 @@ The JSON REST API lives under `/api/v1/*`; each endpoint also has an HTML-fragme
 | Base64 | `POST /base64/encode`, `POST /base64/decode` |
 | GUID | `POST /guid/generate` |
 | QR Code | `POST /qrcode/generate` |
+| WhatsApp Link | `POST /whatsapp/link` |
 | JSON | `POST /json/prettify`, `POST /json/minify`, `POST /json/validate` |
 | YAML | `POST /yaml/json2yaml`, `POST /yaml/yaml2json`, `POST /yaml/prettify`, `POST /yaml/validate` |
 | SQL | `POST /sql/prettify`, `POST /sql/minify` |

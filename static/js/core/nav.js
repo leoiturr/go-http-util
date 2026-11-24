@@ -7,6 +7,7 @@ const TITLES = {
     'base64': 'Base64 Converter',
     'guid': 'GUID Generator',
     'qrcode': 'QR Code Generator',
+    'whatsapp': 'WhatsApp Link',
     'json': 'JSON Formatter & Validator',
     'yaml': 'YAML Formatter & JSON to YAML',
     'sql': 'SQL Formatter & Minifier',

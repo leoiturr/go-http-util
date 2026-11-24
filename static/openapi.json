@@ -168,6 +168,45 @@
         }
       }
     },
+    "/whatsapp/link": {
+      "post": {
+        "summary": "Generate a WhatsApp click-to-chat link",
+        "description": "Creates a wa.me link and WhatsApp deep link for an international phone number, optionally pre-filling a message. The recipient does not need to be saved as a contact.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WhatsAppRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/WhatsAppRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Generated click-to-chat links",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WhatsAppResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Error"
+          },
+          "429": {
+            "$ref": "#/components/responses/429Error"
+          }
+        }
+      }
+    },
     "/json/prettify": {
       "post": {
         "summary": "Prettify JSON data",
@@ -1203,6 +1242,55 @@
           "warning": {
             "type": "string",
             "description": "Advisory message about scanning risk (low contrast, zero quiet zone, very dense symbol). Empty when there is nothing to flag; the code is still returned."
+          }
+        }
+      },
+      "WhatsAppRequest": {
+        "type": "object",
+        "required": [
+          "phone"
+        ],
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "International phone number including country code. Spaces, dashes, dots and parentheses are accepted; for example +1 415 555 0132."
+          },
+          "message": {
+            "type": "string",
+            "description": "Optional message to pre-fill in the WhatsApp chat."
+          }
+        }
+      },
+      "WhatsAppResult": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "Normalized recipient number as digits only."
+          },
+          "formatted_phone": {
+            "type": "string",
+            "description": "Readable normalized phone number with a leading plus sign."
+          },
+          "message": {
+            "type": "string",
+            "description": "Trimmed optional message."
+          },
+          "link": {
+            "type": "string",
+            "format": "uri",
+            "description": "https://wa.me click-to-chat URL."
+          },
+          "deep_link": {
+            "type": "string",
+            "description": "whatsapp://send deep link."
+          },
+          "has_message": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string",
+            "description": "Empty on successful generation."
           }
         }
       },
