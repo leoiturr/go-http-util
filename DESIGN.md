@@ -116,6 +116,7 @@ This document outlines the core architecture, layout design, and implementation 
 ### WhatsApp Link
 - The WhatsApp Link tool lives in the **Generate** group. It validates an international phone number and creates both a `wa.me` click-to-chat URL and a `whatsapp://` deep link, with an optional URL-encoded pre-filled message.
 - The app does not store the recipient; opening the link starts a chat without requiring the number to be saved as a contact.
+- Short single-value outputs (the link, the message preview) use `.result-box.result-box-compact`, which drops the 250px editor-pane minimum height so the control sizes to its `rows`. The phone field is `type="tel"`; the shared text-input rule covers every text-like input type, so it matches the other tools' fields exactly.
 
 ### Modern Platform Features
 - **Popover API**: the history panel is a native `popover` opened via `popovertarget`; it slides in with `@starting-style` + `transition-behavior: allow-discrete` and gets light-dismiss and focus handling from the platform.

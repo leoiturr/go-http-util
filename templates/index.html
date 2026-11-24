@@ -1471,7 +1471,7 @@ line 5 added</textarea>
         {{ else }}
         <div class="form-group">
             <label for="whatsapp-link">Click-to-chat link</label>
-            <div class="result-box">
+            <div class="result-box result-box-compact">
                 <textarea id="whatsapp-link" class="result-text" readonly rows="3">{{ .Link }}</textarea>
             </div>
         </div>
@@ -1493,7 +1493,7 @@ line 5 added</textarea>
         {{ if .HasMessage }}
         <div class="form-group">
             <label for="whatsapp-message-preview">Message preview</label>
-            <div class="result-box">
+            <div class="result-box result-box-compact">
                 <textarea id="whatsapp-message-preview" class="result-text" readonly rows="4">{{ .Message }}</textarea>
             </div>
         </div>

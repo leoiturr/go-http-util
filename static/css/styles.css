@@ -695,7 +695,9 @@ body.dark-theme {
     letter-spacing: 1px;
 }
 
-textarea, input[type="text"], input[type="datetime-local"], input[type="number"], select {
+/* Text-like inputs: add any new type (tel, url, ...) to both this rule and the
+   :focus rule below, otherwise the field falls back to the browser default. */
+textarea, input[type="text"], input[type="tel"], input[type="datetime-local"], input[type="number"], select {
     width: 100%;
     background-color: color-mix(in srgb, var(--text-primary) 5%, transparent);
     border: 1px solid var(--card-border);
@@ -708,7 +710,7 @@ textarea, input[type="text"], input[type="datetime-local"], input[type="number"]
     transition: var(--transition-fast);
 }
 
-textarea:focus, input[type="text"]:focus, input[type="datetime-local"]:focus, input[type="number"]:focus, select:focus {
+textarea:focus, input[type="text"]:focus, input[type="tel"]:focus, input[type="datetime-local"]:focus, input[type="number"]:focus, select:focus {
     border-color: color-mix(in srgb, var(--color-primary) 70%, transparent);
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 18%, transparent);
     background-color: color-mix(in srgb, var(--text-primary) 7%, transparent);
@@ -979,6 +981,12 @@ input[type="range"]::-moz-range-thumb {
     width: 100%;
     min-height: 250px;
     resize: vertical;
+}
+
+/* Compact result surfaces: short single values (a generated link, a message
+   preview) use the control's own rows instead of the full editor pane height. */
+.result-box.result-box-compact textarea.result-text {
+    min-height: 0;
 }
 
 .result-box .cm-editor {
